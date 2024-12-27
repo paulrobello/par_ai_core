@@ -1,0 +1,57 @@
+name: Publish 🐍 📦 to TestPyPI
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  publish-to-testpypi:
+    if: github.event_name == 'workflow_dispatch'  # Only allow manual triggers
+    name: Publish 🐍 distribution 📦 to TestPyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/par_ai_core
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Get version from __init__.py
+        id: get_version
+        run: |
+          echo "VERSION=$(uv run python -c "from src.par_ai_core import __version__; print(__version__)")" >> $GITHUB_ENV
+          echo "Version extracted: ${{ env.VERSION }}"
+
+      - name: Restore cached build artifacts
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Publish distribution 📦 to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} ${{ env.VERSION }} has been published to TestPyPI.'
+        continue-on-error: true

@@ -1,0 +1,138 @@
+[project]
+name = "par_ai_core"
+dynamic = ["version"]
+description = "PAR AI Core"
+url = "https://github.com/paulrobello/par_ai_core"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Paul Robello", email = "probello@gmail.com" }]
+maintainers = [{ name = "Paul Robello", email = "probello@gmail.com" }]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+keywords = ["ai", "langchain"]
+
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "html2text>=2024.2.26",
+    "markdownify>=0.13.1",
+    "boto3>=1.34.0",
+    "botocore>=1.34.0",
+    "langchain-anthropic>=0.1.23",
+    "langchain-aws>=0.1.18",
+    "langchain-chroma>=0.1.3",
+    "langchain-community>=0.2.12",
+    "langchain-core>=0.2.34",
+    "langchain-experimental>=0.0.65",
+    "langchain-google-genai>=1.0.10",
+    "langchain-groq>=0.1.9",
+    "langchain-ollama>=0.1.1",
+    "langchain-openai>=0.1.22",
+    "langchain-qdrant>=0.1.3",
+    "langchain-text-splitters>=0.2.4",
+    "langchain-xai>=0.1.0",
+    "langchain-google-community>=2.0.3",
+    "langchain>=0.2.14",
+    "langgraph>=0.2.14",
+    "pydantic-core>=2.20.1",
+    "pydantic>=2.8.2",
+    "playwright>=1.47.0",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+    "rich>=13.7.1",
+    "orjson>=3.10.7",
+    "selenium>=4.25.0",
+    "webdriver-manager>=4.0.2",
+    "praw>=7.8.1",
+    "tavily-python>=0.5.0",
+    "youtube-transcript-api>=0.6.3",
+    "strenum>=0.4.15",
+    "pytest-xdist>=3.6.1",
+]
+packages = ["src/par_ai_core"]
+
+[project.urls]
+Homepage = "https://github.com/paulrobello/par_ai_core"
+Documentation = "https://github.com/paulrobello/par_ai_core/blob/main/README.md"
+Repository = "https://github.com/paulrobello/par_ai_core"
+Issues = "https://github.com/paulrobello/par_ai_core/issues"
+Discussions = "https://github.com/paulrobello/par_ai_core/discussions"
+Wiki = "https://github.com/paulrobello/par_ai_core/wiki"
+
+
+[project.scripts]
+par_ai_core = "par_ai_core.__main__:main"
+
+[tool.setuptools.package-data]
+par_ai_core = [
+    "py.typed",
+    "*/*.png",
+    "*/*.md",
+    "*.png",
+]
+
+[build-system]
+requires = ["hatchling", "wheel"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "build>=1.2.1",
+    "twine>=5.1.1",
+    "pyright>=1.1.379",
+    "pre-commit>=3.8.0",
+    "ruff>=0.7.0",
+    "types-orjson>=3.6.2",
+    "pyinstrument>=5.0.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.5",
+    "pytest-mock>=3.14.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --cov=src/par_ai_core --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.hatch.version]
+path = "src/par_ai_core/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/par_ai_core"]
+include = [
+    "*.py",
+    "py.typed",
+    "*.png",
+    "*.md",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/par_ai_core",
+    "LICENSE",
+    "README.md",
+    "extraction_prompt.md",
+    "pyproject.toml"
+]
+exclude = [
+    "*.pyc",
+    "__pycache__",
+    "*.so",
+    "*.dylib"
+]
