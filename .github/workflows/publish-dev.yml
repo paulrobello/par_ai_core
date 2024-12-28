@@ -1,9 +1,6 @@
 name: Publish 🐍 📦 to TestPyPI
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
 
 jobs:
@@ -39,7 +36,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dist
-          key: ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
+          key: ${{ runner.os }}-3.12-${{ runner.architecture }}-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
           fail-on-cache-miss: true
 
       - name: Publish distribution 📦 to TestPyPI

@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed"
 ]
-keywords = ["ai", "langchain"]
+keywords = ["ai", "langchain", "openai", "anthropic", "ollama", "llamacpp"]
 
 dependencies = [
     "beautifulsoup4>=4.12.3",
@@ -58,7 +58,6 @@ dependencies = [
     "tavily-python>=0.5.0",
     "youtube-transcript-api>=0.6.3",
     "strenum>=0.4.15",
-    "pytest-xdist>=3.6.1",
 ]
 packages = ["src/par_ai_core"]
 
@@ -99,6 +98,7 @@ dev = [
     "pytest-cov>=4.1.0",
     "pytest-asyncio>=0.23.5",
     "pytest-mock>=3.14.0",
+    "pytest-xdist>=3.6.1",
 ]
 
 [tool.pytest.ini_options]

@@ -1,9 +1,6 @@
 name: Release 🐍 distribution
 
 on:
-  push:
-    tags:
-      - 'release-v*.*.*'
   workflow_dispatch:
 
 jobs:
@@ -27,10 +24,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dist
-          key: ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
+          key: ${{ runner.os }}-3.12-${{ runner.architecture }}-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-
-            ${{ runner.os }}-3.12-x64-
+            ${{ runner.os }}-3.12-${{ runner.architecture }}-${{ hashFiles('**/pyproject.toml') }}-
+            ${{ runner.os }}-3.12-${{ runner.architecture }}-
 
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0

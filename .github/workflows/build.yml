@@ -80,7 +80,7 @@ jobs:
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
-          name: coverage-report-ubuntu-latest-3.12-x64
+          name: coverage-report-${{ runner.os }}-3.12-${{ runner.architecture }}
           path: ./
 
       - name: Upload coverage to Codecov
