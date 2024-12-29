@@ -224,7 +224,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
-
+- Version 0.1.7:
+  - Fix documentation issues
 - Version 0.1.6:
   - Pricing for Deepseek
   - Updated Docs
