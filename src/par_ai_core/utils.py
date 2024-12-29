@@ -38,7 +38,7 @@ import subprocess
 import sys
 import time
 import uuid
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import date, datetime
 from decimal import Decimal
@@ -496,25 +496,6 @@ def nested_get(dictionary: dict, keys: str | list[str]) -> Any:
                 return dictionary[element]
             return nested_get(dictionary[element], keys[1:])
     return None
-
-
-def override(cls: type) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    """
-    A decorator to ensure that the decorated method overrides a method in its superclass.
-
-    Args:
-        cls: The superclass to check for method override
-
-    Returns:
-        callable: The decorator function
-    """
-
-    def overrider(method: Callable[..., Any]) -> Callable[..., Any]:
-        if method.__name__ not in dir(cls):
-            raise AttributeError(f"Method {method.__name__} is not overriding any method of {cls.__name__}.")
-        return method
-
-    return overrider
 
 
 @contextmanager

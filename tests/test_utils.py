@@ -61,7 +61,6 @@ from par_ai_core.utils import (
     nested_get,
     non_zero,
     output_to_dicts,
-    override,
     parse_csv_text,
     read_env_file,
     read_text_file_to_stringio,
@@ -622,30 +621,6 @@ def test_run_cmd():
     result = run_cmd(["nonexistentcommand"], console=console, check=False)
     assert result is None
     assert "Error running command" in console.last_output
-
-
-def test_override_decorator():
-    """Test override decorator."""
-
-    class Parent:
-        def method(self):
-            pass
-
-    class Child(Parent):
-        @override(Parent)
-        def method(self):
-            pass
-
-    # Should not raise error
-    Child().method()
-
-    # Should raise error for non-existent method
-    with pytest.raises(AttributeError):
-
-        class BadChild(Parent):
-            @override(Parent)
-            def nonexistent(self):
-                pass
 
 
 def test_code_file_globs():

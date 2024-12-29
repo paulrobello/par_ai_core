@@ -976,44 +976,6 @@ False
 </details>
 <div class="desc"><p>Convert a tab-delimited output to a list of dicts.</p></div>
 </dd>
-<dt id="par_ai_core.utils.override"><code class="name flex">
-<span>def <span class="ident">override</span></span>(<span>cls: type) ‑> Callable[[Callable[..., typing.Any]], Callable[..., typing.Any]]</span>
-</code></dt>
-<dd>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def override(cls: type) -&gt; Callable[[Callable[..., Any]], Callable[..., Any]]:
-    &#34;&#34;&#34;
-    A decorator to ensure that the decorated method overrides a method in its superclass.
-
-    Args:
-        cls: The superclass to check for method override
-
-    Returns:
-        callable: The decorator function
-    &#34;&#34;&#34;
-
-    def overrider(method: Callable[..., Any]) -&gt; Callable[..., Any]:
-        if method.__name__ not in dir(cls):
-            raise AttributeError(f&#34;Method {method.__name__} is not overriding any method of {cls.__name__}.&#34;)
-        return method
-
-    return overrider</code></pre>
-</details>
-<div class="desc"><p>A decorator to ensure that the decorated method overrides a method in its superclass.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>cls</code></strong></dt>
-<dd>The superclass to check for method override</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>callable</code></dt>
-<dd>The decorator function</dd>
-</dl></div>
-</dd>
 <dt id="par_ai_core.utils.parse_csv_text"><code class="name flex">
 <span>def <span class="ident">parse_csv_text</span></span>(<span>csv_data: StringIO, has_header: bool = True) ‑> list[dict]</span>
 </code></dt>
@@ -1507,7 +1469,6 @@ def timer_block(label: str = &#34;Timer&#34;, console: Console | None = None) -&
 <li><code><a title="par_ai_core.utils.nested_get" href="#par_ai_core.utils.nested_get">nested_get</a></code></li>
 <li><code><a title="par_ai_core.utils.non_zero" href="#par_ai_core.utils.non_zero">non_zero</a></code></li>
 <li><code><a title="par_ai_core.utils.output_to_dicts" href="#par_ai_core.utils.output_to_dicts">output_to_dicts</a></code></li>
-<li><code><a title="par_ai_core.utils.override" href="#par_ai_core.utils.override">override</a></code></li>
 <li><code><a title="par_ai_core.utils.parse_csv_text" href="#par_ai_core.utils.parse_csv_text">parse_csv_text</a></code></li>
 <li><code><a title="par_ai_core.utils.read_env_file" href="#par_ai_core.utils.read_env_file">read_env_file</a></code></li>
 <li><code><a title="par_ai_core.utils.read_text_file_to_stringio" href="#par_ai_core.utils.read_text_file_to_stringio">read_text_file_to_stringio</a></code></li>
