@@ -37,6 +37,10 @@ jobs:
         with:
           path: dist
           key: ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-
+            ${{ runner.os }}-3.12-x64-${{ env.VERSION }}-
+            ${{ runner.os }}-3.12-x64-
           fail-on-cache-miss: true
 
       - name: Publish distribution 📦 to TestPyPI
