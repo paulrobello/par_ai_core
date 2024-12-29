@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.pricing_lookup API documentation</title>
-<meta name="description" content="Pricing lookup table.">
+<meta name="description" content="Pricing Lookup and Cost Calculation Module …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,7 +36,26 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.pricing_lookup</code></h1>
 </header>
 <section id="section-intro">
-<p>Pricing lookup table.</p>
+<p>Pricing Lookup and Cost Calculation Module</p>
+<p>This module provides functionality for managing and calculating costs associated with
+various AI language models across different providers. It includes:</p>
+<ul>
+<li>A comprehensive pricing lookup table for different AI models</li>
+<li>Functions to calculate API call costs based on usage</li>
+<li>Utilities for accumulating and displaying cost information</li>
+</ul>
+<p>Key components:
+- pricing_lookup: A dictionary containing pricing details for various AI models
+- PricingDisplay: An enum for controlling the level of cost display detail
+- Functions for cost calculation, usage metadata management, and cost display</p>
+<h2 id="usage">Usage</h2>
+<p>from par_ai_core.pricing_lookup import get_api_call_cost, show_llm_cost</p>
+<h1 id="calculate-cost-for-an-api-call">Calculate cost for an API call</h1>
+<p>cost = get_api_call_cost(llm_config, usage_metadata)</p>
+<h1 id="display-cost-information">Display cost information</h1>
+<p>show_llm_cost(usage_metadata, show_pricing=PricingDisplay.DETAILS)</p>
+<p>This module is essential for tracking and managing costs in AI-powered applications,
+especially when working with multiple AI providers and models.</p>
 </section>
 <section>
 </section>

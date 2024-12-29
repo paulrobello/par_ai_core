@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.provider_cb_info API documentation</title>
-<meta name="description" content="Callback Handler that prints to std out.">
+<meta name="description" content="Callback Handler for tracking token usage, tool calling, and LLM interactions …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,7 +36,30 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.provider_cb_info</code></h1>
 </header>
 <section id="section-intro">
-<p>Callback Handler that prints to std out.</p>
+<p>Callback Handler for tracking token usage, tool calling, and LLM interactions.</p>
+<p>This module provides a custom callback handler for monitoring and managing
+interactions with Large Language Models (LLMs). It offers functionality for:</p>
+<ol>
+<li>Token usage tracking: Monitor input, output, and total token consumption.</li>
+<li>Cost calculation: Compute and accumulate costs associated with LLM API calls.</li>
+<li>Tool call tracking: Keep track of tool invocations made by the LLM.</li>
+<li>Debug information: Optionally display prompts, completions, and tool calls.</li>
+<li>Thread-safe operations: Ensure proper handling in multi-threaded environments.</li>
+</ol>
+<p>Key Components:
+- ParAICallbackHandler: The main callback handler class that inherits from
+BaseCallbackHandler and Serializable.
+- get_parai_callback: A context manager for easy setup and teardown of the
+callback handler.</p>
+<p>This module integrates with the par_ai_core ecosystem, utilizing components like
+LlmConfig, llm_run_manager, and pricing_lookup for a cohesive experience in
+managing LLM interactions and associated metadata.</p>
+<h2 id="usage">Usage</h2>
+<p>with get_parai_callback(llm_config, show_prompts=True) as cb:
+# Your LLM interaction code here
+# The callback handler will automatically track usage and costs</p>
+<p>Note: This module is designed to work seamlessly with LangChain and supports
+various LLM providers through the LlmConfig system.</p>
 </section>
 <section>
 </section>

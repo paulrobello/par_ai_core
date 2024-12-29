@@ -57,7 +57,7 @@ jobs:
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.arch }}
+          name: coverage-report-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.arch }}.xml
           path: coverage.xml
       - name: Package
         run: make packagecheck
@@ -80,7 +80,7 @@ jobs:
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
-          name: coverage-report-${{ runner.os }}-3.12-${{ runner.architecture }}
+          name: coverage-report-ubuntu-latest-3.12-x64.xml
           path: ./
 
       - name: Upload coverage to Codecov
@@ -89,7 +89,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: paulrobello/par_ai_core
           fail_ci_if_error: true
-          files: ./coverage.xml
+          files: ./coverage-report-ubuntu-latest-3.12-x64.xml
 
   tag-version:
     name: Tag Version

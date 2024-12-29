@@ -1,12 +1,42 @@
 """Utilities for performing web searches across various platforms.
 
-This module provides functions to search different web platforms including Tavily,
-Jina, Brave Search, Google Serper, Reddit, and YouTube. Each search function returns
-results in a standardized format.
+This module provides a set of functions to search different web platforms including
+Tavily, Jina, Brave Search, Google Serper, Reddit, and YouTube. Each search function
+returns results in a standardized format, making it easy to integrate and compare
+results from multiple sources.
 
-Typical usage example:
-    results = brave_search("artificial intelligence", days=7, max_results=5)
-    youtube_results = youtube_search("OpenAI", fetch_transcript=True)
+Features:
+- Standardized result format across all search functions
+- Support for various search parameters like date range and result limit
+- Optional content scraping for more detailed results
+- Special handling for Reddit and YouTube searches, including comment retrieval
+- YouTube transcript fetching and summarization capabilities
+
+Typical usage examples:
+
+1. Perform a Tavily search:
+    results = tavily_search("artificial intelligence", days=7, max_results=5)
+
+2. Search using Brave Search with content scraping:
+    results = brave_search("machine learning", days=30, max_results=3, scrape=True)
+
+3. Search Reddit for recent posts:
+    results = reddit_search("python tips", subreddit="learnpython", max_comments=5, max_results=3)
+
+4. Search YouTube with transcript fetching:
+    from par_ai_core.llm_config import get_llm
+    llm = get_llm()
+    results = youtube_search("OpenAI GPT-4", fetch_transcript=True, summarize_llm=llm)
+
+5. Perform a Google search using Serper:
+    results = serper_search("climate change", days=7, max_results=5)
+
+Each search function returns a list of dictionaries, where each dictionary represents
+a search result with standardized keys: 'title', 'url', 'content', and 'raw_content'.
+
+Note: Proper API keys and environment variables must be set up for each search
+service before use. Refer to the individual function docstrings for specific
+requirements and usage details.
 """
 
 from __future__ import annotations

@@ -1,13 +1,33 @@
-"""Various types, utility functions and decorators."""
+"""
+Various types, utility functions and decorators for the par_ai_core package.
+
+This module provides a wide range of utility functions and decorators to support
+common operations in AI and data processing tasks. It includes functions for:
+
+- String manipulation (e.g., camel case to snake case conversion)
+- Data structure operations (e.g., nested dictionary access)
+- File and I/O operations (e.g., CSV parsing, file reading)
+- Type checking and conversion
+- Hashing and encryption
+- Command execution and shell interactions
+- Timing and performance measurement
+- Exception handling and logging
+- UUID validation
+- Environment variable management
+
+The module also includes several context managers for temporary modifications
+to system state or execution environment.
+
+These utilities are designed to streamline development and improve code
+readability across the par_ai_core package and related projects.
+"""
 
 from __future__ import annotations
 
-import contextlib
 import csv
 import glob
 import hashlib
 import html
-import io
 import math
 import os
 import random
@@ -23,7 +43,6 @@ from contextlib import contextmanager
 from datetime import date, datetime
 from decimal import Decimal
 from io import StringIO
-from os import listdir
 from os.path import isfile, join
 from pathlib import Path
 from typing import Any
@@ -178,7 +197,7 @@ def get_files(path: str | Path | os.PathLike[str], ext: str = "") -> list[str]:
         list[str]: Alphabetically sorted list of filenames in the directory,
             excluding files ending with the specified extension if provided.
     """
-    ret = [f for f in listdir(path) if isfile(join(path, f)) and (not ext or not f.endswith(ext))]
+    ret = [f for f in os.listdir(path) if isfile(join(path, f)) and (not ext or not f.endswith(ext))]
     ret.sort()
     return ret
 
@@ -604,7 +623,7 @@ def output_to_dicts(output: str) -> list[dict[str, Any]]:
         return []
     # split string on newline loop over each line and convert
     # Use csv module to parse the tab-delimited output
-    reader = csv.DictReader(io.StringIO(output), delimiter="\t")
+    reader = csv.DictReader(StringIO(output), delimiter="\t")
     ret = []
     for model in reader:
         mod = {}
@@ -685,7 +704,7 @@ def all_subclasses(cls: type) -> set[type]:
     return set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in all_subclasses(c)])
 
 
-@contextlib.contextmanager
+@contextmanager
 def suppress_output():
     """Context manager to suppress stdout and stderr."""
     with open(os.devnull, "w", encoding="utf-8") as devnull:

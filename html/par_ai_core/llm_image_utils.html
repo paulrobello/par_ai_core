@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.llm_image_utils API documentation</title>
-<meta name="description" content="Utilities for handling images with LLMs …">
+<meta name="description" content="Utilities for handling images with Language Learning Models (LLMs) …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,9 +36,29 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.llm_image_utils</code></h1>
 </header>
 <section id="section-intro">
-<p>Utilities for handling images with LLMs.</p>
-<p>This module provides functions for encoding, decoding and processing images
-for use with language learning models.</p>
+<p>Utilities for handling images with Language Learning Models (LLMs).</p>
+<p>This module provides a set of functions for encoding, decoding, and processing
+images to facilitate their use with Language Learning Models. It includes
+utilities for:</p>
+<ul>
+<li>Base64 encoding of images</li>
+<li>Image type detection</li>
+<li>Converting images to base64 data URLs</li>
+<li>Formatting images for chat message inputs</li>
+</ul>
+<p>These utilities are particularly useful when working with LLMs that support
+image inputs, such as GPT-4 Vision or similar models.</p>
+<h2 id="usage">Usage</h2>
+<p>from par_ai_core.llm_image_utils import image_to_base64, image_to_chat_message</p>
+<h1 id="convert-an-image-file-to-a-base64-data-url">Convert an image file to a base64 data URL</h1>
+<p>with open('image.jpg', 'rb') as img_file:
+img_bytes = img_file.read()
+img_b64 = image_to_base64(img_bytes, 'jpeg')</p>
+<h1 id="format-the-image-for-a-chat-message">Format the image for a chat message</h1>
+<p>chat_message = image_to_chat_message(img_b64)</p>
+<h2 id="note">Note</h2>
+<p>This module supports JPEG, PNG, and GIF image formats. Attempting to use
+unsupported formats will raise an UnsupportedImageTypeError.</p>
 </section>
 <section>
 </section>

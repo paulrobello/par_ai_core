@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.output_utils API documentation</title>
-<meta name="description" content="Output formatting utilities …">
+<meta name="description" content="Output formatting utilities for enhanced display and data presentation …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,10 +36,35 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.output_utils</code></h1>
 </header>
 <section id="section-intro">
-<p>Output formatting utilities.</p>
-<p>This module provides utilities for formatting and displaying output in various formats
-including plain text, Markdown, CSV, and JSON. It uses the Rich library for enhanced
-terminal output.</p>
+<p>Output formatting utilities for enhanced display and data presentation.</p>
+<p>This module provides a set of utilities for formatting and displaying output in various
+formats, including plain text, Markdown, CSV, and JSON. It leverages the Rich library
+to create enhanced terminal output with features such as syntax highlighting, tables,
+and formatted text.</p>
+<p>Key features:
+- Support for multiple output formats (plain text, Markdown, CSV, JSON)
+- Conversion of CSV data to Rich tables for improved readability
+- Syntax highlighting for JSON data
+- Flexible display options using Rich console
+- Utilities for handling both string data and file inputs</p>
+<p>Main components:
+- DisplayOutputFormat: An enum class for specifying output format choices
+- csv_to_table: Converts CSV string data to a Rich Table
+- csv_file_to_table: Converts a CSV file to a Rich Table
+- highlight_json: Applies syntax highlighting to JSON string data
+- highlight_json_file: Applies syntax highlighting to JSON file content
+- get_output_format_prompt: Generates format-specific instructions for AI models
+- display_formatted_output: Displays content in the specified format using Rich</p>
+<p>Usage:
+This module can be used to enhance the presentation of data in command-line
+interfaces, improve the readability of structured data like CSV and JSON,
+and provide consistent formatting across different output types.</p>
+<h2 id="example">Example</h2>
+<p>from par_ai_core.output_utils import display_formatted_output, DisplayOutputFormat</p>
+<p>data = '{"name": "John", "age": 30}'
+display_formatted_output(data, DisplayOutputFormat.JSON)</p>
+<h2 id="note">Note</h2>
+<p>This module requires the Rich library for enhanced terminal output.</p>
 </section>
 <section>
 </section>

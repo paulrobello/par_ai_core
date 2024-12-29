@@ -1,8 +1,35 @@
 """LLM provider types and configurations.
 
-This module defines the supported LLM providers and their configurations including
-model names, API endpoints, and environment variables. It provides utilities for
-provider management and configuration access.
+This module defines the supported Large Language Model (LLM) providers and their
+configurations, including model names, API endpoints, and environment variables.
+It provides utilities for provider management, configuration access, and API key
+validation.
+
+Key components:
+- LlmProvider: Enum of supported LLM providers (e.g., OpenAI, Anthropic, Google)
+- LlmProviderConfig: Dataclass for storing provider-specific configurations
+- Provider dictionaries: Mappings of providers to their default models, API URLs, etc.
+- Utility functions: Helper methods for provider name matching, API key validation,
+  and retrieving available providers
+
+The module supports various LLM providers, including cloud-based services and
+local instances, and offers flexibility in configuring model selections for
+different use cases (e.g., standard, lightweight, vision tasks).
+
+Usage:
+    from par_ai_core.llm_providers import LlmProvider, get_provider_name_fuzzy
+
+    # Get a provider enum from a string
+    provider = get_provider_name_fuzzy("openai")
+
+    # Check if API key is set for a provider
+    is_configured = is_provider_api_key_set(LlmProvider.OPENAI)
+
+    # Get list of configured providers
+    available_providers = get_providers_with_api_keys()
+
+This module is designed to be easily extensible for adding new LLM providers
+and updating existing configurations as provider offerings evolve.
 """
 
 from __future__ import annotations

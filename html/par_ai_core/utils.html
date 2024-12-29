@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.utils API documentation</title>
-<meta name="description" content="Various types, utility functions and decorators.">
+<meta name="description" content="Various types, utility functions and decorators for the par_ai_core package …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,7 +36,25 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.utils</code></h1>
 </header>
 <section id="section-intro">
-<p>Various types, utility functions and decorators.</p>
+<p>Various types, utility functions and decorators for the par_ai_core package.</p>
+<p>This module provides a wide range of utility functions and decorators to support
+common operations in AI and data processing tasks. It includes functions for:</p>
+<ul>
+<li>String manipulation (e.g., camel case to snake case conversion)</li>
+<li>Data structure operations (e.g., nested dictionary access)</li>
+<li>File and I/O operations (e.g., CSV parsing, file reading)</li>
+<li>Type checking and conversion</li>
+<li>Hashing and encryption</li>
+<li>Command execution and shell interactions</li>
+<li>Timing and performance measurement</li>
+<li>Exception handling and logging</li>
+<li>UUID validation</li>
+<li>Environment variable management</li>
+</ul>
+<p>The module also includes several context managers for temporary modifications
+to system state or execution environment.</p>
+<p>These utilities are designed to streamline development and improve code
+readability across the par_ai_core package and related projects.</p>
 </section>
 <section>
 </section>
@@ -370,7 +388,7 @@ def catch_to_logger(logger: object, re_throw: bool = False) -&gt; Generator[None
         list[str]: Alphabetically sorted list of filenames in the directory,
             excluding files ending with the specified extension if provided.
     &#34;&#34;&#34;
-    ret = [f for f in listdir(path) if isfile(join(path, f)) and (not ext or not f.endswith(ext))]
+    ret = [f for f in os.listdir(path) if isfile(join(path, f)) and (not ext or not f.endswith(ext))]
     ret.sort()
     return ret</code></pre>
 </details>
@@ -947,7 +965,7 @@ False
         return []
     # split string on newline loop over each line and convert
     # Use csv module to parse the tab-delimited output
-    reader = csv.DictReader(io.StringIO(output), delimiter=&#34;\t&#34;)
+    reader = csv.DictReader(StringIO(output), delimiter=&#34;\t&#34;)
     ret = []
     for model in reader:
         mod = {}
@@ -1316,7 +1334,7 @@ Lines starting with # are ignored</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@contextlib.contextmanager
+<pre><code class="python">@contextmanager
 def suppress_output():
     &#34;&#34;&#34;Context manager to suppress stdout and stderr.&#34;&#34;&#34;
     with open(os.devnull, &#34;w&#34;, encoding=&#34;utf-8&#34;) as devnull:

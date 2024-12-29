@@ -1,4 +1,22 @@
-"""Utils to help with LLM setup."""
+"""
+Utilities for LLM (Large Language Model) setup and operations.
+
+This module provides helper functions and utilities for configuring and
+interacting with Large Language Models. It includes functionality for:
+
+1. Creating LLM configurations from environment variables
+2. Summarizing content using LLMs
+
+The module is designed to work with various LLM providers and offers
+flexible configuration options through environment variables.
+
+Key functions:
+- llm_config_from_env: Creates an LlmConfig instance from environment variables
+- summarize_content: Generates a structured summary of given content using an LLM
+
+This module is part of the par_ai_core package and relies on other
+components such as llm_config, llm_providers, and langchain integrations.
+"""
 
 from __future__ import annotations
 

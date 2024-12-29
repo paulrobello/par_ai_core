@@ -1,4 +1,29 @@
-"""Logging handler using rich."""
+"""
+Logging handler for Par AI Core using rich.
+
+This module sets up a customized logging configuration using the rich library,
+providing enhanced console output with color-coded log levels, rich tracebacks,
+and configurable log levels via environment variables.
+
+Features:
+- Uses rich for prettier console output
+- Configurable log level via PARAI_LOG_LEVEL environment variable
+- Rich tracebacks for better error visualization
+- Separate console instances for standard output and error streams
+
+Usage:
+    from par_ai_core.par_logging import log
+
+    log.debug("Debug message")
+    log.info("Info message")
+    log.warning("Warning message")
+    log.error("Error message")
+    log.critical("Critical message")
+
+Environment Variables:
+    PARAI_LOG_LEVEL: Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+                     Defaults to ERROR if not set or invalid.
+"""
 
 from __future__ import annotations
 

@@ -1,8 +1,39 @@
-"""Output formatting utilities.
+"""Output formatting utilities for enhanced display and data presentation.
 
-This module provides utilities for formatting and displaying output in various formats
-including plain text, Markdown, CSV, and JSON. It uses the Rich library for enhanced
-terminal output.
+This module provides a set of utilities for formatting and displaying output in various
+formats, including plain text, Markdown, CSV, and JSON. It leverages the Rich library
+to create enhanced terminal output with features such as syntax highlighting, tables,
+and formatted text.
+
+Key features:
+- Support for multiple output formats (plain text, Markdown, CSV, JSON)
+- Conversion of CSV data to Rich tables for improved readability
+- Syntax highlighting for JSON data
+- Flexible display options using Rich console
+- Utilities for handling both string data and file inputs
+
+Main components:
+- DisplayOutputFormat: An enum class for specifying output format choices
+- csv_to_table: Converts CSV string data to a Rich Table
+- csv_file_to_table: Converts a CSV file to a Rich Table
+- highlight_json: Applies syntax highlighting to JSON string data
+- highlight_json_file: Applies syntax highlighting to JSON file content
+- get_output_format_prompt: Generates format-specific instructions for AI models
+- display_formatted_output: Displays content in the specified format using Rich
+
+Usage:
+This module can be used to enhance the presentation of data in command-line
+interfaces, improve the readability of structured data like CSV and JSON,
+and provide consistent formatting across different output types.
+
+Example:
+    from par_ai_core.output_utils import display_formatted_output, DisplayOutputFormat
+
+    data = '{"name": "John", "age": 30}'
+    display_formatted_output(data, DisplayOutputFormat.JSON)
+
+Note:
+    This module requires the Rich library for enhanced terminal output.
 """
 
 from __future__ import annotations

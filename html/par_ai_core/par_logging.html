@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.par_logging API documentation</title>
-<meta name="description" content="Logging handler using rich.">
+<meta name="description" content="Logging handler for Par AI Core using rich …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,7 +36,25 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.par_logging</code></h1>
 </header>
 <section id="section-intro">
-<p>Logging handler using rich.</p>
+<p>Logging handler for Par AI Core using rich.</p>
+<p>This module sets up a customized logging configuration using the rich library,
+providing enhanced console output with color-coded log levels, rich tracebacks,
+and configurable log levels via environment variables.</p>
+<p>Features:
+- Uses rich for prettier console output
+- Configurable log level via PARAI_LOG_LEVEL environment variable
+- Rich tracebacks for better error visualization
+- Separate console instances for standard output and error streams</p>
+<h2 id="usage">Usage</h2>
+<p>from par_ai_core.par_logging import log</p>
+<p>log.debug("Debug message")
+log.info("Info message")
+log.warning("Warning message")
+log.error("Error message")
+log.critical("Critical message")</p>
+<p>Environment Variables:
+PARAI_LOG_LEVEL: Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+Defaults to ERROR if not set or invalid.</p>
 </section>
 <section>
 </section>

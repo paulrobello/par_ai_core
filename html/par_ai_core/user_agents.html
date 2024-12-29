@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.user_agents API documentation</title>
-<meta name="description" content="Generate a random user agent.">
+<meta name="description" content="User Agent Generator Module …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,7 +36,22 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.user_agents</code></h1>
 </header>
 <section id="section-intro">
-<p>Generate a random user agent.</p>
+<p>User Agent Generator Module</p>
+<p>This module provides functionality to generate random user agent strings that mimic
+common web browsers. It's useful for applications that need to simulate different
+user agents, such as web scraping tools or testing frameworks.</p>
+<p>The module includes:
+- A function to generate random user agent strings
+- Lists of operating systems and browsers to create realistic combinations
+- Random version number generation for various browser components</p>
+<h2 id="usage">Usage</h2>
+<p>from par_ai_core.user_agents import get_random_user_agent</p>
+<p>user_agent = get_random_user_agent()
+print(user_agent)</p>
+<h2 id="note">Note</h2>
+<p>The generated user agents are designed to be realistic but may not cover all
+possible real-world combinations. They should be used responsibly and in
+compliance with the terms of service of any websites or services you interact with.</p>
 </section>
 <section>
 </section>

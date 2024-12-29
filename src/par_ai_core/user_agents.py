@@ -1,4 +1,26 @@
-"""Generate a random user agent."""
+"""
+User Agent Generator Module
+
+This module provides functionality to generate random user agent strings that mimic
+common web browsers. It's useful for applications that need to simulate different
+user agents, such as web scraping tools or testing frameworks.
+
+The module includes:
+- A function to generate random user agent strings
+- Lists of operating systems and browsers to create realistic combinations
+- Random version number generation for various browser components
+
+Usage:
+    from par_ai_core.user_agents import get_random_user_agent
+
+    user_agent = get_random_user_agent()
+    print(user_agent)
+
+Note:
+    The generated user agents are designed to be realistic but may not cover all
+    possible real-world combinations. They should be used responsibly and in
+    compliance with the terms of service of any websites or services you interact with.
+"""
 
 import random
 

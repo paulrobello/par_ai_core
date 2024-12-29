@@ -1,4 +1,32 @@
-"""Web tools"""
+"""
+Web Tools Module
+
+This module provides a set of utilities for web-related tasks, including web searching,
+HTML parsing, and web page fetching. It offers functionality to interact with search
+engines, extract information from web pages, and handle various web-related operations.
+
+Key Features:
+- Web searching using Google Custom Search API
+- HTML element extraction
+- Web page fetching using either Playwright or Selenium
+- URL content fetching and conversion to Markdown
+
+The module includes tools for:
+1. Performing Google web searches
+2. Extracting specific HTML elements from web pages
+3. Fetching web page content using different methods (Playwright or Selenium)
+4. Converting fetched web content to Markdown format
+
+Dependencies:
+- BeautifulSoup for HTML parsing
+- Pydantic for data modeling
+- Rich for console output formatting
+- Playwright or Selenium for web page interaction (configurable)
+- html2text for HTML to Markdown conversion
+
+This module is part of the par_ai_core package and is designed to be used in
+conjunction with other AI and web scraping related tasks.
+"""
 
 from __future__ import annotations
 

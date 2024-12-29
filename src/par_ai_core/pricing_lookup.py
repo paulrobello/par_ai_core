@@ -1,4 +1,30 @@
-"""Pricing lookup table."""
+"""
+Pricing Lookup and Cost Calculation Module
+
+This module provides functionality for managing and calculating costs associated with
+various AI language models across different providers. It includes:
+
+- A comprehensive pricing lookup table for different AI models
+- Functions to calculate API call costs based on usage
+- Utilities for accumulating and displaying cost information
+
+Key components:
+- pricing_lookup: A dictionary containing pricing details for various AI models
+- PricingDisplay: An enum for controlling the level of cost display detail
+- Functions for cost calculation, usage metadata management, and cost display
+
+Usage:
+    from par_ai_core.pricing_lookup import get_api_call_cost, show_llm_cost
+
+    # Calculate cost for an API call
+    cost = get_api_call_cost(llm_config, usage_metadata)
+
+    # Display cost information
+    show_llm_cost(usage_metadata, show_pricing=PricingDisplay.DETAILS)
+
+This module is essential for tracking and managing costs in AI-powered applications,
+especially when working with multiple AI providers and models.
+"""
 
 from rich.console import Console
 from rich.panel import Panel

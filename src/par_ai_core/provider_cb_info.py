@@ -1,4 +1,32 @@
-"""Callback Handler that prints to std out."""
+"""Callback Handler for tracking token usage, tool calling, and LLM interactions.
+
+This module provides a custom callback handler for monitoring and managing
+interactions with Large Language Models (LLMs). It offers functionality for:
+
+1. Token usage tracking: Monitor input, output, and total token consumption.
+2. Cost calculation: Compute and accumulate costs associated with LLM API calls.
+3. Tool call tracking: Keep track of tool invocations made by the LLM.
+4. Debug information: Optionally display prompts, completions, and tool calls.
+5. Thread-safe operations: Ensure proper handling in multi-threaded environments.
+
+Key Components:
+- ParAICallbackHandler: The main callback handler class that inherits from
+  BaseCallbackHandler and Serializable.
+- get_parai_callback: A context manager for easy setup and teardown of the
+  callback handler.
+
+This module integrates with the par_ai_core ecosystem, utilizing components like
+LlmConfig, llm_run_manager, and pricing_lookup for a cohesive experience in
+managing LLM interactions and associated metadata.
+
+Usage:
+    with get_parai_callback(llm_config, show_prompts=True) as cb:
+        # Your LLM interaction code here
+        # The callback handler will automatically track usage and costs
+
+Note: This module is designed to work seamlessly with LangChain and supports
+various LLM providers through the LlmConfig system.
+"""
 
 import threading
 from collections.abc import Generator

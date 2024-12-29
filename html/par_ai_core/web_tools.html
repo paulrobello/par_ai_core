@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.5">
 <title>par_ai_core.web_tools API documentation</title>
-<meta name="description" content="Web tools">
+<meta name="description" content="Web Tools Module …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -36,7 +36,28 @@ el.replaceWith(d);
 <h1 class="title">Module <code>par_ai_core.web_tools</code></h1>
 </header>
 <section id="section-intro">
-<p>Web tools</p>
+<p>Web Tools Module</p>
+<p>This module provides a set of utilities for web-related tasks, including web searching,
+HTML parsing, and web page fetching. It offers functionality to interact with search
+engines, extract information from web pages, and handle various web-related operations.</p>
+<p>Key Features:
+- Web searching using Google Custom Search API
+- HTML element extraction
+- Web page fetching using either Playwright or Selenium
+- URL content fetching and conversion to Markdown</p>
+<p>The module includes tools for:
+1. Performing Google web searches
+2. Extracting specific HTML elements from web pages
+3. Fetching web page content using different methods (Playwright or Selenium)
+4. Converting fetched web content to Markdown format</p>
+<p>Dependencies:
+- BeautifulSoup for HTML parsing
+- Pydantic for data modeling
+- Rich for console output formatting
+- Playwright or Selenium for web page interaction (configurable)
+- html2text for HTML to Markdown conversion</p>
+<p>This module is part of the par_ai_core package and is designed to be used in
+conjunction with other AI and web scraping related tasks.</p>
 </section>
 <section>
 </section>
