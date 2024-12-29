@@ -73,7 +73,7 @@ BRAVE_API_KEY=
 REDDIT_CLIENT_ID=
 REDDIT_CLIENT_SECRET=
 
-# Misc api
+# Misc API
 WEATHERAPI_KEY=
 GITHUB_PERSONAL_ACCESS_TOKEN=
 
@@ -82,6 +82,24 @@ LANGCHAIN_TRACING_V2=false
 LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
 LANGCHAIN_API_KEY=
 LANGCHAIN_PROJECT=par_ai
+
+# PARAI Related (Not all providers / models support all vars)
+PARAI_AI_PROVIDER=
+PARAI_MODEL=
+PARAI_AI_BASE_URL=
+PARAI_TEMPERATURE=
+PARAI_TIMEOUT=
+PARAI_NUM_CTX=
+PARAI_NUM_REDICT=
+PARAI_REPEAT_LAST_N=
+PARAI_REPEAT_PENALTY=
+PARAI_MIROSTAT=
+PARAI_MIROSTAT_ETA=
+PARAI_MIROSTAT_TAU=
+PARAI_TFS_Z=
+PARAI_TOP_K=
+PARAI_TOP_P=
+PARAI_SEED=
 ```
 
 ### AI API KEYS
@@ -108,13 +126,29 @@ LANGCHAIN_PROJECT=par_ai
 * REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET are needed for Reddit search. Get a free key
   from https://www.reddit.com/prefs/apps/
 
-### Misc
+### Misc API
 
 * GITHUB_PERSONAL_ACCESS_TOKEN is required for GitHub related tools. Get a free key
   from https://github.com/settings/tokens
 * WEATHERAPI_KEY is required for weather. Get a free key from https://www.weatherapi.com/
 * LANGCHAIN_API_KEY is required for Langchain / Langsmith tracing. Get a free key
   from https://smith.langchain.com/settings
+
+### PARAI Related
+* PARAI_AI_PROVIDER is one of Ollama|OpenAI|Groq|XAI|Anthropic|Google|Bedrock|Github|LlamaCpp
+* PARAI_MODEL is the model to use with the selected provider
+* PARAI_AI_BASE_URL can be used to override the base url used to call a provider
+* PARAI_TEMPERATURE sets model temperature. Range depends on provider usually 0.0 to 1.0
+* PARAI_TIMEOUT length of time to wait in seconds for ai response
+* PARAI_NUM_CTX sets the context window size. Max size varies by model
+* Other PARAI related params are to tweak model responses not all are supported / used by all providers
+
+### Open AI Compatible Providers
+
+If a specify provider is not listed but has an OpenAI compatible endpoint you can use the following combo of vars:
+* PARAI_AI_PROVIDER=OpenAI
+* PARAI_MODEL=Your selected model
+* PARAI_AI_BASE_URL=The providers OpenAI endpoint URL
 
 ## Example
 
@@ -188,6 +222,9 @@ if __name__ == "__main__":
 
 ## Whats New
 
+- Version 0.1.6:
+  - Pricing for Deepseek
+  - Updated Docs
 - Version 0.1.5:
   - Initial release
 

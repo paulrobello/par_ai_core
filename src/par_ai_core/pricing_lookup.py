@@ -220,6 +220,13 @@ pricing_lookup = {
         "cache_read": 1,
         "cache_write": 1,
     },
+    # Deepseek
+    "deepseek-chat": {
+        "input": (0.14 / 1_000_000),
+        "output": (0.28 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
 }
 
 
