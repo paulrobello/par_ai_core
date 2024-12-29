@@ -24,10 +24,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dist
-          key: ubuntu-latest-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
+          key: ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
           restore-keys: |
-            ubuntu-latest-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-
-            ubuntu-latest-3.12-x64-
+            ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-
+            ${{ runner.os }}-3.12-x64-
 
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0
