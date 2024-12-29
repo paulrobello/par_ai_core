@@ -1,0 +1,1582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>par_ai_core.llm_config API documentation</title>
+<meta name="description" content="Configuration and management of Language Learning Models (LLMs) …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>par_ai_core.llm_config</code></h1>
+</header>
+<section id="section-intro">
+<p>Configuration and management of Language Learning Models (LLMs).</p>
+<p>This module provides classes and utilities for configuring and managing different types
+of Language Learning Models (LLMs) across various providers. It includes support for:</p>
+<ul>
+<li>Multiple LLM providers (OpenAI, Anthropic, Google, etc.)</li>
+<li>Different operating modes (Base, Chat, Embeddings)</li>
+<li>Comprehensive model configuration options</li>
+<li>Run-time management of LLM instances</li>
+<li>Environment variable handling</li>
+</ul>
+<h2 id="classes">Classes</h2>
+<p>LlmMode: Enum for different LLM operating modes
+LlmConfig: Configuration class for Language Learning Models
+LlmRunManager: Manager class for tracking LLM runs</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="par_ai_core.llm_config.LlmConfig"><code class="flex name class">
+<span>class <span class="ident">LlmConfig</span></span>
+<span>(</span><span>provider: LlmProvider,<br>model_name: str,<br>temperature: float = 0.8,<br>mode: <a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a> = LlmMode.CHAT,<br>streaming: bool = True,<br>base_url: str | None = None,<br>timeout: int | None = None,<br>user_agent_appid: str | None = None,<br>class_name: str = 'LlmConfig',<br>num_ctx: int | None = None,<br>num_predict: int | None = None,<br>repeat_last_n: int | None = None,<br>repeat_penalty: float | None = None,<br>mirostat: int | None = None,<br>mirostat_eta: float | None = None,<br>mirostat_tau: float | None = None,<br>tfs_z: float | None = None,<br>top_k: int | None = None,<br>top_p: float | None = None,<br>seed: int | None = None,<br>env_prefix: str = 'PARAI')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class LlmConfig:
+    &#34;&#34;&#34;Configuration for Language Learning Models (LLMs).
+
+    This class holds all configuration parameters needed to initialize and run
+    different types of language models across various providers.
+
+    Attributes:
+        provider: AI Provider to use (e.g., OpenAI, Anthropic, etc.)
+        model_name: Name of the specific model to use
+        temperature: Controls randomness in responses (0.0-1.0)
+        mode: Operating mode (Base, Chat, or Embeddings)
+        streaming: Whether to stream responses or return complete
+        base_url: Optional custom API endpoint URL
+        timeout: Request timeout in seconds
+        user_agent_appid: Custom app ID for API requests
+        class_name: Class identifier for serialization
+        num_ctx: Context window size for token generation
+        num_predict: Maximum tokens to generate
+        repeat_last_n: Window size for repetition checking
+        repeat_penalty: Penalty factor for repeated content
+        mirostat: Mirostat sampling control (0-2)
+        mirostat_eta: Learning rate for Mirostat
+        mirostat_tau: Diversity control for Mirostat
+        tfs_z: Tail free sampling parameter
+        top_k: Top-K sampling parameter
+        top_p: Top-P (nucleus) sampling parameter
+        seed: Random seed for reproducibility
+        env_prefix: Environment variable prefix
+    &#34;&#34;&#34;
+
+    provider: LlmProvider
+    &#34;&#34;&#34;AI Provider to use.&#34;&#34;&#34;
+    model_name: str
+    &#34;&#34;&#34;Model name to use.&#34;&#34;&#34;
+    temperature: float = 0.8
+    &#34;&#34;&#34;The temperature of the model. Increasing the temperature will
+    make the model answer more creatively. (Default: 0.8)&#34;&#34;&#34;
+    mode: LlmMode = LlmMode.CHAT
+    &#34;&#34;&#34;The mode of the LLM. (Default: LlmMode.CHAT)&#34;&#34;&#34;
+    streaming: bool = True
+    &#34;&#34;&#34;Whether to stream the results or not.&#34;&#34;&#34;
+    base_url: str | None = None
+    &#34;&#34;&#34;Base url the model is hosted under.&#34;&#34;&#34;
+    timeout: int | None = None
+    &#34;&#34;&#34;Timeout in seconds.&#34;&#34;&#34;
+    user_agent_appid: str | None = None
+    &#34;&#34;&#34;App id to add to user agent for the API request. Can be used for authenticating&#34;&#34;&#34;
+    class_name: str = &#34;LlmConfig&#34;
+    &#34;&#34;&#34;Used for serialization.&#34;&#34;&#34;
+    num_ctx: int | None = None
+    &#34;&#34;&#34;Sets the size of the context window used to generate the
+    next token. (Default: 2048) &#34;&#34;&#34;
+    num_predict: int | None = None
+    &#34;&#34;&#34;Maximum number of tokens to predict when generating text.
+    (Default: 128, -1 = infinite generation, -2 = fill context)&#34;&#34;&#34;
+    repeat_last_n: int | None = None
+    &#34;&#34;&#34;Sets how far back for the model to look back to prevent
+    repetition. (Default: 64, 0 = disabled, -1 = num_ctx)&#34;&#34;&#34;
+    repeat_penalty: float | None = None
+    &#34;&#34;&#34;Sets how strongly to penalize repetitions. A higher value (e.g., 1.5)
+    will penalize repetitions more strongly, while a lower value (e.g., 0.9)
+    will be more lenient. (Default: 1.1)&#34;&#34;&#34;
+    mirostat: int | None = None
+    &#34;&#34;&#34;Enable Mirostat sampling for controlling perplexity.
+    (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0)&#34;&#34;&#34;
+    mirostat_eta: float | None = None
+    &#34;&#34;&#34;Influences how quickly the algorithm responds to feedback
+    from the generated text. A lower learning rate will result in
+    slower adjustments, while a higher learning rate will make
+    the algorithm more responsive. (Default: 0.1)&#34;&#34;&#34;
+    mirostat_tau: float | None = None
+    &#34;&#34;&#34;Controls the balance between coherence and diversity
+    of the output. A lower value will result in more focused and
+    coherent text. (Default: 5.0)&#34;&#34;&#34;
+    tfs_z: float | None = None
+    &#34;&#34;&#34;Tail free sampling is used to reduce the impact of less probable
+    tokens from the output. A higher value (e.g., 2.0) will reduce the
+    impact more, while a value of 1.0 disables this setting. (default: 1)&#34;&#34;&#34;
+    top_k: int | None = None
+    &#34;&#34;&#34;Reduces the probability of generating nonsense. A higher value (e.g. 100)
+    will give more diverse answers, while a lower value (e.g. 10)
+    will be more conservative. (Default: 40)&#34;&#34;&#34;
+    top_p: float | None = None
+    &#34;&#34;&#34;Works together with top-k. A higher value (e.g., 0.95) will lead
+    to more diverse text, while a lower value (e.g., 0.5) will
+    generate more focused and conservative text. (Default: 0.9)&#34;&#34;&#34;
+    seed: int | None = None
+    &#34;&#34;&#34;Sets the random number seed to use for generation. Setting this
+    to a specific number will make the model generate the same text for
+    the same prompt.&#34;&#34;&#34;
+    env_prefix: str = &#34;PARAI&#34;
+    &#34;&#34;&#34;Prefix to use for environment variables&#34;&#34;&#34;
+
+    def to_json(self) -&gt; dict:
+        &#34;&#34;&#34;Converts the configuration to a JSON-serializable dictionary.
+
+        Returns:
+            dict: A dictionary containing all configuration parameters,
+                suitable for JSON serialization
+        &#34;&#34;&#34;
+        return {
+            &#34;class_name&#34;: self.__class__.__name__,
+            &#34;provider&#34;: self.provider,
+            &#34;model_name&#34;: self.model_name,
+            &#34;mode&#34;: self.mode,
+            &#34;temperature&#34;: self.temperature,
+            &#34;streaming&#34;: self.streaming,
+            &#34;base_url&#34;: self.base_url,
+            &#34;timeout&#34;: self.timeout,
+            &#34;user_agent_appid&#34;: self.user_agent_appid,
+            &#34;num_ctx&#34;: self.num_ctx,
+            &#34;num_predict&#34;: self.num_predict,
+            &#34;repeat_last_n&#34;: self.repeat_last_n,
+            &#34;repeat_penalty&#34;: self.repeat_penalty,
+            &#34;mirostat&#34;: self.mirostat,
+            &#34;mirostat_eta&#34;: self.mirostat_eta,
+            &#34;mirostat_tau&#34;: self.mirostat_tau,
+            &#34;tfs_z&#34;: self.tfs_z,
+            &#34;top_k&#34;: self.top_k,
+            &#34;top_p&#34;: self.top_p,
+            &#34;seed&#34;: self.seed,
+            &#34;env_prefix&#34;: self.env_prefix,
+        }
+
+    @classmethod
+    def from_json(cls, data: dict) -&gt; LlmConfig:
+        &#34;&#34;&#34;Creates an LlmConfig instance from JSON data.
+
+        Args:
+            data (dict): Dictionary containing configuration parameters
+
+        Returns:
+            LlmConfig: A new instance initialized with the provided data
+
+        Raises:
+            ValueError: If the class_name in the data doesn&#39;t match &#39;LlmConfig&#39;
+        &#34;&#34;&#34;
+        if &#34;class_name&#34; in data and data[&#34;class_name&#34;] != &#34;LlmConfig&#34;:
+            raise ValueError(f&#34;Invalid config class: {data[&#39;class_name&#39;]}&#34;)
+        class_fields = {f.name for f in fields(cls)}
+        return LlmConfig(**{k: v for k, v in data.items() if k in class_fields})
+
+    def clone(self) -&gt; LlmConfig:
+        &#34;&#34;&#34;Creates a deep copy of the current LlmConfig instance.
+
+        Returns:
+            LlmConfig: A new instance with identical configuration parameters
+        &#34;&#34;&#34;
+        return LlmConfig(
+            provider=self.provider,
+            model_name=self.model_name,
+            mode=self.mode,
+            temperature=self.temperature,
+            streaming=self.streaming,
+            base_url=self.base_url,
+            timeout=self.timeout,
+            num_ctx=self.num_ctx,
+            num_predict=self.num_predict,
+            repeat_last_n=self.repeat_last_n,
+            repeat_penalty=self.repeat_penalty,
+            mirostat=self.mirostat,
+            mirostat_eta=self.mirostat_eta,
+            mirostat_tau=self.mirostat_tau,
+            tfs_z=self.tfs_z,
+            top_k=self.top_k,
+            top_p=self.top_p,
+            seed=self.seed,
+            env_prefix=self.env_prefix,
+        )
+
+    def gen_runnable_config(self) -&gt; RunnableConfig:
+        config_id = str(uuid.uuid4())
+        return RunnableConfig(
+            metadata=self.to_json() | {&#34;config_id&#34;: config_id},
+            tags=[f&#34;config_id={config_id}&#34;, f&#34;provider={self.provider.value}&#34;, f&#34;model={self.model_name}&#34;],
+        )
+
+    def _build_ollama_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the OLLAMA LLM.&#34;&#34;&#34;
+        if self.provider != LlmProvider.OLLAMA:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but OLLAMA requested.&#34;)
+
+        from langchain_ollama import ChatOllama, OllamaEmbeddings, OllamaLLM
+
+        if self.mode == LlmMode.BASE:
+            return OllamaLLM(
+                model=self.model_name,
+                temperature=self.temperature,
+                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                client_kwargs={&#34;timeout&#34;: self.timeout},
+                num_ctx=self.num_ctx or None,
+                num_predict=self.num_predict,
+                repeat_last_n=self.repeat_last_n,
+                repeat_penalty=self.repeat_penalty,
+                mirostat=self.mirostat,
+                mirostat_eta=self.mirostat_eta,
+                mirostat_tau=self.mirostat_tau,
+                tfs_z=self.tfs_z,
+                top_k=self.top_k,
+                top_p=self.top_p,
+            )
+        if self.mode == LlmMode.CHAT:
+            return ChatOllama(
+                model=self.model_name,
+                temperature=self.temperature,
+                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                client_kwargs={&#34;timeout&#34;: self.timeout},
+                num_ctx=self.num_ctx or None,
+                num_predict=self.num_predict,
+                repeat_last_n=self.repeat_last_n,
+                repeat_penalty=self.repeat_penalty,
+                mirostat=self.mirostat,
+                mirostat_eta=self.mirostat_eta,
+                mirostat_tau=self.mirostat_tau,
+                tfs_z=self.tfs_z,
+                top_k=self.top_k,
+                top_p=self.top_p,
+                seed=self.seed,
+                disable_streaming=not self.streaming,
+            )
+        if self.mode == LlmMode.EMBEDDINGS:
+            return OllamaEmbeddings(
+                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                model=self.model_name,
+            )
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_openai_compat_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the OPENAI LLM.&#34;&#34;&#34;
+        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but OPENAI requested.&#34;)
+        if self.provider == LlmProvider.GITHUB:
+            api_key = SecretStr(os.environ.get(&#34;GITHUB_TOKEN&#34;, &#34;&#34;))
+        else:
+            api_key = SecretStr(os.environ.get(&#34;OPENAI_API_KEY&#34;, &#34;&#34;))
+
+        from langchain_openai import ChatOpenAI, OpenAI, OpenAIEmbeddings
+
+        if self.mode == LlmMode.BASE:
+            return OpenAI(
+                api_key=api_key,
+                model=self.model_name,
+                temperature=self.temperature,
+                streaming=self.streaming,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                frequency_penalty=self.repeat_penalty or 0,
+                top_p=self.top_p or 1,
+                seed=self.seed,
+                max_tokens=self.num_ctx or -1,
+            )
+        if self.mode == LlmMode.CHAT:
+            return ChatOpenAI(
+                api_key=api_key,
+                model=self.model_name,
+                temperature=self.temperature,
+                stream_usage=True,
+                streaming=self.streaming,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                top_p=self.top_p,
+                seed=self.seed,
+                max_tokens=self.num_ctx,  # type: ignore
+                disable_streaming=not self.streaming,
+            )
+        if self.mode == LlmMode.EMBEDDINGS:
+            return OpenAIEmbeddings(
+                api_key=api_key,
+                model=self.model_name,
+                base_url=self.base_url,
+                timeout=self.timeout,
+            )
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_groq_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the GROQ LLM.&#34;&#34;&#34;
+        if self.provider != LlmProvider.GROQ:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but GROQ requested.&#34;)
+
+        from langchain_groq import ChatGroq
+
+        if self.mode == LlmMode.BASE:
+            raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+        if self.mode == LlmMode.CHAT:
+            return ChatGroq(
+                model=self.model_name,
+                temperature=self.temperature,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                streaming=self.streaming,
+                max_tokens=self.num_ctx,
+                disable_streaming=not self.streaming,
+            )  # type: ignore
+        if self.mode == LlmMode.EMBEDDINGS:
+            raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_xai_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the XAI LLM.&#34;&#34;&#34;
+        if self.provider != LlmProvider.XAI:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but XAI requested.&#34;)
+        if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
+            raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+
+        from langchain_xai import ChatXAI
+
+        if self.mode == LlmMode.CHAT:
+            return ChatXAI(
+                model=self.model_name,
+                temperature=self.temperature,
+                timeout=self.timeout,
+                streaming=self.streaming,
+                max_tokens=self.num_ctx,
+                disable_streaming=not self.streaming,
+            )  # type: ignore
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_anthropic_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the ANTHROPIC LLM.&#34;&#34;&#34;
+        if self.provider != LlmProvider.ANTHROPIC:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but ANTHROPIC requested.&#34;)
+
+        if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
+            raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+
+        from langchain_anthropic import ChatAnthropic
+
+        if self.mode == LlmMode.CHAT:
+            return ChatAnthropic(
+                model=self.model_name,  # type: ignore
+                temperature=self.temperature,
+                streaming=self.streaming,
+                base_url=self.base_url,
+                default_headers={&#34;anthropic-beta&#34;: &#34;prompt-caching-2024-07-31&#34;},
+                timeout=self.timeout,
+                top_k=self.top_k,
+                top_p=self.top_p,
+                max_tokens_to_sample=self.num_predict or 1024,
+                disable_streaming=not self.streaming,
+                max_tokens=self.num_ctx or None,  # type: ignore
+            )  # type: ignore
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_google_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the GOOGLE LLM.&#34;&#34;&#34;
+
+        if self.provider != LlmProvider.GOOGLE:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but GOOGLE requested.&#34;)
+
+        from langchain_google_genai import (
+            ChatGoogleGenerativeAI,
+            GoogleGenerativeAI,
+            GoogleGenerativeAIEmbeddings,
+            HarmBlockThreshold,
+            HarmCategory,
+        )
+
+        if self.mode == LlmMode.BASE:
+            return GoogleGenerativeAI(
+                model=self.model_name,
+                temperature=self.temperature,
+                timeout=self.timeout,
+                top_k=self.top_k,
+                top_p=self.top_p,
+                max_tokens=self.num_ctx,
+                safety_settings={HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE},
+            )
+        if self.mode == LlmMode.CHAT:
+            return ChatGoogleGenerativeAI(
+                model=self.model_name,
+                temperature=self.temperature,
+                timeout=self.timeout,
+                top_k=self.top_k,
+                top_p=self.top_p,
+                max_tokens=self.num_ctx,
+                safety_settings={HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE},
+                disable_streaming=not self.streaming,
+            )
+        if self.mode == LlmMode.EMBEDDINGS:
+            return GoogleGenerativeAIEmbeddings(
+                model=self.model_name,
+                client_options={&#34;timeout&#34;: self.timeout},
+            )
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_bedrock_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the BEDROCK LLM.&#34;&#34;&#34;
+        if self.provider != LlmProvider.BEDROCK:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but BEDROCK requested.&#34;)
+        import boto3
+        from botocore.config import Config
+        from langchain_aws import BedrockEmbeddings, BedrockLLM, ChatBedrockConverse
+
+        session = boto3.Session(
+            region_name=os.environ.get(&#34;AWS_REGION&#34;, &#34;us-east-1&#34;),
+            profile_name=os.environ.get(&#34;AWS_PROFILE&#34;),
+            aws_access_key_id=os.environ.get(&#34;AWS_ACCESS_KEY_ID&#34;),
+            aws_secret_access_key=os.environ.get(&#34;AWS_SECRET_ACCESS_KEY&#34;),
+            aws_session_token=os.environ.get(&#34;AWS_SESSION_TOKEN&#34;),
+        )
+        config = Config(connect_timeout=self.timeout, read_timeout=self.timeout, user_agent_appid=self.user_agent_appid)
+        bedrock_client = session.client(
+            &#34;bedrock-runtime&#34;,
+            config=config,
+            endpoint_url=self.base_url,
+        )
+
+        if self.mode == LlmMode.BASE:
+            return BedrockLLM(
+                client=bedrock_client,
+                model=self.model_name,
+                endpoint_url=self.base_url,
+                temperature=self.temperature,
+                max_tokens=self.num_ctx,
+                streaming=self.streaming,
+            )
+        if self.mode == LlmMode.CHAT:
+            return ChatBedrockConverse(
+                client=bedrock_client,
+                model=self.model_name,
+                endpoint_url=self.base_url,  # type: ignore
+                temperature=self.temperature,
+                max_tokens=self.num_ctx or None,
+                top_p=self.top_p,
+                disable_streaming=not self.streaming,
+            )
+        if self.mode == LlmMode.EMBEDDINGS:
+            return BedrockEmbeddings(
+                client=bedrock_client,
+                model_id=self.model_name or &#34;amazon.titan-embed-text-v1&#34;,
+                endpoint_url=self.base_url,
+            )
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
+    def _build_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the LLM.&#34;&#34;&#34;
+        if not isinstance(self.provider, LlmProvider):
+            raise ValueError(f&#34;Invalid LLM provider &#39;{self.provider}&#39;&#34;)
+        self.base_url = self.base_url or provider_base_urls.get(self.provider)
+        if self.provider == LlmProvider.OLLAMA:
+            return self._build_ollama_llm()
+        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+            return self._build_openai_compat_llm()
+        if self.provider == LlmProvider.GROQ:
+            return self._build_groq_llm()
+        if self.provider == LlmProvider.XAI:
+            return self._build_xai_llm()
+        if self.provider == LlmProvider.ANTHROPIC:
+            return self._build_anthropic_llm()
+        if self.provider == LlmProvider.GOOGLE:
+            return self._build_google_llm()
+        if self.provider == LlmProvider.BEDROCK:
+            return self._build_bedrock_llm()
+
+        raise ValueError(f&#34;Invalid LLM provider &#39;{self.provider.value}&#39; or mode &#39;{self.mode.value}&#39;&#34;)
+
+    def build_llm_model(self) -&gt; BaseLanguageModel:
+        &#34;&#34;&#34;Build the LLM model.&#34;&#34;&#34;
+        if self.model_name.startswith(&#34;o1&#34;):
+            self.temperature = 1
+        llm = self._build_llm()
+        if not isinstance(llm, BaseLanguageModel):
+            raise ValueError(f&#34;Invalid LLM type returned for base mode from provider &#39;{self.provider.value}&#39;&#34;)
+        config = self.gen_runnable_config()
+        llm.name = config[&#34;metadata&#34;][&#34;config_id&#34;] if &#34;metadata&#34; in config else None
+        llm_run_manager.register_id(config, self)
+        return llm
+
+    def build_chat_model(self) -&gt; BaseChatModel:
+        &#34;&#34;&#34;Build the chat model.&#34;&#34;&#34;
+        if self.model_name.startswith(&#34;o1&#34;):
+            self.temperature = 1
+            self.streaming = False
+
+        llm = self._build_llm()
+        if not isinstance(llm, BaseChatModel):
+            raise ValueError(f&#34;Invalid LLM type returned for chat mode from provider &#39;{self.provider.value}&#39;&#34;)
+        config = self.gen_runnable_config()
+        llm.name = config[&#34;metadata&#34;][&#34;config_id&#34;] if &#34;metadata&#34; in config else None
+        llm_run_manager.register_id(config, self)
+        return llm
+
+    def build_embeddings(self) -&gt; Embeddings:
+        &#34;&#34;&#34;Build the embeddings.&#34;&#34;&#34;
+        llm = self._build_llm()
+        if not isinstance(llm, Embeddings):
+            raise ValueError(f&#34;LLM mode &#39;{self.mode.value}&#39; does not support embeddings.&#34;)
+        return llm
+
+    def is_api_key_set(self) -&gt; bool:
+        &#34;&#34;&#34;Check if API key is set for the provider.&#34;&#34;&#34;
+        return is_provider_api_key_set(self.provider)
+
+    def set_env(self) -&gt; LlmConfig:
+        &#34;&#34;&#34;Update environment variables to match the LLM configuration.&#34;&#34;&#34;
+        os.environ[f&#34;{self.env_prefix}_AI_PROVIDER&#34;] = self.provider.value
+        os.environ[f&#34;{self.env_prefix}_MODEL&#34;] = self.model_name
+        if self.base_url:
+            os.environ[f&#34;{self.env_prefix}_AI_BASE_URL&#34;] = self.base_url
+        os.environ[f&#34;{self.env_prefix}_TEMPERATURE&#34;] = str(self.temperature)
+        if self.user_agent_appid:
+            os.environ[f&#34;{self.env_prefix}_USER_AGENT_APPID&#34;] = self.user_agent_appid
+        os.environ[f&#34;{self.env_prefix}_STREAMING&#34;] = str(self.streaming)
+        if self.num_ctx is not None:
+            os.environ[f&#34;{self.env_prefix}_NUM_CTX&#34;] = str(self.num_ctx)
+        if self.num_predict is not None:
+            os.environ[f&#34;{self.env_prefix}_NUM_PREDICT&#34;] = str(self.num_predict)
+        if self.repeat_last_n is not None:
+            os.environ[f&#34;{self.env_prefix}_REPEAT_LAST_N&#34;] = str(self.repeat_last_n)
+        if self.repeat_penalty is not None:
+            os.environ[f&#34;{self.env_prefix}_REPEAT_PENALTY&#34;] = str(self.repeat_penalty)
+        if self.mirostat is not None:
+            os.environ[f&#34;{self.env_prefix}_MIROSTAT&#34;] = str(self.mirostat)
+        if self.mirostat_eta is not None:
+            os.environ[f&#34;{self.env_prefix}_MIROSTAT_ETA&#34;] = str(self.mirostat_eta)
+        if self.mirostat_tau is not None:
+            os.environ[f&#34;{self.env_prefix}_MIROSTAT_TAU&#34;] = str(self.mirostat_tau)
+        if self.tfs_z is not None:
+            os.environ[f&#34;{self.env_prefix}_TFS_Z&#34;] = str(self.tfs_z)
+        if self.top_k is not None:
+            os.environ[f&#34;{self.env_prefix}_TOP_K&#34;] = str(self.top_k)
+        if self.top_p is not None:
+            os.environ[f&#34;{self.env_prefix}_TOP_P&#34;] = str(self.top_p)
+        if self.seed is not None:
+            os.environ[f&#34;{self.env_prefix}_SEED&#34;] = str(self.seed)
+        if self.timeout is not None:
+            os.environ[f&#34;{self.env_prefix}_TIMEOUT&#34;] = str(self.timeout)
+
+        return self</code></pre>
+</details>
+<div class="desc"><p>Configuration for Language Learning Models (LLMs).</p>
+<p>This class holds all configuration parameters needed to initialize and run
+different types of language models across various providers.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>provider</code></strong></dt>
+<dd>AI Provider to use (e.g., OpenAI, Anthropic, etc.)</dd>
+<dt><strong><code>model_name</code></strong></dt>
+<dd>Name of the specific model to use</dd>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>Controls randomness in responses (0.0-1.0)</dd>
+<dt><strong><code>mode</code></strong></dt>
+<dd>Operating mode (Base, Chat, or Embeddings)</dd>
+<dt><strong><code>streaming</code></strong></dt>
+<dd>Whether to stream responses or return complete</dd>
+<dt><strong><code>base_url</code></strong></dt>
+<dd>Optional custom API endpoint URL</dd>
+<dt><strong><code>timeout</code></strong></dt>
+<dd>Request timeout in seconds</dd>
+<dt><strong><code>user_agent_appid</code></strong></dt>
+<dd>Custom app ID for API requests</dd>
+<dt><strong><code>class_name</code></strong></dt>
+<dd>Class identifier for serialization</dd>
+<dt><strong><code>num_ctx</code></strong></dt>
+<dd>Context window size for token generation</dd>
+<dt><strong><code>num_predict</code></strong></dt>
+<dd>Maximum tokens to generate</dd>
+<dt><strong><code>repeat_last_n</code></strong></dt>
+<dd>Window size for repetition checking</dd>
+<dt><strong><code>repeat_penalty</code></strong></dt>
+<dd>Penalty factor for repeated content</dd>
+<dt><strong><code>mirostat</code></strong></dt>
+<dd>Mirostat sampling control (0-2)</dd>
+<dt><strong><code>mirostat_eta</code></strong></dt>
+<dd>Learning rate for Mirostat</dd>
+<dt><strong><code>mirostat_tau</code></strong></dt>
+<dd>Diversity control for Mirostat</dd>
+<dt><strong><code>tfs_z</code></strong></dt>
+<dd>Tail free sampling parameter</dd>
+<dt><strong><code>top_k</code></strong></dt>
+<dd>Top-K sampling parameter</dd>
+<dt><strong><code>top_p</code></strong></dt>
+<dd>Top-P (nucleus) sampling parameter</dd>
+<dt><strong><code>seed</code></strong></dt>
+<dd>Random seed for reproducibility</dd>
+<dt><strong><code>env_prefix</code></strong></dt>
+<dd>Environment variable prefix</dd>
+</dl></div>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.llm_config.LlmConfig.base_url"><code class="name">var <span class="ident">base_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>Base url the model is hosted under.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.class_name"><code class="name">var <span class="ident">class_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Used for serialization.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.env_prefix"><code class="name">var <span class="ident">env_prefix</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Prefix to use for environment variables</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.mirostat"><code class="name">var <span class="ident">mirostat</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Enable Mirostat sampling for controlling perplexity.
+(default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.mirostat_eta"><code class="name">var <span class="ident">mirostat_eta</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>Influences how quickly the algorithm responds to feedback
+from the generated text. A lower learning rate will result in
+slower adjustments, while a higher learning rate will make
+the algorithm more responsive. (Default: 0.1)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.mirostat_tau"><code class="name">var <span class="ident">mirostat_tau</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>Controls the balance between coherence and diversity
+of the output. A lower value will result in more focused and
+coherent text. (Default: 5.0)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.mode"><code class="name">var <span class="ident">mode</span> : <a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a></code></dt>
+<dd>
+<div class="desc"><p>The mode of the LLM. (Default: LlmMode.CHAT)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.model_name"><code class="name">var <span class="ident">model_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Model name to use.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.num_ctx"><code class="name">var <span class="ident">num_ctx</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Sets the size of the context window used to generate the
+next token. (Default: 2048)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.num_predict"><code class="name">var <span class="ident">num_predict</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Maximum number of tokens to predict when generating text.
+(Default: 128, -1 = infinite generation, -2 = fill context)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.provider"><code class="name">var <span class="ident">provider</span> : <a title="par_ai_core.llm_providers.LlmProvider" href="llm_providers.html#par_ai_core.llm_providers.LlmProvider">LlmProvider</a></code></dt>
+<dd>
+<div class="desc"><p>AI Provider to use.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.repeat_last_n"><code class="name">var <span class="ident">repeat_last_n</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Sets how far back for the model to look back to prevent
+repetition. (Default: 64, 0 = disabled, -1 = num_ctx)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.repeat_penalty"><code class="name">var <span class="ident">repeat_penalty</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>Sets how strongly to penalize repetitions. A higher value (e.g., 1.5)
+will penalize repetitions more strongly, while a lower value (e.g., 0.9)
+will be more lenient. (Default: 1.1)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.seed"><code class="name">var <span class="ident">seed</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Sets the random number seed to use for generation. Setting this
+to a specific number will make the model generate the same text for
+the same prompt.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.streaming"><code class="name">var <span class="ident">streaming</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Whether to stream the results or not.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.temperature"><code class="name">var <span class="ident">temperature</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The temperature of the model. Increasing the temperature will
+make the model answer more creatively. (Default: 0.8)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.tfs_z"><code class="name">var <span class="ident">tfs_z</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>Tail free sampling is used to reduce the impact of less probable
+tokens from the output. A higher value (e.g., 2.0) will reduce the
+impact more, while a value of 1.0 disables this setting. (default: 1)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.timeout"><code class="name">var <span class="ident">timeout</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Timeout in seconds.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.top_k"><code class="name">var <span class="ident">top_k</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>Reduces the probability of generating nonsense. A higher value (e.g. 100)
+will give more diverse answers, while a lower value (e.g. 10)
+will be more conservative. (Default: 40)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.top_p"><code class="name">var <span class="ident">top_p</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>Works together with top-k. A higher value (e.g., 0.95) will lead
+to more diverse text, while a lower value (e.g., 0.5) will
+generate more focused and conservative text. (Default: 0.9)</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.user_agent_appid"><code class="name">var <span class="ident">user_agent_appid</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>App id to add to user agent for the API request. Can be used for authenticating</p></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="par_ai_core.llm_config.LlmConfig.from_json"><code class="name flex">
+<span>def <span class="ident">from_json</span></span>(<span>data: dict) ‑> <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates an LlmConfig instance from JSON data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Dictionary containing configuration parameters</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></dt>
+<dd>A new instance initialized with the provided data</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the class_name in the data doesn't match 'LlmConfig'</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="par_ai_core.llm_config.LlmConfig.build_chat_model"><code class="name flex">
+<span>def <span class="ident">build_chat_model</span></span>(<span>self) ‑> langchain_core.language_models.chat_models.BaseChatModel</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_chat_model(self) -&gt; BaseChatModel:
+    &#34;&#34;&#34;Build the chat model.&#34;&#34;&#34;
+    if self.model_name.startswith(&#34;o1&#34;):
+        self.temperature = 1
+        self.streaming = False
+
+    llm = self._build_llm()
+    if not isinstance(llm, BaseChatModel):
+        raise ValueError(f&#34;Invalid LLM type returned for chat mode from provider &#39;{self.provider.value}&#39;&#34;)
+    config = self.gen_runnable_config()
+    llm.name = config[&#34;metadata&#34;][&#34;config_id&#34;] if &#34;metadata&#34; in config else None
+    llm_run_manager.register_id(config, self)
+    return llm</code></pre>
+</details>
+<div class="desc"><p>Build the chat model.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.build_embeddings"><code class="name flex">
+<span>def <span class="ident">build_embeddings</span></span>(<span>self) ‑> langchain_core.embeddings.embeddings.Embeddings</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_embeddings(self) -&gt; Embeddings:
+    &#34;&#34;&#34;Build the embeddings.&#34;&#34;&#34;
+    llm = self._build_llm()
+    if not isinstance(llm, Embeddings):
+        raise ValueError(f&#34;LLM mode &#39;{self.mode.value}&#39; does not support embeddings.&#34;)
+    return llm</code></pre>
+</details>
+<div class="desc"><p>Build the embeddings.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.build_llm_model"><code class="name flex">
+<span>def <span class="ident">build_llm_model</span></span>(<span>self) ‑> langchain_core.language_models.base.BaseLanguageModel</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_llm_model(self) -&gt; BaseLanguageModel:
+    &#34;&#34;&#34;Build the LLM model.&#34;&#34;&#34;
+    if self.model_name.startswith(&#34;o1&#34;):
+        self.temperature = 1
+    llm = self._build_llm()
+    if not isinstance(llm, BaseLanguageModel):
+        raise ValueError(f&#34;Invalid LLM type returned for base mode from provider &#39;{self.provider.value}&#39;&#34;)
+    config = self.gen_runnable_config()
+    llm.name = config[&#34;metadata&#34;][&#34;config_id&#34;] if &#34;metadata&#34; in config else None
+    llm_run_manager.register_id(config, self)
+    return llm</code></pre>
+</details>
+<div class="desc"><p>Build the LLM model.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.clone"><code class="name flex">
+<span>def <span class="ident">clone</span></span>(<span>self) ‑> <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clone(self) -&gt; LlmConfig:
+    &#34;&#34;&#34;Creates a deep copy of the current LlmConfig instance.
+
+    Returns:
+        LlmConfig: A new instance with identical configuration parameters
+    &#34;&#34;&#34;
+    return LlmConfig(
+        provider=self.provider,
+        model_name=self.model_name,
+        mode=self.mode,
+        temperature=self.temperature,
+        streaming=self.streaming,
+        base_url=self.base_url,
+        timeout=self.timeout,
+        num_ctx=self.num_ctx,
+        num_predict=self.num_predict,
+        repeat_last_n=self.repeat_last_n,
+        repeat_penalty=self.repeat_penalty,
+        mirostat=self.mirostat,
+        mirostat_eta=self.mirostat_eta,
+        mirostat_tau=self.mirostat_tau,
+        tfs_z=self.tfs_z,
+        top_k=self.top_k,
+        top_p=self.top_p,
+        seed=self.seed,
+        env_prefix=self.env_prefix,
+    )</code></pre>
+</details>
+<div class="desc"><p>Creates a deep copy of the current LlmConfig instance.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></dt>
+<dd>A new instance with identical configuration parameters</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.gen_runnable_config"><code class="name flex">
+<span>def <span class="ident">gen_runnable_config</span></span>(<span>self) ‑> langchain_core.runnables.config.RunnableConfig</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gen_runnable_config(self) -&gt; RunnableConfig:
+    config_id = str(uuid.uuid4())
+    return RunnableConfig(
+        metadata=self.to_json() | {&#34;config_id&#34;: config_id},
+        tags=[f&#34;config_id={config_id}&#34;, f&#34;provider={self.provider.value}&#34;, f&#34;model={self.model_name}&#34;],
+    )</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.is_api_key_set"><code class="name flex">
+<span>def <span class="ident">is_api_key_set</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_api_key_set(self) -&gt; bool:
+    &#34;&#34;&#34;Check if API key is set for the provider.&#34;&#34;&#34;
+    return is_provider_api_key_set(self.provider)</code></pre>
+</details>
+<div class="desc"><p>Check if API key is set for the provider.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.set_env"><code class="name flex">
+<span>def <span class="ident">set_env</span></span>(<span>self) ‑> <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_env(self) -&gt; LlmConfig:
+    &#34;&#34;&#34;Update environment variables to match the LLM configuration.&#34;&#34;&#34;
+    os.environ[f&#34;{self.env_prefix}_AI_PROVIDER&#34;] = self.provider.value
+    os.environ[f&#34;{self.env_prefix}_MODEL&#34;] = self.model_name
+    if self.base_url:
+        os.environ[f&#34;{self.env_prefix}_AI_BASE_URL&#34;] = self.base_url
+    os.environ[f&#34;{self.env_prefix}_TEMPERATURE&#34;] = str(self.temperature)
+    if self.user_agent_appid:
+        os.environ[f&#34;{self.env_prefix}_USER_AGENT_APPID&#34;] = self.user_agent_appid
+    os.environ[f&#34;{self.env_prefix}_STREAMING&#34;] = str(self.streaming)
+    if self.num_ctx is not None:
+        os.environ[f&#34;{self.env_prefix}_NUM_CTX&#34;] = str(self.num_ctx)
+    if self.num_predict is not None:
+        os.environ[f&#34;{self.env_prefix}_NUM_PREDICT&#34;] = str(self.num_predict)
+    if self.repeat_last_n is not None:
+        os.environ[f&#34;{self.env_prefix}_REPEAT_LAST_N&#34;] = str(self.repeat_last_n)
+    if self.repeat_penalty is not None:
+        os.environ[f&#34;{self.env_prefix}_REPEAT_PENALTY&#34;] = str(self.repeat_penalty)
+    if self.mirostat is not None:
+        os.environ[f&#34;{self.env_prefix}_MIROSTAT&#34;] = str(self.mirostat)
+    if self.mirostat_eta is not None:
+        os.environ[f&#34;{self.env_prefix}_MIROSTAT_ETA&#34;] = str(self.mirostat_eta)
+    if self.mirostat_tau is not None:
+        os.environ[f&#34;{self.env_prefix}_MIROSTAT_TAU&#34;] = str(self.mirostat_tau)
+    if self.tfs_z is not None:
+        os.environ[f&#34;{self.env_prefix}_TFS_Z&#34;] = str(self.tfs_z)
+    if self.top_k is not None:
+        os.environ[f&#34;{self.env_prefix}_TOP_K&#34;] = str(self.top_k)
+    if self.top_p is not None:
+        os.environ[f&#34;{self.env_prefix}_TOP_P&#34;] = str(self.top_p)
+    if self.seed is not None:
+        os.environ[f&#34;{self.env_prefix}_SEED&#34;] = str(self.seed)
+    if self.timeout is not None:
+        os.environ[f&#34;{self.env_prefix}_TIMEOUT&#34;] = str(self.timeout)
+
+    return self</code></pre>
+</details>
+<div class="desc"><p>Update environment variables to match the LLM configuration.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.to_json"><code class="name flex">
+<span>def <span class="ident">to_json</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_json(self) -&gt; dict:
+    &#34;&#34;&#34;Converts the configuration to a JSON-serializable dictionary.
+
+    Returns:
+        dict: A dictionary containing all configuration parameters,
+            suitable for JSON serialization
+    &#34;&#34;&#34;
+    return {
+        &#34;class_name&#34;: self.__class__.__name__,
+        &#34;provider&#34;: self.provider,
+        &#34;model_name&#34;: self.model_name,
+        &#34;mode&#34;: self.mode,
+        &#34;temperature&#34;: self.temperature,
+        &#34;streaming&#34;: self.streaming,
+        &#34;base_url&#34;: self.base_url,
+        &#34;timeout&#34;: self.timeout,
+        &#34;user_agent_appid&#34;: self.user_agent_appid,
+        &#34;num_ctx&#34;: self.num_ctx,
+        &#34;num_predict&#34;: self.num_predict,
+        &#34;repeat_last_n&#34;: self.repeat_last_n,
+        &#34;repeat_penalty&#34;: self.repeat_penalty,
+        &#34;mirostat&#34;: self.mirostat,
+        &#34;mirostat_eta&#34;: self.mirostat_eta,
+        &#34;mirostat_tau&#34;: self.mirostat_tau,
+        &#34;tfs_z&#34;: self.tfs_z,
+        &#34;top_k&#34;: self.top_k,
+        &#34;top_p&#34;: self.top_p,
+        &#34;seed&#34;: self.seed,
+        &#34;env_prefix&#34;: self.env_prefix,
+    }</code></pre>
+</details>
+<div class="desc"><p>Converts the configuration to a JSON-serializable dictionary.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictionary containing all configuration parameters,
+suitable for JSON serialization</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="par_ai_core.llm_config.LlmMode"><code class="flex name class">
+<span>class <span class="ident">LlmMode</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LlmMode(str, Enum):
+    &#34;&#34;&#34;Enumeration of LLM operating modes.
+
+    Defines the different ways an LLM can be used:
+        BASE: Basic text completion mode
+        CHAT: Interactive conversation mode
+        EMBEDDINGS: Vector embedding generation mode
+    &#34;&#34;&#34;
+
+    BASE = &#34;Base&#34;
+    CHAT = &#34;Chat&#34;
+    EMBEDDINGS = &#34;Embeddings&#34;</code></pre>
+</details>
+<div class="desc"><p>Enumeration of LLM operating modes.</p>
+<p>Defines the different ways an LLM can be used:
+BASE: Basic text completion mode
+CHAT: Interactive conversation mode
+EMBEDDINGS: Vector embedding generation mode</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.llm_config.LlmMode.BASE"><code class="name">var <span class="ident">BASE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmMode.CHAT"><code class="name">var <span class="ident">CHAT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmMode.EMBEDDINGS"><code class="name">var <span class="ident">EMBEDDINGS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="par_ai_core.llm_config.LlmRunManager"><code class="flex name class">
+<span>class <span class="ident">LlmRunManager</span></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LlmRunManager:
+    &#34;&#34;&#34;Manages and tracks Language Learning Model (LLM) configurations and runs.
+
+    This class provides thread-safe tracking of LLM configurations and their associated
+    run identifiers. It maintains a mapping between configuration IDs and their
+    corresponding LLM configurations, allowing for runtime lookup and management of
+    LLM instances. The manager ensures proper synchronization when accessing shared
+    configuration data across multiple threads.
+
+    The class implements a singleton pattern to maintain a global state of LLM
+    configurations throughout the application lifecycle.
+
+    Attributes:
+        _lock (threading.Lock): Thread synchronization lock for thread-safe access
+            to shared configuration data.
+        _id_to_config (dict[str, tuple[RunnableConfig, LlmConfig]]): Thread-safe mapping
+            of configuration IDs to their corresponding configuration pairs. Each pair
+            consists of a RunnableConfig and its associated LlmConfig.
+
+    Example:
+        &gt;&gt;&gt; config = RunnableConfig(metadata={&#34;config_id&#34;: &#34;123&#34;})
+        &gt;&gt;&gt; llm_config = LlmConfig(provider=LlmProvider.OPENAI, model_name=&#34;gpt-4&#34;)
+        &gt;&gt;&gt; llm_run_manager.register_id(config, llm_config)
+        &gt;&gt;&gt; retrieved_config = llm_run_manager.get_config(&#34;123&#34;)
+    &#34;&#34;&#34;
+
+    _lock: threading.Lock = threading.Lock()
+    _id_to_config: dict[str, tuple[RunnableConfig, LlmConfig]] = {}
+
+    def register_id(self, config: RunnableConfig, llmConfig: LlmConfig) -&gt; None:
+        &#34;&#34;&#34;Registers a configuration pair with a unique identifier.
+
+        Args:
+            config (RunnableConfig): The runnable configuration to register
+            llmConfig (LlmConfig): The associated LLM configuration
+
+        Raises:
+            ValueError: If the config lacks a config_id in its metadata
+        &#34;&#34;&#34;
+        if &#34;metadata&#34; not in config or &#34;config_id&#34; not in config[&#34;metadata&#34;]:
+            raise ValueError(&#34;Runnable config must have a config_id in metadata&#34;)
+        with self._lock:
+            self._id_to_config[config[&#34;metadata&#34;][&#34;config_id&#34;]] = (config, llmConfig)
+
+    def get_config(self, config_id: str) -&gt; tuple[RunnableConfig, LlmConfig] | None:
+        &#34;&#34;&#34;Retrieves the configuration pair associated with a config ID.
+
+        Args:
+            config_id (str): The unique identifier of the configuration
+
+        Returns:
+            tuple[RunnableConfig, LlmConfig] | None: The configuration pair if found,
+                None otherwise
+        &#34;&#34;&#34;
+        with self._lock:
+            return self._id_to_config.get(config_id)
+
+    def get_runnable_config(self, config_id: str | None) -&gt; RunnableConfig | None:
+        &#34;&#34;&#34;Retrieves a runnable configuration by its unique identifier.
+
+        Args:
+            config_id (str | None): The unique identifier of the configuration to retrieve.
+                If None, returns None.
+
+        Returns:
+            RunnableConfig | None: The runnable configuration if found, None otherwise.
+
+        Thread Safety:
+            This method is thread-safe and can be called from multiple threads.
+        &#34;&#34;&#34;
+        if not config_id:
+            return None
+        with self._lock:
+            config = self._id_to_config.get(config_id)
+            if not config:
+                return None
+            return config[0]
+
+    def get_runnable_config_by_model(self, model_name: str) -&gt; RunnableConfig | None:
+        &#34;&#34;&#34;Retrieves a runnable configuration by model name.
+
+        Searches through all registered configurations to find the first one
+        that matches the specified model name.
+
+        Args:
+            model_name (str): The name of the model to search for.
+
+        Returns:
+            RunnableConfig | None: The first matching runnable configuration,
+                or None if no match is found.
+
+        Thread Safety:
+            This method is thread-safe and can be called from multiple threads.
+        &#34;&#34;&#34;
+        if not model_name:
+            return None
+        with self._lock:
+            for item in self._id_to_config.values():
+                if item[1].model_name == model_name:
+                    return item[0]
+            return None
+
+    def get_runnable_config_by_llm_config(self, llm_config: LlmConfig) -&gt; RunnableConfig | None:
+        &#34;&#34;&#34;Retrieves a runnable configuration matching the provided LLM configuration.
+
+        Searches through all registered configurations to find the first one
+        that matches the model name in the provided LLM configuration.
+
+        Args:
+            llm_config (LlmConfig): The LLM configuration to match against.
+
+        Returns:
+            RunnableConfig | None: The first matching runnable configuration,
+                or None if no match is found.
+
+        Thread Safety:
+            This method is thread-safe and can be called from multiple threads.
+        &#34;&#34;&#34;
+        if not llm_config:
+            return None
+        with self._lock:
+            for item in self._id_to_config.values():
+                if item[1].model_name == llm_config.model_name:
+                    return item[0]
+            return None
+
+    def get_provider_and_model(self, config_id: str | None) -&gt; tuple[str, str] | None:
+        &#34;&#34;&#34;Retrieves the provider and model information for a given run ID.
+
+        Args:
+            config_id (str | None): The unique identifier of the configuration
+
+        Returns:
+            tuple[str, str] | None: A tuple of (provider, model_name) if found,
+                None if the config_id is None or not found
+        &#34;&#34;&#34;
+        if not config_id:
+            return None
+        with self._lock:
+            config = self._id_to_config.get(config_id)
+            if not config:
+                return None
+            return config[1].provider, config[1].model_name</code></pre>
+</details>
+<div class="desc"><p>Manages and tracks Language Learning Model (LLM) configurations and runs.</p>
+<p>This class provides thread-safe tracking of LLM configurations and their associated
+run identifiers. It maintains a mapping between configuration IDs and their
+corresponding LLM configurations, allowing for runtime lookup and management of
+LLM instances. The manager ensures proper synchronization when accessing shared
+configuration data across multiple threads.</p>
+<p>The class implements a singleton pattern to maintain a global state of LLM
+configurations throughout the application lifecycle.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>_lock</code></strong> :&ensp;<code>threading.Lock</code></dt>
+<dd>Thread synchronization lock for thread-safe access
+to shared configuration data.</dd>
+<dt><strong><code>_id_to_config</code></strong> :&ensp;<code>dict[str, tuple[RunnableConfig, <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a>]]</code></dt>
+<dd>Thread-safe mapping
+of configuration IDs to their corresponding configuration pairs. Each pair
+consists of a RunnableConfig and its associated LlmConfig.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; config = RunnableConfig(metadata={&quot;config_id&quot;: &quot;123&quot;})
+&gt;&gt;&gt; llm_config = LlmConfig(provider=LlmProvider.OPENAI, model_name=&quot;gpt-4&quot;)
+&gt;&gt;&gt; llm_run_manager.register_id(config, llm_config)
+&gt;&gt;&gt; retrieved_config = llm_run_manager.get_config(&quot;123&quot;)
+</code></pre></div>
+<h3>Methods</h3>
+<dl>
+<dt id="par_ai_core.llm_config.LlmRunManager.get_config"><code class="name flex">
+<span>def <span class="ident">get_config</span></span>(<span>self, config_id: str) ‑> tuple[langchain_core.runnables.config.RunnableConfig, <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a>] | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_config(self, config_id: str) -&gt; tuple[RunnableConfig, LlmConfig] | None:
+    &#34;&#34;&#34;Retrieves the configuration pair associated with a config ID.
+
+    Args:
+        config_id (str): The unique identifier of the configuration
+
+    Returns:
+        tuple[RunnableConfig, LlmConfig] | None: The configuration pair if found,
+            None otherwise
+    &#34;&#34;&#34;
+    with self._lock:
+        return self._id_to_config.get(config_id)</code></pre>
+</details>
+<div class="desc"><p>Retrieves the configuration pair associated with a config ID.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The unique identifier of the configuration</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[RunnableConfig, LlmConfig] | None</code></dt>
+<dd>The configuration pair if found,
+None otherwise</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmRunManager.get_provider_and_model"><code class="name flex">
+<span>def <span class="ident">get_provider_and_model</span></span>(<span>self, config_id: str | None) ‑> tuple[str, str] | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_provider_and_model(self, config_id: str | None) -&gt; tuple[str, str] | None:
+    &#34;&#34;&#34;Retrieves the provider and model information for a given run ID.
+
+    Args:
+        config_id (str | None): The unique identifier of the configuration
+
+    Returns:
+        tuple[str, str] | None: A tuple of (provider, model_name) if found,
+            None if the config_id is None or not found
+    &#34;&#34;&#34;
+    if not config_id:
+        return None
+    with self._lock:
+        config = self._id_to_config.get(config_id)
+        if not config:
+            return None
+        return config[1].provider, config[1].model_name</code></pre>
+</details>
+<div class="desc"><p>Retrieves the provider and model information for a given run ID.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_id</code></strong> :&ensp;<code>str | None</code></dt>
+<dd>The unique identifier of the configuration</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, str] | None</code></dt>
+<dd>A tuple of (provider, model_name) if found,
+None if the config_id is None or not found</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmRunManager.get_runnable_config"><code class="name flex">
+<span>def <span class="ident">get_runnable_config</span></span>(<span>self, config_id: str | None) ‑> langchain_core.runnables.config.RunnableConfig | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_runnable_config(self, config_id: str | None) -&gt; RunnableConfig | None:
+    &#34;&#34;&#34;Retrieves a runnable configuration by its unique identifier.
+
+    Args:
+        config_id (str | None): The unique identifier of the configuration to retrieve.
+            If None, returns None.
+
+    Returns:
+        RunnableConfig | None: The runnable configuration if found, None otherwise.
+
+    Thread Safety:
+        This method is thread-safe and can be called from multiple threads.
+    &#34;&#34;&#34;
+    if not config_id:
+        return None
+    with self._lock:
+        config = self._id_to_config.get(config_id)
+        if not config:
+            return None
+        return config[0]</code></pre>
+</details>
+<div class="desc"><p>Retrieves a runnable configuration by its unique identifier.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_id</code></strong> :&ensp;<code>str | None</code></dt>
+<dd>The unique identifier of the configuration to retrieve.
+If None, returns None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>RunnableConfig | None</code></dt>
+<dd>The runnable configuration if found, None otherwise.</dd>
+</dl>
+<p>Thread Safety:
+This method is thread-safe and can be called from multiple threads.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmRunManager.get_runnable_config_by_llm_config"><code class="name flex">
+<span>def <span class="ident">get_runnable_config_by_llm_config</span></span>(<span>self,<br>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a>) ‑> langchain_core.runnables.config.RunnableConfig | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_runnable_config_by_llm_config(self, llm_config: LlmConfig) -&gt; RunnableConfig | None:
+    &#34;&#34;&#34;Retrieves a runnable configuration matching the provided LLM configuration.
+
+    Searches through all registered configurations to find the first one
+    that matches the model name in the provided LLM configuration.
+
+    Args:
+        llm_config (LlmConfig): The LLM configuration to match against.
+
+    Returns:
+        RunnableConfig | None: The first matching runnable configuration,
+            or None if no match is found.
+
+    Thread Safety:
+        This method is thread-safe and can be called from multiple threads.
+    &#34;&#34;&#34;
+    if not llm_config:
+        return None
+    with self._lock:
+        for item in self._id_to_config.values():
+            if item[1].model_name == llm_config.model_name:
+                return item[0]
+        return None</code></pre>
+</details>
+<div class="desc"><p>Retrieves a runnable configuration matching the provided LLM configuration.</p>
+<p>Searches through all registered configurations to find the first one
+that matches the model name in the provided LLM configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>llm_config</code></strong> :&ensp;<code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></dt>
+<dd>The LLM configuration to match against.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>RunnableConfig | None</code></dt>
+<dd>The first matching runnable configuration,
+or None if no match is found.</dd>
+</dl>
+<p>Thread Safety:
+This method is thread-safe and can be called from multiple threads.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmRunManager.get_runnable_config_by_model"><code class="name flex">
+<span>def <span class="ident">get_runnable_config_by_model</span></span>(<span>self, model_name: str) ‑> langchain_core.runnables.config.RunnableConfig | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_runnable_config_by_model(self, model_name: str) -&gt; RunnableConfig | None:
+    &#34;&#34;&#34;Retrieves a runnable configuration by model name.
+
+    Searches through all registered configurations to find the first one
+    that matches the specified model name.
+
+    Args:
+        model_name (str): The name of the model to search for.
+
+    Returns:
+        RunnableConfig | None: The first matching runnable configuration,
+            or None if no match is found.
+
+    Thread Safety:
+        This method is thread-safe and can be called from multiple threads.
+    &#34;&#34;&#34;
+    if not model_name:
+        return None
+    with self._lock:
+        for item in self._id_to_config.values():
+            if item[1].model_name == model_name:
+                return item[0]
+        return None</code></pre>
+</details>
+<div class="desc"><p>Retrieves a runnable configuration by model name.</p>
+<p>Searches through all registered configurations to find the first one
+that matches the specified model name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the model to search for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>RunnableConfig | None</code></dt>
+<dd>The first matching runnable configuration,
+or None if no match is found.</dd>
+</dl>
+<p>Thread Safety:
+This method is thread-safe and can be called from multiple threads.</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmRunManager.register_id"><code class="name flex">
+<span>def <span class="ident">register_id</span></span>(<span>self,<br>config: RunnableConfig,<br>llmConfig: <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a>) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register_id(self, config: RunnableConfig, llmConfig: LlmConfig) -&gt; None:
+    &#34;&#34;&#34;Registers a configuration pair with a unique identifier.
+
+    Args:
+        config (RunnableConfig): The runnable configuration to register
+        llmConfig (LlmConfig): The associated LLM configuration
+
+    Raises:
+        ValueError: If the config lacks a config_id in its metadata
+    &#34;&#34;&#34;
+    if &#34;metadata&#34; not in config or &#34;config_id&#34; not in config[&#34;metadata&#34;]:
+        raise ValueError(&#34;Runnable config must have a config_id in metadata&#34;)
+    with self._lock:
+        self._id_to_config[config[&#34;metadata&#34;][&#34;config_id&#34;]] = (config, llmConfig)</code></pre>
+</details>
+<div class="desc"><p>Registers a configuration pair with a unique identifier.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>RunnableConfig</code></dt>
+<dd>The runnable configuration to register</dd>
+<dt><strong><code>llmConfig</code></strong> :&ensp;<code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></dt>
+<dd>The associated LLM configuration</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the config lacks a config_id in its metadata</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="par_ai_core" href="index.html">par_ai_core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="par_ai_core.llm_config.LlmConfig.base_url" href="#par_ai_core.llm_config.LlmConfig.base_url">base_url</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.build_chat_model" href="#par_ai_core.llm_config.LlmConfig.build_chat_model">build_chat_model</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.build_embeddings" href="#par_ai_core.llm_config.LlmConfig.build_embeddings">build_embeddings</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.build_llm_model" href="#par_ai_core.llm_config.LlmConfig.build_llm_model">build_llm_model</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.class_name" href="#par_ai_core.llm_config.LlmConfig.class_name">class_name</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.clone" href="#par_ai_core.llm_config.LlmConfig.clone">clone</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.env_prefix" href="#par_ai_core.llm_config.LlmConfig.env_prefix">env_prefix</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.from_json" href="#par_ai_core.llm_config.LlmConfig.from_json">from_json</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.gen_runnable_config" href="#par_ai_core.llm_config.LlmConfig.gen_runnable_config">gen_runnable_config</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.is_api_key_set" href="#par_ai_core.llm_config.LlmConfig.is_api_key_set">is_api_key_set</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.mirostat" href="#par_ai_core.llm_config.LlmConfig.mirostat">mirostat</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.mirostat_eta" href="#par_ai_core.llm_config.LlmConfig.mirostat_eta">mirostat_eta</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.mirostat_tau" href="#par_ai_core.llm_config.LlmConfig.mirostat_tau">mirostat_tau</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.mode" href="#par_ai_core.llm_config.LlmConfig.mode">mode</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.model_name" href="#par_ai_core.llm_config.LlmConfig.model_name">model_name</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.num_ctx" href="#par_ai_core.llm_config.LlmConfig.num_ctx">num_ctx</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.num_predict" href="#par_ai_core.llm_config.LlmConfig.num_predict">num_predict</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.provider" href="#par_ai_core.llm_config.LlmConfig.provider">provider</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.repeat_last_n" href="#par_ai_core.llm_config.LlmConfig.repeat_last_n">repeat_last_n</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.repeat_penalty" href="#par_ai_core.llm_config.LlmConfig.repeat_penalty">repeat_penalty</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.seed" href="#par_ai_core.llm_config.LlmConfig.seed">seed</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.set_env" href="#par_ai_core.llm_config.LlmConfig.set_env">set_env</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.streaming" href="#par_ai_core.llm_config.LlmConfig.streaming">streaming</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.temperature" href="#par_ai_core.llm_config.LlmConfig.temperature">temperature</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.tfs_z" href="#par_ai_core.llm_config.LlmConfig.tfs_z">tfs_z</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.timeout" href="#par_ai_core.llm_config.LlmConfig.timeout">timeout</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.to_json" href="#par_ai_core.llm_config.LlmConfig.to_json">to_json</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.top_k" href="#par_ai_core.llm_config.LlmConfig.top_k">top_k</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.top_p" href="#par_ai_core.llm_config.LlmConfig.top_p">top_p</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.user_agent_appid" href="#par_ai_core.llm_config.LlmConfig.user_agent_appid">user_agent_appid</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a></code></h4>
+<ul class="">
+<li><code><a title="par_ai_core.llm_config.LlmMode.BASE" href="#par_ai_core.llm_config.LlmMode.BASE">BASE</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmMode.CHAT" href="#par_ai_core.llm_config.LlmMode.CHAT">CHAT</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmMode.EMBEDDINGS" href="#par_ai_core.llm_config.LlmMode.EMBEDDINGS">EMBEDDINGS</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="par_ai_core.llm_config.LlmRunManager" href="#par_ai_core.llm_config.LlmRunManager">LlmRunManager</a></code></h4>
+<ul class="">
+<li><code><a title="par_ai_core.llm_config.LlmRunManager.get_config" href="#par_ai_core.llm_config.LlmRunManager.get_config">get_config</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmRunManager.get_provider_and_model" href="#par_ai_core.llm_config.LlmRunManager.get_provider_and_model">get_provider_and_model</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmRunManager.get_runnable_config" href="#par_ai_core.llm_config.LlmRunManager.get_runnable_config">get_runnable_config</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmRunManager.get_runnable_config_by_llm_config" href="#par_ai_core.llm_config.LlmRunManager.get_runnable_config_by_llm_config">get_runnable_config_by_llm_config</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmRunManager.get_runnable_config_by_model" href="#par_ai_core.llm_config.LlmRunManager.get_runnable_config_by_model">get_runnable_config_by_model</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmRunManager.register_id" href="#par_ai_core.llm_config.LlmRunManager.register_id">register_id</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>

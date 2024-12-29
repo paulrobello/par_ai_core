@@ -1,4 +1,8 @@
-"""Par AI Core."""
+"""
+Par AI Core.
+This package provides a simple interface for interacting with various LLM providers.
+Created by Paul Robello probello@gmail.com.
+"""
 
 from __future__ import annotations
 

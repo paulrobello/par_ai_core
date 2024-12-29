@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>par_ai_core.llm_utils API documentation</title>
+<meta name="description" content="Utils to help with LLM setup.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>par_ai_core.llm_utils</code></h1>
+</header>
+<section id="section-intro">
+<p>Utils to help with LLM setup.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="par_ai_core.llm_utils.llm_config_from_env"><code class="name flex">
+<span>def <span class="ident">llm_config_from_env</span></span>(<span>prefix: str = 'PARAI') ‑> <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def llm_config_from_env(prefix: str = &#34;PARAI&#34;) -&gt; LlmConfig:
+    &#34;&#34;&#34;
+    Create instance of LlmConfig from environment variables.
+    The following environment variables are used:
+
+    - {prefix}_AI_PROVIDER (required)
+    - {prefix}_MODEL (optional - defaults to provider default)
+    - {prefix}_AI_BASE_URL (optional - defaults to provider default)
+    - {prefix}_TEMPERATURE (optional - defaults to 0.8)
+    - {prefix}_USER_AGENT_APPID (optional)
+    - {prefix}_STREAMING (optional - defaults to false)
+    - {prefix}_MAX_CONTEXT_SIZE (optional - defaults to provider default)
+
+    Args:
+        prefix: Prefix to use for environment variables (default: &#34;PARAI&#34;)
+
+    Returns:
+        LlmConfig
+    &#34;&#34;&#34;
+    prefix = prefix.strip(&#34;_&#34;)
+    ai_provider_name = os.environ.get(f&#34;{prefix}_AI_PROVIDER&#34;)
+    if not ai_provider_name:
+        raise ValueError(f&#34;{prefix}_AI_PROVIDER environment variable not set.&#34;)
+
+    ai_provider = LlmProvider(ai_provider_name)
+    if ai_provider not in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.BEDROCK]:
+        key_name = provider_env_key_names[ai_provider]
+        if not os.environ.get(key_name):
+            raise ValueError(f&#34;{key_name} environment variable not set.&#34;)
+
+    model_name = os.environ.get(f&#34;{prefix}_MODEL&#34;) or provider_default_models[ai_provider]
+    if not model_name:
+        raise ValueError(f&#34;{prefix}_MODEL environment variable not set.&#34;)
+
+    ai_base_url = os.environ.get(f&#34;{prefix}_AI_BASE_URL&#34;) or provider_base_urls[ai_provider]
+    temperature = float(os.environ.get(f&#34;{prefix}_TEMPERATURE&#34;, &#34;0.8&#34;))
+    user_agent_appid = os.environ.get(f&#34;{prefix}_USER_AGENT_APPID&#34;)
+    streaming = os.environ.get(f&#34;{prefix}_STREAMING&#34;, &#34;false&#34;) == &#34;true&#34;
+    num_ctx = os.environ.get(f&#34;{prefix}_NUM_CTX&#34;)
+    if num_ctx is not None:
+        num_ctx = int(num_ctx)
+        if num_ctx &lt; 0:
+            num_ctx = 0
+
+    timeout = os.environ.get(f&#34;{prefix}_TIMEOUT&#34;)
+    if timeout is not None:
+        timeout = int(timeout)
+    num_predict = os.environ.get(f&#34;{prefix}_NUM_PREDICT&#34;)
+    if num_predict is not None:
+        num_predict = int(num_predict)
+    repeat_last_n = os.environ.get(f&#34;{prefix}_REPEAT_LAST_N&#34;)
+    if repeat_last_n is not None:
+        repeat_last_n = int(repeat_last_n)
+    repeat_penalty = os.environ.get(f&#34;{prefix}_REPEAT_PENALTY&#34;)
+    if repeat_penalty is not None:
+        repeat_penalty = float(repeat_penalty)
+    mirostat = os.environ.get(f&#34;{prefix}_MIROSTAT&#34;)
+    if mirostat is not None:
+        mirostat = int(mirostat)
+    mirostat_eta = os.environ.get(f&#34;{prefix}_MIROSTAT_ETA&#34;)
+    if mirostat_eta is not None:
+        mirostat_eta = float(mirostat_eta)
+    mirostat_tau = os.environ.get(f&#34;{prefix}_MIROSTAT_TAU&#34;)
+    if mirostat_tau is not None:
+        mirostat_tau = float(mirostat_tau)
+    tfs_z = os.environ.get(f&#34;{prefix}_TFS_Z&#34;)
+    if tfs_z is not None:
+        tfs_z = float(tfs_z)
+    top_k = os.environ.get(f&#34;{prefix}_TOP_K&#34;)
+    if top_k is not None:
+        top_k = int(top_k)
+    top_p = os.environ.get(f&#34;{prefix}_TOP_P&#34;)
+    if top_p is not None:
+        top_p = float(top_p)
+    seed = os.environ.get(f&#34;{prefix}_SEED&#34;)
+    if seed is not None:
+        seed = int(seed)
+
+    return LlmConfig(
+        provider=ai_provider,
+        model_name=model_name,
+        base_url=ai_base_url,
+        temperature=temperature,
+        user_agent_appid=user_agent_appid,
+        streaming=streaming,
+        num_ctx=num_ctx,
+        env_prefix=prefix,
+        timeout=timeout,
+        num_predict=num_predict,
+        repeat_last_n=repeat_last_n,
+        repeat_penalty=repeat_penalty,
+        mirostat=mirostat,
+        mirostat_eta=mirostat_eta,
+        mirostat_tau=mirostat_tau,
+        tfs_z=tfs_z,
+        top_k=top_k,
+        top_p=top_p,
+        seed=seed,
+    )</code></pre>
+</details>
+<div class="desc"><p>Create instance of LlmConfig from environment variables.
+The following environment variables are used:</p>
+<ul>
+<li>{prefix}_AI_PROVIDER (required)</li>
+<li>{prefix}_MODEL (optional - defaults to provider default)</li>
+<li>{prefix}_AI_BASE_URL (optional - defaults to provider default)</li>
+<li>{prefix}_TEMPERATURE (optional - defaults to 0.8)</li>
+<li>{prefix}_USER_AGENT_APPID (optional)</li>
+<li>{prefix}_STREAMING (optional - defaults to false)</li>
+<li>{prefix}_MAX_CONTEXT_SIZE (optional - defaults to provider default)</li>
+</ul>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prefix</code></strong></dt>
+<dd>Prefix to use for environment variables (default: "PARAI")</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>LlmConfig</p></div>
+</dd>
+<dt id="par_ai_core.llm_utils.summarize_content"><code class="name flex">
+<span>def <span class="ident">summarize_content</span></span>(<span>content: str, llm: BaseChatModel) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def summarize_content(content: str, llm: BaseChatModel) -&gt; str:
+    &#34;&#34;&#34;Summarize content using an LLM.
+
+    Args:
+        content: Text content to summarize
+        llm: Language model to use for summarization
+
+    Returns:
+        A structured summary containing:
+        - Title
+        - Key points
+        - Summary paragraph
+    &#34;&#34;&#34;
+    summarize_content_instructions = &#34;&#34;&#34;Your goal is to generate a summary of the user provided content.
+
+    Your response should include the following:
+    - Title
+    - List of key points
+    - Summary
+
+    Do not include the content itself.
+    Do not include a preamble such as &#34;Summary of the content:&#34;
+    &#34;&#34;&#34;
+    return str(
+        llm.invoke(
+            [
+                SystemMessage(content=summarize_content_instructions),
+                HumanMessage(content=content),
+            ],
+            config=llm_run_manager.get_runnable_config(llm.name or &#34;&#34;),
+        ).content
+    )</code></pre>
+</details>
+<div class="desc"><p>Summarize content using an LLM.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content</code></strong></dt>
+<dd>Text content to summarize</dd>
+<dt><strong><code>llm</code></strong></dt>
+<dd>Language model to use for summarization</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A structured summary containing:
+- Title
+- Key points
+- Summary paragraph</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="par_ai_core" href="index.html">par_ai_core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="par_ai_core.llm_utils.llm_config_from_env" href="#par_ai_core.llm_utils.llm_config_from_env">llm_config_from_env</a></code></li>
+<li><code><a title="par_ai_core.llm_utils.summarize_content" href="#par_ai_core.llm_utils.summarize_content">summarize_content</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>

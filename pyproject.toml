@@ -99,6 +99,7 @@ dev = [
     "pytest-asyncio>=0.23.5",
     "pytest-mock>=3.14.0",
     "pytest-xdist>=3.6.1",
+    "pdoc3>=0.11.5",
 ]
 
 [tool.pytest.ini_options]

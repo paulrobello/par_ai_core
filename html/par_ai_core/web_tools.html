@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>par_ai_core.web_tools API documentation</title>
+<meta name="description" content="Web tools">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>par_ai_core.web_tools</code></h1>
+</header>
+<section id="section-intro">
+<p>Web tools</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="par_ai_core.web_tools.fetch_url"><code class="name flex">
+<span>def <span class="ident">fetch_url</span></span>(<span>urls: str | list[str],<br>*,<br>fetch_using: "Literal['playwright', 'selenium']" = 'playwright',<br>sleep_time: int = 1,<br>timeout: int = 10,<br>verbose: bool = False,<br>ignore_ssl: bool = True,<br>console: Console | None = None) ‑> list[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_url(
+    urls: str | list[str],
+    *,
+    fetch_using: Literal[&#34;playwright&#34;, &#34;selenium&#34;] = &#34;playwright&#34;,
+    sleep_time: int = 1,
+    timeout: int = 10,
+    verbose: bool = False,
+    ignore_ssl: bool = True,
+    console: Console | None = None,
+) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Fetch the contents of a webpage using either Playwright or Selenium.
+
+    Args:
+        urls (str | list[str]): The URL(s) to fetch.
+        fetch_using (Literal[&#34;playwright&#34;, &#34;selenium&#34;]): The library to use for fetching the webpage.
+        sleep_time (int): The number of seconds to sleep between requests.
+        timeout (int): The number of seconds to wait for a response.
+        verbose (bool): Whether to print verbose output.
+        ignore_ssl (bool): Whether to ignore SSL errors.
+        console (Console | None): The console to use for output. Defaults to console_err.
+
+    Returns:
+        list[str]: A list of HTML contents of the fetched webpages.
+    &#34;&#34;&#34;
+    if isinstance(urls, str):
+        urls = [urls]
+    if not all(urlparse(url).scheme for url in urls):
+        raise ValueError(&#34;All URLs must be absolute URLs with a scheme (e.g. http:// or https://)&#34;)
+    try:
+        if fetch_using == &#34;playwright&#34;:
+            return fetch_url_playwright(
+                urls, sleep_time=sleep_time, timeout=timeout, verbose=verbose, ignore_ssl=ignore_ssl, console=console
+            )
+        return fetch_url_selenium(
+            urls, sleep_time=sleep_time, timeout=timeout, verbose=verbose, ignore_ssl=ignore_ssl, console=console
+        )
+    except Exception as e:
+        if verbose:
+            if not console:
+                console = console_err
+            console.print(f&#34;[bold red]Error fetching URL: {str(e)}[/bold red]&#34;)
+        return [&#34;&#34;] * (len(urls) if isinstance(urls, list) else 1)</code></pre>
+</details>
+<div class="desc"><p>Fetch the contents of a webpage using either Playwright or Selenium.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>urls</code></strong> :&ensp;<code>str | list[str]</code></dt>
+<dd>The URL(s) to fetch.</dd>
+<dt>fetch_using (Literal["playwright", "selenium"]): The library to use for fetching the webpage.</dt>
+<dt><strong><code>sleep_time</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of seconds to sleep between requests.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of seconds to wait for a response.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to print verbose output.</dd>
+<dt><strong><code>ignore_ssl</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to ignore SSL errors.</dd>
+<dt><strong><code>console</code></strong> :&ensp;<code>Console | None</code></dt>
+<dd>The console to use for output. Defaults to console_err.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>A list of HTML contents of the fetched webpages.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.web_tools.fetch_url_and_convert_to_markdown"><code class="name flex">
+<span>def <span class="ident">fetch_url_and_convert_to_markdown</span></span>(<span>urls: str | list[str],<br>*,<br>fetch_using: "Literal['playwright', 'selenium']" = 'playwright',<br>include_links: bool = True,<br>include_images: bool = False,<br>include_metadata: bool = False,<br>tags: list[str] | None = None,<br>meta: list[str] | None = None,<br>sleep_time: int = 1,<br>timeout: int = 10,<br>verbose: bool = False,<br>console: Console | None = None) ‑> list[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_url_and_convert_to_markdown(
+    urls: str | list[str],
+    *,
+    fetch_using: Literal[&#34;playwright&#34;, &#34;selenium&#34;] = &#34;playwright&#34;,
+    include_links: bool = True,
+    include_images: bool = False,
+    include_metadata: bool = False,
+    tags: list[str] | None = None,
+    meta: list[str] | None = None,
+    sleep_time: int = 1,
+    timeout: int = 10,
+    verbose: bool = False,
+    console: Console | None = None,
+) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Fetch the contents of a webpage and convert it to markdown.
+
+    Args:
+        urls (Union[str, list[str]]): The URL(s) to fetch.
+        fetch_using (Literal[&#34;playwright&#34;, &#34;selenium&#34;], optional): The method to use for fetching the content. Defaults to &#34;playwright&#34;.
+        include_links (bool, optional): Whether to include links in the markdown. Defaults to True.
+        include_images (bool, optional): Whether to include images in the markdown. Defaults to False.
+        include_metadata (bool, optional): Whether to include a metadata section in the markdown. Defaults to False.
+        tags (list[str], optional): A list of tags to include in the markdown metadata. Defaults to None.
+        meta (list[str], optional): A list of metadata attributes to include in the markdown. Defaults to None.
+        sleep_time (int, optional): The number of seconds to sleep between requests. Defaults to 1.
+        timeout (int, optional): The timeout in seconds for the request. Defaults to 10.
+        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+        console (Console, optional): The console to use for printing verbose output.
+
+    Returns:
+        list[str]: The converted markdown content as a list of strings.
+    &#34;&#34;&#34;
+    import html2text
+
+    if not console:
+        console = console_err
+
+    if not tags:
+        tags = []
+    if not meta:
+        meta = []
+
+    if isinstance(urls, str):
+        urls = [urls]
+    pages = fetch_url(urls, fetch_using=fetch_using, sleep_time=sleep_time, timeout=timeout, verbose=verbose)
+    sources = list(zip(urls, pages))
+    if verbose:
+        console.print(&#34;[bold green]Converting fetched content to markdown...[/bold green]&#34;)
+    results: list[str] = []
+    for url, html_content in sources:
+        soup = BeautifulSoup(html_content, &#34;html.parser&#34;)
+        title = soup.title.text if soup.title else None
+
+        if include_links:
+            url_attributes = [
+                &#34;href&#34;,
+                &#34;src&#34;,
+                &#34;action&#34;,
+                &#34;data&#34;,
+                &#34;poster&#34;,
+                &#34;background&#34;,
+                &#34;cite&#34;,
+                &#34;codebase&#34;,
+                &#34;formaction&#34;,
+                &#34;icon&#34;,
+            ]
+
+            # Convert relative links to fully qualified URLs
+            for tag in soup.find_all(True):
+                for attribute in url_attributes:
+                    if tag.has_attr(attribute):
+                        attr_value = tag[attribute]
+                        if attr_value.startswith(&#34;//&#34;):
+                            tag[attribute] = f&#34;https:{attr_value}&#34;
+                        elif not attr_value.startswith((&#34;http://&#34;, &#34;https://&#34;)):
+                            tag[attribute] = urljoin(url, attr_value)
+
+        metadata = {
+            &#34;source&#34;: url,
+            &#34;title&#34;: title or &#34;&#34;,
+            &#34;tags&#34;: (&#34; &#34;.join(tags)).strip(),
+        }
+        for m in soup.find_all(&#34;meta&#34;):
+            n = m.get(&#34;name&#34;, &#34;&#34;).strip()
+            if not n:
+                continue
+            v = m.get(&#34;content&#34;, &#34;&#34;).strip()
+            if not v:
+                continue
+            if n in meta:
+                metadata[n] = v
+
+        elements_to_remove = [
+            &#34;head&#34;,
+            &#34;header&#34;,
+            &#34;footer&#34;,
+            &#34;script&#34;,
+            &#34;source&#34;,
+            &#34;style&#34;,
+            &#34;svg&#34;,
+            &#34;iframe&#34;,
+        ]
+        if not include_links:
+            elements_to_remove.append(&#34;a&#34;)
+            elements_to_remove.append(&#34;link&#34;)
+
+        if not include_images:
+            elements_to_remove.append(&#34;img&#34;)
+
+        for element in elements_to_remove:
+            for tag in soup.find_all(element):
+                tag.decompose()
+
+        ### text separators
+        # Convert separator elements to &lt;hr&gt;
+        for element in soup.find_all(attrs={&#34;role&#34;: &#34;separator&#34;}):
+            hr = soup.new_tag(&#34;hr&#34;)
+            element.replace_with(hr)
+            # Add extra newlines around hr to ensure proper markdown rendering
+            hr.insert_before(soup.new_string(&#34;\n&#34;))
+            hr.insert_after(soup.new_string(&#34;\n&#34;))
+
+        html_content = str(soup)
+
+        ### code blocks
+        html_content = html_content.replace(&#34;&lt;pre&#34;, &#34;```&lt;pre&#34;)
+        html_content = html_content.replace(&#34;&lt;/pre&gt;&#34;, &#34;&lt;/pre&gt;```&#34;)
+
+        ### convert to markdown
+        converter = html2text.HTML2Text()
+        converter.ignore_links = not include_links
+        converter.ignore_images = not include_images
+        markdown = converter.handle(html_content)
+
+        if include_metadata:
+            meta_markdown = &#34;# Metadata\n\n&#34;
+            for k, v in metadata.items():
+                meta_markdown += f&#34;- {k}: {v}\n&#34;
+            markdown = meta_markdown + markdown
+        results.append(markdown)
+    if verbose:
+        console.print(&#34;[bold green]Conversion to markdown complete.[/bold green]&#34;)
+    return results</code></pre>
+</details>
+<div class="desc"><p>Fetch the contents of a webpage and convert it to markdown.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>urls</code></strong> :&ensp;<code>Union[str, list[str]]</code></dt>
+<dd>The URL(s) to fetch.</dd>
+<dt>fetch_using (Literal["playwright", "selenium"], optional): The method to use for fetching the content. Defaults to "playwright".</dt>
+<dt><strong><code>include_links</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to include links in the markdown. Defaults to True.</dd>
+<dt><strong><code>include_images</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to include images in the markdown. Defaults to False.</dd>
+<dt><strong><code>include_metadata</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to include a metadata section in the markdown. Defaults to False.</dd>
+<dt><strong><code>tags</code></strong> :&ensp;<code>list[str]</code>, optional</dt>
+<dd>A list of tags to include in the markdown metadata. Defaults to None.</dd>
+<dt><strong><code>meta</code></strong> :&ensp;<code>list[str]</code>, optional</dt>
+<dd>A list of metadata attributes to include in the markdown. Defaults to None.</dd>
+<dt><strong><code>sleep_time</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of seconds to sleep between requests. Defaults to 1.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The timeout in seconds for the request. Defaults to 10.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to print verbose output. Defaults to False.</dd>
+<dt><strong><code>console</code></strong> :&ensp;<code>Console</code>, optional</dt>
+<dd>The console to use for printing verbose output.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>The converted markdown content as a list of strings.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.web_tools.fetch_url_playwright"><code class="name flex">
+<span>def <span class="ident">fetch_url_playwright</span></span>(<span>urls: str | list[str],<br>*,<br>sleep_time: int = 1,<br>timeout: int = 10,<br>ignore_ssl: bool = True,<br>verbose: bool = False,<br>console: Console | None = None) ‑> list[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_url_playwright(
+    urls: str | list[str],
+    *,
+    sleep_time: int = 1,
+    timeout: int = 10,
+    ignore_ssl: bool = True,
+    verbose: bool = False,
+    console: Console | None = None,
+) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Fetch HTML content from a URL using Playwright.
+
+    Args:
+        urls (Union[str, list[str]]): The URL(s) to fetch.
+        sleep_time (int, optional): The number of seconds to sleep between requests. Defaults to 1.
+        timeout (int, optional): The timeout in seconds for the request. Defaults to 10.
+        ignore_ssl (bool, optional): Whether to ignore SSL errors. Defaults to True.
+        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+        console (Console, optional): The console to use for printing verbose output.
+
+    Returns:
+        list[str]: The fetched HTML content as a list of strings.
+    &#34;&#34;&#34;
+    from playwright.sync_api import sync_playwright
+
+    if not console:
+        console = console_err
+
+    if isinstance(urls, str):
+        urls = [urls]
+
+    results: list[str] = []
+
+    with sync_playwright() as p:
+        try:
+            browser = p.chromium.launch(headless=True)
+        except Exception as e:
+            console.print(
+                &#34;[bold red]Error launching playwright browser:[/bold red] Make sure you install playwright: `uv tool install playwright` then run `playwright install chromium`.&#34;
+            )
+            raise e
+            # return [&#34;&#34; * len(urls)]
+        context = browser.new_context(
+            viewport={&#34;width&#34;: 1280, &#34;height&#34;: 1024}, user_agent=get_random_user_agent(), ignore_https_errors=ignore_ssl
+        )
+
+        page = context.new_page()
+        for url in urls:
+            if verbose:
+                console.print(f&#34;[bold blue]Playwright fetching content from {url}...[/bold blue]&#34;)
+            try:
+                page.goto(url, timeout=timeout * 1000)
+
+                # Add delays to mimic human behavior
+                if sleep_time &gt; 0:
+                    page.wait_for_timeout(sleep_time * 1000)  # Use the specified sleep time
+
+                # Add more realistic actions like scrolling
+                page.evaluate(&#34;window.scrollTo(0, document.body.scrollHeight)&#34;)
+                page.wait_for_timeout(1000)  # Simulate time taken to scroll and read
+                html = page.content()
+                results.append(html)
+                # if verbose:
+                #     console.print(
+                #         Panel(
+                #             html[0:500] + &#34;...&#34;,
+                #             title=&#34;[bold green]Snippet[/bold green]&#34;,
+                #         )
+                #     )
+            except Exception as e:
+                if verbose:
+                    console.print(f&#34;[bold red]Error fetching content from {url}[/bold red]: {str(e)}&#34;)
+                results.append(&#34;&#34;)
+        try:
+            browser.close()
+        except Exception as _:
+            pass
+
+    return results</code></pre>
+</details>
+<div class="desc"><p>Fetch HTML content from a URL using Playwright.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>urls</code></strong> :&ensp;<code>Union[str, list[str]]</code></dt>
+<dd>The URL(s) to fetch.</dd>
+<dt><strong><code>sleep_time</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of seconds to sleep between requests. Defaults to 1.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The timeout in seconds for the request. Defaults to 10.</dd>
+<dt><strong><code>ignore_ssl</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to ignore SSL errors. Defaults to True.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to print verbose output. Defaults to False.</dd>
+<dt><strong><code>console</code></strong> :&ensp;<code>Console</code>, optional</dt>
+<dd>The console to use for printing verbose output.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>The fetched HTML content as a list of strings.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.web_tools.fetch_url_selenium"><code class="name flex">
+<span>def <span class="ident">fetch_url_selenium</span></span>(<span>urls: str | list[str],<br>*,<br>sleep_time: int = 1,<br>timeout: int = 10,<br>ignore_ssl: bool = True,<br>verbose: bool = False,<br>console: Console | None = None) ‑> list[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fetch_url_selenium(
+    urls: str | list[str],
+    *,
+    sleep_time: int = 1,
+    timeout: int = 10,
+    ignore_ssl: bool = True,
+    verbose: bool = False,
+    console: Console | None = None,
+) -&gt; list[str]:
+    &#34;&#34;&#34;Fetch the contents of a webpage using Selenium.
+
+    Args:
+        urls: The URL(s) to fetch
+        sleep_time: The number of seconds to sleep between requests
+        timeout: The number of seconds to wait for a response
+        ignore_ssl: Whether to ignore SSL errors
+        verbose: Whether to print verbose output
+        console: The console to use for printing verbose output
+
+    Returns:
+        A list of HTML contents of the fetched webpages
+    &#34;&#34;&#34;
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
+
+    if not console:
+        console = console_err
+
+    if isinstance(urls, str):
+        urls = [urls]
+
+    os.environ[&#34;WDM_LOG_LEVEL&#34;] = &#34;0&#34;
+    options = Options()
+    options.add_argument(&#34;--disable-gpu&#34;)
+    options.add_argument(&#34;--disable-dev-shm-usage&#34;)
+    options.add_argument(&#34;--window-size=1280,1024&#34;)
+    options.add_experimental_option(&#34;excludeSwitches&#34;, [&#34;enable-logging&#34;])  # Disable logging
+    options.add_argument(&#34;--log-level=3&#34;)  # Suppress console logging
+    options.add_argument(&#34;--silent&#34;)
+    options.add_argument(&#34;--disable-extensions&#34;)
+    options.add_argument(&#34;--disable-infobars&#34;)
+    if ignore_ssl:
+        options.add_argument(&#34;--ignore-certificate-errors&#34;)
+    # Randomize user-agent to mimic different users
+    options.add_argument(&#34;user-agent=&#34; + get_random_user_agent())
+    options.add_argument(&#34;--window-position=-2400,-2400&#34;)
+    options.add_argument(&#34;--headless=new&#34;)
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    driver.set_page_load_timeout(timeout)
+
+    results: list[str] = []
+    for url in urls:
+        if verbose:
+            console.print(f&#34;[bold blue]Selenium fetching content from {url}...[/bold blue]&#34;)
+        try:
+            driver.get(url)
+            if verbose:
+                console.print(&#34;[bold green]Page loaded. Scrolling and waiting for dynamic content...[/bold green]&#34;)
+                console.print(f&#34;[bold yellow]Sleeping for {sleep_time} seconds...[/bold yellow]&#34;)
+            time.sleep(sleep_time)  # Sleep for the specified time
+            # Scroll to the bottom of the page
+            driver.execute_script(&#34;window.scrollTo(0, document.body.scrollHeight);&#34;)
+            time.sleep(1)  # Wait a bit for any dynamic content to load
+            results.append(driver.page_source)
+        except Exception as e:
+            if verbose:
+                console.print(f&#34;[bold red]Error fetching content from {url}: {str(e)}[/bold red]&#34;)
+            results.append(&#34;&#34;)
+    try:
+        driver.quit()
+    except Exception as _:
+        pass
+
+    return results</code></pre>
+</details>
+<div class="desc"><p>Fetch the contents of a webpage using Selenium.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>urls</code></strong></dt>
+<dd>The URL(s) to fetch</dd>
+<dt><strong><code>sleep_time</code></strong></dt>
+<dd>The number of seconds to sleep between requests</dd>
+<dt><strong><code>timeout</code></strong></dt>
+<dd>The number of seconds to wait for a response</dd>
+<dt><strong><code>ignore_ssl</code></strong></dt>
+<dd>Whether to ignore SSL errors</dd>
+<dt><strong><code>verbose</code></strong></dt>
+<dd>Whether to print verbose output</dd>
+<dt><strong><code>console</code></strong></dt>
+<dd>The console to use for printing verbose output</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A list of HTML contents of the fetched webpages</p></div>
+</dd>
+<dt id="par_ai_core.web_tools.get_html_element"><code class="name flex">
+<span>def <span class="ident">get_html_element</span></span>(<span>element: str, soup: BeautifulSoup) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_html_element(element: str, soup: BeautifulSoup) -&gt; str:
+    &#34;&#34;&#34;Search for and return text of first matching HTML element.
+
+    Args:
+        element: The tag name of the HTML element to search for (e.g., &#39;h1&#39;, &#39;div&#39;)
+        soup: BeautifulSoup object containing the parsed HTML document
+
+    Returns:
+        str: Text content of first matching element, or empty string if not found
+    &#34;&#34;&#34;
+    result = soup.find(element)
+    if result:
+        return result.text
+
+    # print(f&#34;No element ${element} found.&#34;)
+    return &#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Search for and return text of first matching HTML element.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>element</code></strong></dt>
+<dd>The tag name of the HTML element to search for (e.g., 'h1', 'div')</dd>
+<dt><strong><code>soup</code></strong></dt>
+<dd>BeautifulSoup object containing the parsed HTML document</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Text content of first matching element, or empty string if not found</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.web_tools.web_search"><code class="name flex">
+<span>def <span class="ident">web_search</span></span>(<span>query: str,<br>*,<br>num_results: int = 3,<br>verbose: bool = False,<br>console: Console | None = None) ‑> list[<a title="par_ai_core.web_tools.GoogleSearchResult" href="#par_ai_core.web_tools.GoogleSearchResult">GoogleSearchResult</a>]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def web_search(
+    query: str, *, num_results: int = 3, verbose: bool = False, console: Console | None = None
+) -&gt; list[GoogleSearchResult]:
+    &#34;&#34;&#34;Perform a Google web search using the Google Custom Search API.
+
+    Args:
+        query: The search query to execute
+        num_results: Maximum number of results to return. Defaults to 3.
+        verbose: Whether to print verbose output. Defaults to False.
+        console: Console to use for output. Defaults to console_err.
+
+    Returns:
+        list[GoogleSearchResult]: List of search results containing title, link and snippet
+
+    Raises:
+        ValueError: If GOOGLE_CSE_ID or GOOGLE_CSE_API_KEY environment variables are not set
+    &#34;&#34;&#34;
+    from langchain_google_community import GoogleSearchAPIWrapper
+
+    if verbose:
+        if not console:
+            console = console_err
+        console.print(f&#34;[bold green]Web search:[bold yellow] {query}&#34;)
+
+    google_cse_id = os.environ.get(&#34;GOOGLE_CSE_ID&#34;)
+    google_api_key = os.environ.get(&#34;GOOGLE_CSE_API_KEY&#34;)
+
+    if not google_cse_id or not google_api_key:
+        raise ValueError(&#34;Missing required environment variables: GOOGLE_CSE_ID and GOOGLE_CSE_API_KEY must be set&#34;)
+
+    search = GoogleSearchAPIWrapper(
+        google_cse_id=google_cse_id,
+        google_api_key=google_api_key,
+    )
+    return [GoogleSearchResult(**result) for result in search.results(query, num_results=num_results)]</code></pre>
+</details>
+<div class="desc"><p>Perform a Google web search using the Google Custom Search API.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong></dt>
+<dd>The search query to execute</dd>
+<dt><strong><code>num_results</code></strong></dt>
+<dd>Maximum number of results to return. Defaults to 3.</dd>
+<dt><strong><code>verbose</code></strong></dt>
+<dd>Whether to print verbose output. Defaults to False.</dd>
+<dt><strong><code>console</code></strong></dt>
+<dd>Console to use for output. Defaults to console_err.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[<a title="par_ai_core.web_tools.GoogleSearchResult" href="#par_ai_core.web_tools.GoogleSearchResult">GoogleSearchResult</a>]</code></dt>
+<dd>List of search results containing title, link and snippet</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If GOOGLE_CSE_ID or GOOGLE_CSE_API_KEY environment variables are not set</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="par_ai_core.web_tools.GoogleSearchResult"><code class="flex name class">
+<span>class <span class="ident">GoogleSearchResult</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@rich_repr
+class GoogleSearchResult(BaseModel):
+    &#34;&#34;&#34;Google search result.&#34;&#34;&#34;
+
+    title: str
+    link: str
+    snippet: str</code></pre>
+</details>
+<div class="desc"><p>Google search result.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.web_tools.GoogleSearchResult.link"><code class="name">var <span class="ident">link</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.web_tools.GoogleSearchResult.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.web_tools.GoogleSearchResult.snippet"><code class="name">var <span class="ident">snippet</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.web_tools.GoogleSearchResult.title"><code class="name">var <span class="ident">title</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="par_ai_core" href="index.html">par_ai_core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="par_ai_core.web_tools.fetch_url" href="#par_ai_core.web_tools.fetch_url">fetch_url</a></code></li>
+<li><code><a title="par_ai_core.web_tools.fetch_url_and_convert_to_markdown" href="#par_ai_core.web_tools.fetch_url_and_convert_to_markdown">fetch_url_and_convert_to_markdown</a></code></li>
+<li><code><a title="par_ai_core.web_tools.fetch_url_playwright" href="#par_ai_core.web_tools.fetch_url_playwright">fetch_url_playwright</a></code></li>
+<li><code><a title="par_ai_core.web_tools.fetch_url_selenium" href="#par_ai_core.web_tools.fetch_url_selenium">fetch_url_selenium</a></code></li>
+<li><code><a title="par_ai_core.web_tools.get_html_element" href="#par_ai_core.web_tools.get_html_element">get_html_element</a></code></li>
+<li><code><a title="par_ai_core.web_tools.web_search" href="#par_ai_core.web_tools.web_search">web_search</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="par_ai_core.web_tools.GoogleSearchResult" href="#par_ai_core.web_tools.GoogleSearchResult">GoogleSearchResult</a></code></h4>
+<ul class="">
+<li><code><a title="par_ai_core.web_tools.GoogleSearchResult.link" href="#par_ai_core.web_tools.GoogleSearchResult.link">link</a></code></li>
+<li><code><a title="par_ai_core.web_tools.GoogleSearchResult.model_config" href="#par_ai_core.web_tools.GoogleSearchResult.model_config">model_config</a></code></li>
+<li><code><a title="par_ai_core.web_tools.GoogleSearchResult.snippet" href="#par_ai_core.web_tools.GoogleSearchResult.snippet">snippet</a></code></li>
+<li><code><a title="par_ai_core.web_tools.GoogleSearchResult.title" href="#par_ai_core.web_tools.GoogleSearchResult.title">title</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>

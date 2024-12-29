@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>par_ai_core.output_utils API documentation</title>
+<meta name="description" content="Output formatting utilities …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>par_ai_core.output_utils</code></h1>
+</header>
+<section id="section-intro">
+<p>Output formatting utilities.</p>
+<p>This module provides utilities for formatting and displaying output in various formats
+including plain text, Markdown, CSV, and JSON. It uses the Rich library for enhanced
+terminal output.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="par_ai_core.output_utils.csv_file_to_table"><code class="name flex">
+<span>def <span class="ident">csv_file_to_table</span></span>(<span>csv_file: Path, title: str | None = None) ‑> rich.table.Table</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def csv_file_to_table(csv_file: Path, title: str | None = None) -&gt; Table:
+    &#34;&#34;&#34;Convert a CSV file to a Rich Table format.
+
+    Args:
+        csv_file: Path to the CSV file to convert
+        title: Optional title for the table. If None, uses the filename
+
+    Returns:
+        Table: A Rich Table object containing the formatted CSV data
+
+    Raises:
+        FileNotFoundError: If the CSV file doesn&#39;t exist
+        UnicodeDecodeError: If file encoding is not UTF-8
+    &#34;&#34;&#34;
+    return csv_to_table(
+        csv_file.read_text(encoding=&#34;utf-8&#34;).strip(),
+        csv_file.name if title is None else title,
+    )</code></pre>
+</details>
+<div class="desc"><p>Convert a CSV file to a Rich Table format.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>csv_file</code></strong></dt>
+<dd>Path to the CSV file to convert</dd>
+<dt><strong><code>title</code></strong></dt>
+<dd>Optional title for the table. If None, uses the filename</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Table</code></dt>
+<dd>A Rich Table object containing the formatted CSV data</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>FileNotFoundError</code></dt>
+<dd>If the CSV file doesn't exist</dd>
+<dt><code>UnicodeDecodeError</code></dt>
+<dd>If file encoding is not UTF-8</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.output_utils.csv_to_table"><code class="name flex">
+<span>def <span class="ident">csv_to_table</span></span>(<span>data: str, title: str = 'Results') ‑> rich.table.Table</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def csv_to_table(data: str, title: str = &#34;Results&#34;) -&gt; Table:
+    &#34;&#34;&#34;Convert CSV string data to a Rich Table format.
+
+    Args:
+        data: CSV formatted string data to convert
+        title: Title to display at the top of the table. Defaults to &#34;Results&#34;
+
+    Returns:
+        Table: A Rich Table object containing the formatted CSV data
+
+    Raises:
+        csv.Error: If CSV parsing fails
+        ValueError: If CSV data is malformed
+    &#34;&#34;&#34;
+    data = data.strip()
+    table = Table(title=title, show_header=True, header_style=&#34;bold cyan&#34;)
+
+    if not data:
+        table.add_column(&#34;Empty&#34;, justify=&#34;left&#34;, style=&#34;cyan&#34;, no_wrap=True)
+        return table
+
+    try:
+        reader = csv.reader(io.StringIO(data))
+        headers = next(reader, None)
+
+        if not headers:
+            table.add_column(&#34;Error&#34;, justify=&#34;left&#34;, style=&#34;red&#34;)
+            table.add_row(&#34;No fields found in CSV data&#34;)
+            return table
+
+        # Add columns
+        for field in headers:
+            table.add_column(str(field), justify=&#34;left&#34;, style=&#34;cyan&#34;, no_wrap=True)
+
+        # Add rows
+        try:
+            for row in reader:
+                if len(row) != len(headers):
+                    table = Table(title=title)
+                    table.add_column(&#34;Error&#34;, justify=&#34;left&#34;, style=&#34;red&#34;)
+                    table.add_row(&#34;Failed to parse CSV data: Inconsistent number of fields&#34;)
+                    return table
+                table.add_row(*[str(val) for val in row])
+        except Exception as e:
+            table = Table(title=title)
+            table.add_column(&#34;Error&#34;, justify=&#34;left&#34;, style=&#34;red&#34;)
+            table.add_row(f&#34;Failed to parse CSV data: {str(e)}&#34;)
+            return table
+
+    except (csv.Error, ValueError) as e:
+        table = Table(title=title)
+        table.add_column(&#34;Error&#34;, justify=&#34;left&#34;, style=&#34;red&#34;)
+        table.add_row(f&#34;Failed to parse CSV data: {str(e)}&#34;)
+    return table</code></pre>
+</details>
+<div class="desc"><p>Convert CSV string data to a Rich Table format.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong></dt>
+<dd>CSV formatted string data to convert</dd>
+<dt><strong><code>title</code></strong></dt>
+<dd>Title to display at the top of the table. Defaults to "Results"</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Table</code></dt>
+<dd>A Rich Table object containing the formatted CSV data</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>csv.Error</code></dt>
+<dd>If CSV parsing fails</dd>
+<dt><code>ValueError</code></dt>
+<dd>If CSV data is malformed</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.output_utils.display_formatted_output"><code class="name flex">
+<span>def <span class="ident">display_formatted_output</span></span>(<span>content: str,<br>display_format: <a title="par_ai_core.output_utils.DisplayOutputFormat" href="#par_ai_core.output_utils.DisplayOutputFormat">DisplayOutputFormat</a>,<br>console: Console | None = None) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def display_formatted_output(content: str, display_format: DisplayOutputFormat, console: Console | None = None) -&gt; None:
+    &#34;&#34;&#34;Display content in the specified format using Rich console output.
+
+    Formats and displays content according to the specified DisplayOutputFormat.
+    Supports plain text, Markdown, CSV table, and syntax-highlighted JSON output.
+
+    Args:
+        content: The content string to display
+        display_format: The format to use for displaying the content
+        console: Optional Rich Console instance to use. If None, uses console_err
+
+    Returns:
+        None
+
+    Note:
+        For CSV format, content is converted to a Rich Table before display.
+        For JSON format, syntax highlighting is applied.
+        If display_format is NONE, nothing is displayed.
+    &#34;&#34;&#34;
+    if display_format == DisplayOutputFormat.NONE:
+        return
+
+    if not console:
+        console = console_err
+
+    if display_format == DisplayOutputFormat.PLAIN:
+        print(content)
+    elif display_format == DisplayOutputFormat.MD:
+        console.print(Markdown(content))
+    elif display_format == DisplayOutputFormat.CSV:
+        # Convert CSV to rich Table
+        table = Table(title=&#34;CSV Data&#34;)
+        csv_reader = csv.reader(io.StringIO(content))
+        headers = next(csv_reader)
+        for header in headers:
+            table.add_column(header, style=&#34;cyan&#34;)
+        for row in csv_reader:
+            table.add_row(*row)
+        console.print(table)
+    elif display_format == DisplayOutputFormat.JSON:
+        console.print(Syntax(content, &#34;json&#34;))</code></pre>
+</details>
+<div class="desc"><p>Display content in the specified format using Rich console output.</p>
+<p>Formats and displays content according to the specified DisplayOutputFormat.
+Supports plain text, Markdown, CSV table, and syntax-highlighted JSON output.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content</code></strong></dt>
+<dd>The content string to display</dd>
+<dt><strong><code>display_format</code></strong></dt>
+<dd>The format to use for displaying the content</dd>
+<dt><strong><code>console</code></strong></dt>
+<dd>Optional Rich Console instance to use. If None, uses console_err</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>None</p>
+<h2 id="note">Note</h2>
+<p>For CSV format, content is converted to a Rich Table before display.
+For JSON format, syntax highlighting is applied.
+If display_format is NONE, nothing is displayed.</p></div>
+</dd>
+<dt id="par_ai_core.output_utils.get_output_format_prompt"><code class="name flex">
+<span>def <span class="ident">get_output_format_prompt</span></span>(<span>display_format: <a title="par_ai_core.output_utils.DisplayOutputFormat" href="#par_ai_core.output_utils.DisplayOutputFormat">DisplayOutputFormat</a>) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_output_format_prompt(display_format: DisplayOutputFormat) -&gt; str:
+    &#34;&#34;&#34;Get the appropriate output format prompt instructions.
+
+    Args:
+        display_format: The desired output format enum value
+
+    Returns:
+        str: XML-formatted instructions for the specified output format.
+            Returns empty string if format is NONE.
+    &#34;&#34;&#34;
+    if display_format == DisplayOutputFormat.MD:
+        return &#34;&#34;&#34;&lt;output_instructions&gt;
+    &lt;instruction&gt;Output properly formatted Markdown.&lt;/instruction&gt;
+    &lt;instruction&gt;Use table / list formatting when applicable or requested.&lt;/instruction&gt;
+    &lt;instruction&gt;Do not include an opening ```markdown or closing ```&lt;/instruction&gt;
+&lt;/output_instructions&gt;
+&#34;&#34;&#34;
+    if display_format == DisplayOutputFormat.JSON:
+        return &#34;&#34;&#34;&lt;output_instructions&gt;
+    &lt;instruction&gt;Output proper JSON.&lt;/instruction&gt;
+    &lt;instruction&gt;Use a schema if provided.&lt;/instruction&gt;
+    &lt;instruction&gt;Only output JSON. Do not include any other text / markdown or formatting such as opening ```json or closing ```&lt;/instruction&gt;
+&lt;/output_instructions&gt;
+&#34;&#34;&#34;
+    if display_format == DisplayOutputFormat.CSV:
+        return &#34;&#34;&#34;&lt;output_instructions&gt;
+    &lt;instruction&gt;Output proper CSV format.&lt;/instruction&gt;
+    &lt;instruction&gt;Ensure you use double quotes on fields containing line breaks or commas.&lt;/instruction&gt;
+    &lt;instruction&gt;Include a header with names of the fields.&lt;/instruction&gt;
+    &lt;instruction&gt;Only output the CSV header and data.&lt;/instruction&gt;
+    &lt;instruction&gt;Do not include any other text / Markdown such as opening ```csv or closing ```&lt;/instruction&gt;
+&lt;/output_instructions&gt;
+&#34;&#34;&#34;
+    if display_format == DisplayOutputFormat.PLAIN:
+        return &#34;&#34;&#34;&lt;output_instructions&gt;
+    &lt;instruction&gt;Output plain text without formatting, do not include any other formatting such as markdown.&lt;/instruction&gt;
+&lt;/output_instructions&gt;
+&#34;&#34;&#34;
+    return &#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the appropriate output format prompt instructions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>display_format</code></strong></dt>
+<dd>The desired output format enum value</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>XML-formatted instructions for the specified output format.
+Returns empty string if format is NONE.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.output_utils.highlight_json"><code class="name flex">
+<span>def <span class="ident">highlight_json</span></span>(<span>data: str) ‑> rich.syntax.Syntax</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def highlight_json(data: str) -&gt; Syntax:
+    &#34;&#34;&#34;Create syntax-highlighted JSON output.
+
+    Args:
+        data: JSON string to highlight
+
+    Returns:
+        Syntax: A Rich Syntax object with JSON highlighting applied
+    &#34;&#34;&#34;
+    return Syntax(data, &#34;json&#34;, background_color=&#34;default&#34;)</code></pre>
+</details>
+<div class="desc"><p>Create syntax-highlighted JSON output.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong></dt>
+<dd>JSON string to highlight</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Syntax</code></dt>
+<dd>A Rich Syntax object with JSON highlighting applied</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.output_utils.highlight_json_file"><code class="name flex">
+<span>def <span class="ident">highlight_json_file</span></span>(<span>json_file: Path) ‑> rich.syntax.Syntax</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def highlight_json_file(json_file: Path) -&gt; Syntax:
+    &#34;&#34;&#34;Create syntax-highlighted output from a JSON file.
+
+    Args:
+        json_file: Path to the JSON file to highlight
+
+    Returns:
+        Syntax: A Rich Syntax object with JSON highlighting applied
+
+    Raises:
+        FileNotFoundError: If the JSON file doesn&#39;t exist
+        UnicodeDecodeError: If file encoding is not UTF-8
+    &#34;&#34;&#34;
+    return highlight_json(json_file.read_text(encoding=&#34;utf-8&#34;).strip())</code></pre>
+</details>
+<div class="desc"><p>Create syntax-highlighted output from a JSON file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>json_file</code></strong></dt>
+<dd>Path to the JSON file to highlight</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Syntax</code></dt>
+<dd>A Rich Syntax object with JSON highlighting applied</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>FileNotFoundError</code></dt>
+<dd>If the JSON file doesn't exist</dd>
+<dt><code>UnicodeDecodeError</code></dt>
+<dd>If file encoding is not UTF-8</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="par_ai_core.output_utils.DisplayOutputFormat"><code class="flex name class">
+<span>class <span class="ident">DisplayOutputFormat</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DisplayOutputFormat(StrEnum):
+    &#34;&#34;&#34;Enum for display output format choices.&#34;&#34;&#34;
+
+    NONE = &#34;none&#34;
+    &#34;&#34;&#34;No output.&#34;&#34;&#34;
+    PLAIN = &#34;plain&#34;
+    &#34;&#34;&#34;Plain text output.&#34;&#34;&#34;
+    MD = &#34;md&#34;
+    &#34;&#34;&#34;Rich Markdown output.&#34;&#34;&#34;
+    CSV = &#34;csv&#34;
+    &#34;&#34;&#34;Rich Table output.&#34;&#34;&#34;
+    JSON = &#34;json&#34;
+    &#34;&#34;&#34;Rich JSON output.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Enum for display output format choices.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>strenum.StrEnum</li>
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.output_utils.DisplayOutputFormat.CSV"><code class="name">var <span class="ident">CSV</span></code></dt>
+<dd>
+<div class="desc"><p>Rich Table output.</p></div>
+</dd>
+<dt id="par_ai_core.output_utils.DisplayOutputFormat.JSON"><code class="name">var <span class="ident">JSON</span></code></dt>
+<dd>
+<div class="desc"><p>Rich JSON output.</p></div>
+</dd>
+<dt id="par_ai_core.output_utils.DisplayOutputFormat.MD"><code class="name">var <span class="ident">MD</span></code></dt>
+<dd>
+<div class="desc"><p>Rich Markdown output.</p></div>
+</dd>
+<dt id="par_ai_core.output_utils.DisplayOutputFormat.NONE"><code class="name">var <span class="ident">NONE</span></code></dt>
+<dd>
+<div class="desc"><p>No output.</p></div>
+</dd>
+<dt id="par_ai_core.output_utils.DisplayOutputFormat.PLAIN"><code class="name">var <span class="ident">PLAIN</span></code></dt>
+<dd>
+<div class="desc"><p>Plain text output.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="par_ai_core" href="index.html">par_ai_core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="par_ai_core.output_utils.csv_file_to_table" href="#par_ai_core.output_utils.csv_file_to_table">csv_file_to_table</a></code></li>
+<li><code><a title="par_ai_core.output_utils.csv_to_table" href="#par_ai_core.output_utils.csv_to_table">csv_to_table</a></code></li>
+<li><code><a title="par_ai_core.output_utils.display_formatted_output" href="#par_ai_core.output_utils.display_formatted_output">display_formatted_output</a></code></li>
+<li><code><a title="par_ai_core.output_utils.get_output_format_prompt" href="#par_ai_core.output_utils.get_output_format_prompt">get_output_format_prompt</a></code></li>
+<li><code><a title="par_ai_core.output_utils.highlight_json" href="#par_ai_core.output_utils.highlight_json">highlight_json</a></code></li>
+<li><code><a title="par_ai_core.output_utils.highlight_json_file" href="#par_ai_core.output_utils.highlight_json_file">highlight_json_file</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="par_ai_core.output_utils.DisplayOutputFormat" href="#par_ai_core.output_utils.DisplayOutputFormat">DisplayOutputFormat</a></code></h4>
+<ul class="">
+<li><code><a title="par_ai_core.output_utils.DisplayOutputFormat.CSV" href="#par_ai_core.output_utils.DisplayOutputFormat.CSV">CSV</a></code></li>
+<li><code><a title="par_ai_core.output_utils.DisplayOutputFormat.JSON" href="#par_ai_core.output_utils.DisplayOutputFormat.JSON">JSON</a></code></li>
+<li><code><a title="par_ai_core.output_utils.DisplayOutputFormat.MD" href="#par_ai_core.output_utils.DisplayOutputFormat.MD">MD</a></code></li>
+<li><code><a title="par_ai_core.output_utils.DisplayOutputFormat.NONE" href="#par_ai_core.output_utils.DisplayOutputFormat.NONE">NONE</a></code></li>
+<li><code><a title="par_ai_core.output_utils.DisplayOutputFormat.PLAIN" href="#par_ai_core.output_utils.DisplayOutputFormat.PLAIN">PLAIN</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>

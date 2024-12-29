@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>par_ai_core.llm_providers API documentation</title>
+<meta name="description" content="LLM provider types and configurations …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>par_ai_core.llm_providers</code></h1>
+</header>
+<section id="section-intro">
+<p>LLM provider types and configurations.</p>
+<p>This module defines the supported LLM providers and their configurations including
+model names, API endpoints, and environment variables. It provides utilities for
+provider management and configuration access.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="par_ai_core.llm_providers.get_provider_name_fuzzy"><code class="name flex">
+<span>def <span class="ident">get_provider_name_fuzzy</span></span>(<span>provider: str) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_provider_name_fuzzy(provider: str) -&gt; str:
+    &#34;&#34;&#34;Get provider name using fuzzy matching.
+
+    Attempts to match a provider name string to a valid provider by checking for
+    exact matches and prefix matches. Case-insensitive matching is used.
+
+    Args:
+        provider: String to match against provider names. Can be full name or prefix
+            (e.g. &#34;openai&#34; or &#34;open&#34; for OpenAI)
+
+    Returns:
+        str: Matched provider name if found, empty string if no match found.
+            Returns exact provider name with proper casing if matched.
+
+    Examples:
+        &gt;&gt;&gt; get_provider_name_fuzzy(&#34;openai&#34;)
+        &#39;OpenAI&#39;
+        &gt;&gt;&gt; get_provider_name_fuzzy(&#34;anth&#34;)
+        &#39;Anthropic&#39;
+        &gt;&gt;&gt; get_provider_name_fuzzy(&#34;invalid&#34;)
+        &#39;&#39;
+    &#34;&#34;&#34;
+    provider = provider.lower()
+    for p in llm_provider_types:
+        if p.value.lower() == provider:
+            return p.value
+        if p.value.lower().startswith(provider):
+            return p.value
+    return &#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get provider name using fuzzy matching.</p>
+<p>Attempts to match a provider name string to a valid provider by checking for
+exact matches and prefix matches. Case-insensitive matching is used.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>provider</code></strong></dt>
+<dd>String to match against provider names. Can be full name or prefix
+(e.g. "openai" or "open" for OpenAI)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Matched provider name if found, empty string if no match found.
+Returns exact provider name with proper casing if matched.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; get_provider_name_fuzzy(&quot;openai&quot;)
+'OpenAI'
+&gt;&gt;&gt; get_provider_name_fuzzy(&quot;anth&quot;)
+'Anthropic'
+&gt;&gt;&gt; get_provider_name_fuzzy(&quot;invalid&quot;)
+''
+</code></pre></div>
+</dd>
+<dt id="par_ai_core.llm_providers.get_provider_select_options"><code class="name flex">
+<span>def <span class="ident">get_provider_select_options</span></span>(<span>) ‑> list[tuple[str, <a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_provider_select_options() -&gt; list[tuple[str, LlmProvider]]:
+    &#34;&#34;&#34;Get provider options for UI selection.
+
+    Returns:
+        list[tuple[str, LlmProvider]]: List of tuples containing
+            (provider display name, provider enum) for each available provider
+    &#34;&#34;&#34;
+    return [
+        (
+            p.value,
+            LlmProvider(p),
+        )
+        for p in get_providers_with_api_keys()
+    ]</code></pre>
+</details>
+<div class="desc"><p>Get provider options for UI selection.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[tuple[str, <a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]]</code></dt>
+<dd>List of tuples containing
+(provider display name, provider enum) for each available provider</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.llm_providers.get_providers_with_api_keys"><code class="name flex">
+<span>def <span class="ident">get_providers_with_api_keys</span></span>(<span>) ‑> list[<a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_providers_with_api_keys() -&gt; list[LlmProvider]:
+    &#34;&#34;&#34;Get list of providers that have valid API keys configured.
+
+    Returns:
+        list[LlmProvider]: List of providers that are ready to use
+            (either have API key set or don&#39;t require one)
+    &#34;&#34;&#34;
+    return [p for p in LlmProvider if is_provider_api_key_set(p)]</code></pre>
+</details>
+<div class="desc"><p>Get list of providers that have valid API keys configured.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[<a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]</code></dt>
+<dd>List of providers that are ready to use
+(either have API key set or don't require one)</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.llm_providers.is_provider_api_key_set"><code class="name flex">
+<span>def <span class="ident">is_provider_api_key_set</span></span>(<span>provider: <a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_provider_api_key_set(provider: LlmProvider) -&gt; bool:
+    &#34;&#34;&#34;Check if API key is set for the given provider.
+
+    Args:
+        provider: LLM provider to check
+
+    Returns:
+        bool: True if provider doesn&#39;t need key (Ollama/LlamaCpp) or
+            if required environment variable is set and non-empty
+    &#34;&#34;&#34;
+    if provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP]:
+        return True
+    return len(os.environ.get(provider_env_key_names[provider], &#34;&#34;)) &gt; 0</code></pre>
+</details>
+<div class="desc"><p>Check if API key is set for the given provider.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>provider</code></strong></dt>
+<dd>LLM provider to check</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if provider doesn't need key (Ollama/LlamaCpp) or
+if required environment variable is set and non-empty</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.llm_providers.provider_name_to_enum"><code class="name flex">
+<span>def <span class="ident">provider_name_to_enum</span></span>(<span>name: str) ‑> <a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def provider_name_to_enum(name: str) -&gt; LlmProvider:
+    &#34;&#34;&#34;Convert provider name string to LlmProvider enum.
+
+    Args:
+        name: Provider name string (case-sensitive)
+
+    Returns:
+        LlmProvider: Corresponding enum value
+
+    Raises:
+        ValueError: If name doesn&#39;t match any provider
+    &#34;&#34;&#34;
+    return LlmProvider(name)</code></pre>
+</details>
+<div class="desc"><p>Convert provider name string to LlmProvider enum.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Provider name string (case-sensitive)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a></code></dt>
+<dd>Corresponding enum value</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If name doesn't match any provider</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="par_ai_core.llm_providers.LangChainConfig"><code class="flex name class">
+<span>class <span class="ident">LangChainConfig</span></span>
+<span>(</span><span>tracing: bool = False,<br>project: str = 'parllama',<br>base_url: str = 'https://api.smith.langchain.com',<br>api_key: str = '')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class LangChainConfig:
+    &#34;&#34;&#34;Configuration for LangChain integration.
+
+    Attributes:
+        tracing: Whether to enable LangChain tracing
+        project: Project name for LangChain
+        base_url: Base URL for LangChain API
+        api_key: API key for LangChain authentication
+    &#34;&#34;&#34;
+
+    tracing: bool = False
+    project: str = &#34;parllama&#34;
+    base_url: str = &#34;https://api.smith.langchain.com&#34;
+    api_key: str = &#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Configuration for LangChain integration.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>tracing</code></strong></dt>
+<dd>Whether to enable LangChain tracing</dd>
+<dt><strong><code>project</code></strong></dt>
+<dd>Project name for LangChain</dd>
+<dt><strong><code>base_url</code></strong></dt>
+<dd>Base URL for LangChain API</dd>
+<dt><strong><code>api_key</code></strong></dt>
+<dd>API key for LangChain authentication</dd>
+</dl></div>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.llm_providers.LangChainConfig.api_key"><code class="name">var <span class="ident">api_key</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LangChainConfig.base_url"><code class="name">var <span class="ident">base_url</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LangChainConfig.project"><code class="name">var <span class="ident">project</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LangChainConfig.tracing"><code class="name">var <span class="ident">tracing</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider"><code class="flex name class">
+<span>class <span class="ident">LlmProvider</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LlmProvider(str, Enum):
+    &#34;&#34;&#34;Enumeration of supported LLM providers.
+
+    Supported providers:
+        OLLAMA: Local Ollama instance
+        OPENAI: OpenAI API
+        GROQ: Groq API
+        XAI: X.AI (formerly Twitter) API
+        ANTHROPIC: Anthropic Claude API
+        GOOGLE: Google AI (Gemini) API
+        BEDROCK: AWS Bedrock API
+        GITHUB: GitHub Copilot API
+        LLAMACPP: Local LlamaCpp instance
+    &#34;&#34;&#34;
+
+    OLLAMA = &#34;Ollama&#34;
+    OPENAI = &#34;OpenAI&#34;
+    GROQ = &#34;Groq&#34;
+    XAI = &#34;XAI&#34;
+    ANTHROPIC = &#34;Anthropic&#34;
+    GOOGLE = &#34;Google&#34;
+    BEDROCK = &#34;Bedrock&#34;
+    GITHUB = &#34;Github&#34;
+    LLAMACPP = &#34;LlamaCpp&#34;</code></pre>
+</details>
+<div class="desc"><p>Enumeration of supported LLM providers.</p>
+<p>Supported providers:
+OLLAMA: Local Ollama instance
+OPENAI: OpenAI API
+GROQ: Groq API
+XAI: X.AI (formerly Twitter) API
+ANTHROPIC: Anthropic Claude API
+GOOGLE: Google AI (Gemini) API
+BEDROCK: AWS Bedrock API
+GITHUB: GitHub Copilot API
+LLAMACPP: Local LlamaCpp instance</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.llm_providers.LlmProvider.ANTHROPIC"><code class="name">var <span class="ident">ANTHROPIC</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.BEDROCK"><code class="name">var <span class="ident">BEDROCK</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.GITHUB"><code class="name">var <span class="ident">GITHUB</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.GOOGLE"><code class="name">var <span class="ident">GOOGLE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.GROQ"><code class="name">var <span class="ident">GROQ</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.LLAMACPP"><code class="name">var <span class="ident">LLAMACPP</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.OLLAMA"><code class="name">var <span class="ident">OLLAMA</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.OPENAI"><code class="name">var <span class="ident">OPENAI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.XAI"><code class="name">var <span class="ident">XAI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig"><code class="flex name class">
+<span>class <span class="ident">LlmProviderConfig</span></span>
+<span>(</span><span>default_model: str,<br>default_light_model: str,<br>default_vision_model: str,<br>default_embeddings_model: str,<br>supports_base_url: bool,<br>env_key_name: str)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class LlmProviderConfig:
+    &#34;&#34;&#34;Configuration for an LLM provider.
+
+    Attributes:
+        default_model: Default model identifier for standard usage
+        default_light_model: Default model for lightweight/fast usage
+        default_vision_model: Default model for vision/multimodal tasks
+        default_embeddings_model: Default model for text embeddings
+        supports_base_url: Whether provider supports custom base URL
+        env_key_name: Environment variable name for API key
+    &#34;&#34;&#34;
+
+    default_model: str
+    default_light_model: str
+    default_vision_model: str
+    default_embeddings_model: str
+    supports_base_url: bool
+    env_key_name: str</code></pre>
+</details>
+<div class="desc"><p>Configuration for an LLM provider.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>default_model</code></strong></dt>
+<dd>Default model identifier for standard usage</dd>
+<dt><strong><code>default_light_model</code></strong></dt>
+<dd>Default model for lightweight/fast usage</dd>
+<dt><strong><code>default_vision_model</code></strong></dt>
+<dd>Default model for vision/multimodal tasks</dd>
+<dt><strong><code>default_embeddings_model</code></strong></dt>
+<dd>Default model for text embeddings</dd>
+<dt><strong><code>supports_base_url</code></strong></dt>
+<dd>Whether provider supports custom base URL</dd>
+<dt><strong><code>env_key_name</code></strong></dt>
+<dd>Environment variable name for API key</dd>
+</dl></div>
+<h3>Class variables</h3>
+<dl>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig.default_embeddings_model"><code class="name">var <span class="ident">default_embeddings_model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig.default_light_model"><code class="name">var <span class="ident">default_light_model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig.default_model"><code class="name">var <span class="ident">default_model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig.default_vision_model"><code class="name">var <span class="ident">default_vision_model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig.env_key_name"><code class="name">var <span class="ident">env_key_name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProviderConfig.supports_base_url"><code class="name">var <span class="ident">supports_base_url</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="par_ai_core" href="index.html">par_ai_core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="par_ai_core.llm_providers.get_provider_name_fuzzy" href="#par_ai_core.llm_providers.get_provider_name_fuzzy">get_provider_name_fuzzy</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.get_provider_select_options" href="#par_ai_core.llm_providers.get_provider_select_options">get_provider_select_options</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.get_providers_with_api_keys" href="#par_ai_core.llm_providers.get_providers_with_api_keys">get_providers_with_api_keys</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.is_provider_api_key_set" href="#par_ai_core.llm_providers.is_provider_api_key_set">is_provider_api_key_set</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.provider_name_to_enum" href="#par_ai_core.llm_providers.provider_name_to_enum">provider_name_to_enum</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="par_ai_core.llm_providers.LangChainConfig" href="#par_ai_core.llm_providers.LangChainConfig">LangChainConfig</a></code></h4>
+<ul class="">
+<li><code><a title="par_ai_core.llm_providers.LangChainConfig.api_key" href="#par_ai_core.llm_providers.LangChainConfig.api_key">api_key</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LangChainConfig.base_url" href="#par_ai_core.llm_providers.LangChainConfig.base_url">base_url</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LangChainConfig.project" href="#par_ai_core.llm_providers.LangChainConfig.project">project</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LangChainConfig.tracing" href="#par_ai_core.llm_providers.LangChainConfig.tracing">tracing</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a></code></h4>
+<ul class="two-column">
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.ANTHROPIC" href="#par_ai_core.llm_providers.LlmProvider.ANTHROPIC">ANTHROPIC</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.BEDROCK" href="#par_ai_core.llm_providers.LlmProvider.BEDROCK">BEDROCK</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.GITHUB" href="#par_ai_core.llm_providers.LlmProvider.GITHUB">GITHUB</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.GOOGLE" href="#par_ai_core.llm_providers.LlmProvider.GOOGLE">GOOGLE</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.GROQ" href="#par_ai_core.llm_providers.LlmProvider.GROQ">GROQ</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.LLAMACPP" href="#par_ai_core.llm_providers.LlmProvider.LLAMACPP">LLAMACPP</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.OLLAMA" href="#par_ai_core.llm_providers.LlmProvider.OLLAMA">OLLAMA</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.OPENAI" href="#par_ai_core.llm_providers.LlmProvider.OPENAI">OPENAI</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.XAI" href="#par_ai_core.llm_providers.LlmProvider.XAI">XAI</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="par_ai_core.llm_providers.LlmProviderConfig" href="#par_ai_core.llm_providers.LlmProviderConfig">LlmProviderConfig</a></code></h4>
+<ul class="">
+<li><code><a title="par_ai_core.llm_providers.LlmProviderConfig.default_embeddings_model" href="#par_ai_core.llm_providers.LlmProviderConfig.default_embeddings_model">default_embeddings_model</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProviderConfig.default_light_model" href="#par_ai_core.llm_providers.LlmProviderConfig.default_light_model">default_light_model</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProviderConfig.default_model" href="#par_ai_core.llm_providers.LlmProviderConfig.default_model">default_model</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProviderConfig.default_vision_model" href="#par_ai_core.llm_providers.LlmProviderConfig.default_vision_model">default_vision_model</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProviderConfig.env_key_name" href="#par_ai_core.llm_providers.LlmProviderConfig.env_key_name">env_key_name</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProviderConfig.supports_base_url" href="#par_ai_core.llm_providers.LlmProviderConfig.supports_base_url">supports_base_url</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>

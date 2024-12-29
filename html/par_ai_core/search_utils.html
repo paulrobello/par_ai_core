@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.5">
+<title>par_ai_core.search_utils API documentation</title>
+<meta name="description" content="Utilities for performing web searches across various platforms …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>par_ai_core.search_utils</code></h1>
+</header>
+<section id="section-intro">
+<p>Utilities for performing web searches across various platforms.</p>
+<p>This module provides functions to search different web platforms including Tavily,
+Jina, Brave Search, Google Serper, Reddit, and YouTube. Each search function returns
+results in a standardized format.</p>
+<p>Typical usage example:
+results = brave_search("artificial intelligence", days=7, max_results=5)
+youtube_results = youtube_search("OpenAI", fetch_transcript=True)</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="par_ai_core.search_utils.brave_search"><code class="name flex">
+<span>def <span class="ident">brave_search</span></span>(<span>query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Search the web using the Brave Search API.
+
+    Performs a web search using Brave&#39;s privacy-focused search engine. Can optionally
+    scrape the content of returned URLs for more detailed results.
+
+    Args:
+        query (str): The search query to execute.
+        days (int, optional): Number of days to search back. Must be &gt;= 0.
+            Defaults to 0 meaning all time.
+        max_results (int, optional): Maximum number of results to return.
+            Defaults to 3.
+        scrape (bool, optional): Whether to scrape the content of the search result
+            URLs. Defaults to False.
+
+    Returns:
+        list[dict[str, Any]]: List of search results, where each dict contains:
+            title (str): Title of the search result
+            url (str): URL of the search result
+            content (str): Snippet/summary of the content
+            raw_content (str): Full content of the page if scraped
+
+    Raises:
+        ValueError: If days parameter is negative.
+    &#34;&#34;&#34;
+    if days &lt; 0:
+        raise ValueError(&#34;days parameter must be &gt;= 0&#34;)
+    if days &gt; 0:
+        start_date = date.today() - timedelta(days=days)
+        end_date = date.today()
+        date_range = f&#34;{start_date.strftime(&#39;%Y-%m-%d&#39;)}to{end_date.strftime(&#39;%Y-%m-%d&#39;)}&#34;
+    else:
+        date_range = &#34;false&#34;
+    wrapper = BraveSearchWrapper(
+        api_key=os.environ[&#34;BRAVE_API_KEY&#34;],
+        search_kwargs={&#34;count&#34;: max_results, &#34;summary&#34;: True, &#34;freshness&#34;: date_range},
+    )
+    res = json.loads(wrapper.run(query))
+    if scrape:
+        urls = [r[&#34;link&#34;] for r in res[:max_results]]
+        content = fetch_url_and_convert_to_markdown(urls)
+        for r, c in zip(res, content):
+            r[&#34;raw_content&#34;] = c
+    # print(res)
+    return [
+        {
+            &#34;title&#34;: r[&#34;title&#34;],
+            &#34;url&#34;: r[&#34;link&#34;],
+            &#34;content&#34;: r[&#34;snippet&#34;],
+            &#34;raw_content&#34;: r.get(&#34;raw_content&#34;, r[&#34;snippet&#34;]),
+        }
+        for r in res[:max_results]
+    ]</code></pre>
+</details>
+<div class="desc"><p>Search the web using the Brave Search API.</p>
+<p>Performs a web search using Brave's privacy-focused search engine. Can optionally
+scrape the content of returned URLs for more detailed results.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The search query to execute.</dd>
+<dt><strong><code>days</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of days to search back. Must be &gt;= 0.
+Defaults to 0 meaning all time.</dd>
+<dt><strong><code>max_results</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of results to return.
+Defaults to 3.</dd>
+<dt><strong><code>scrape</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to scrape the content of the search result
+URLs. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of search results, where each dict contains:
+title (str): Title of the search result
+url (str): URL of the search result
+content (str): Snippet/summary of the content
+raw_content (str): Full content of the page if scraped</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If days parameter is negative.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.search_utils.jina_search"><code class="name flex">
+<span>def <span class="ident">jina_search</span></span>(<span>query: str, *, max_results: int = 3) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def jina_search(query: str, *, max_results: int = 3) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Search the web using the Jina AI search API.
+
+    Performs a web search using Jina&#39;s neural search engine that combines
+    traditional search with AI-powered relevance ranking.
+
+    Args:
+        query (str): The search query to execute.
+        max_results (int): Maximum number of results to return.
+
+    Returns:
+        list[dict[str, Any]]: List of search results, where each dict contains:
+            title (str): Title of the search result
+            url (str): URL of the search result
+            content (str): Snippet/summary of the content
+            raw_content (str): Full content of the page if available
+
+    Raises:
+        Exception: If the Jina API request fails or returns an error status code.
+    &#34;&#34;&#34;
+    response = requests.get(
+        f&#34;https://s.jina.ai/{quote(query)}&#34;,
+        headers={
+            &#34;Authorization&#34;: f&#34;Bearer {os.environ[&#39;JINA_API_KEY&#39;]}&#34;,
+            &#34;X-Retain-Images&#34;: &#34;none&#34;,
+            &#34;Accept&#34;: &#34;application/json&#34;,
+        },
+    )
+
+    if response.status_code == 200:
+        res = response.json()
+        # print(res)
+        return [
+            {&#34;title&#34;: r[&#34;title&#34;], &#34;url&#34;: r[&#34;url&#34;], &#34;content&#34;: r[&#34;description&#34;], &#34;raw_content&#34;: r[&#34;content&#34;]}
+            for r in res[&#34;data&#34;][:max_results]
+            if &#34;warning&#34; not in r
+        ]
+
+    else:
+        raise Exception(f&#34;Jina API request failed with status code {response.status_code}&#34;)</code></pre>
+</details>
+<div class="desc"><p>Search the web using the Jina AI search API.</p>
+<p>Performs a web search using Jina's neural search engine that combines
+traditional search with AI-powered relevance ranking.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The search query to execute.</dd>
+<dt><strong><code>max_results</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of results to return.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of search results, where each dict contains:
+title (str): Title of the search result
+url (str): URL of the search result
+content (str): Snippet/summary of the content
+raw_content (str): Full content of the page if available</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>Exception</code></dt>
+<dd>If the Jina API request fails or returns an error status code.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.search_utils.reddit_search"><code class="name flex">
+<span>def <span class="ident">reddit_search</span></span>(<span>query: str, subreddit: str = 'all', max_comments: int = 0, max_results: int = 3) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reddit_search(
+    query: str, subreddit: str = &#34;all&#34;, max_comments: int = 0, max_results: int = 3
+) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Search Reddit for posts and comments.
+
+    Searches Reddit for posts matching a query, optionally within a specific subreddit.
+    Special query words &#39;hot&#39;, &#39;new&#39;, or &#39;controversial&#39; can be used to fetch posts
+    sorted by those criteria instead of performing a text search.
+
+    Args:
+        query (str): The search query. Special values: &#39;hot&#39;, &#39;new&#39;, &#39;controversial&#39;
+            will fetch posts sorted by those criteria instead of searching.
+        subreddit (str, optional): The subreddit to search. Defaults to &#39;all&#39;.
+        max_comments (int, optional): Maximum number of comments to return per post.
+            Defaults to 0 (no comments).
+        max_results (int, optional): Maximum number of posts to return.
+            Defaults to 3.
+
+    Returns:
+        list[dict[str, Any]]: List of search results, where each dict contains:
+            title (str): Title of the Reddit post
+            url (str): URL of the post
+            content (str): Post text content
+            raw_content (str): Formatted post content including metadata and comments
+
+    Note:
+        If the specified subreddit is not found, falls back to searching &#39;all&#39;.
+    &#34;&#34;&#34;
+    reddit = praw.Reddit(
+        client_id=os.environ.get(&#34;REDDIT_CLIENT_ID&#34;),
+        client_secret=os.environ.get(&#34;REDDIT_CLIENT_SECRET&#34;),
+        username=os.environ.get(&#34;REDDIT_USERNAME&#34;),
+        password=os.environ.get(&#34;REDDIT_PASSWORD&#34;),
+        user_agent=&#34;parai&#34;,
+    )
+    try:
+        sub_reddit = reddit.subreddit(subreddit)
+    except Exception as _:
+        # console.log(&#34;[red]Subreddit not found, falling back to all&#34;)
+        subreddit = &#34;all&#34;
+        sub_reddit = reddit.subreddit(subreddit)
+    if query == &#34;hot&#34;:
+        sub_reddit = sub_reddit.hot(limit=max_results)
+    elif query == &#34;new&#34;:
+        sub_reddit = sub_reddit.new(limit=max_results)
+    elif query == &#34;controversial&#34;:
+        sub_reddit = sub_reddit.controversial(limit=max_results)
+    else:
+        sub_reddit = sub_reddit.search(query, limit=max_results)
+    results: list[dict[str, Any]] = []
+    for sub in sub_reddit:
+        comments_res = []
+
+        if max_comments &gt; 0:
+            sub.comments.replace_more(limit=3)
+            for comment in sub.comments.list():
+                if isinstance(comment, praw.models.MoreComments):
+                    continue
+                if not comment.author:  # skip deleted comments
+                    continue
+                comments_res.append(
+                    f&#34;* Author: {comment.author.name if comment.author else &#39;Unknown&#39;} Score: {comment.score} Content: {comment.body}&#34;
+                )
+                if len(comments_res) &gt;= max_comments:
+                    break
+
+        raw_content = [
+            &#34;# &#34; + sub.title,
+            &#34;*Author*: &#34; + (sub.author.name if sub.author else &#34;Unknown&#34;),
+            &#34;*Score*: &#34; + str(sub.score),
+            &#34;*URL*: &#34; + sub.url,
+            &#34;*Content*: &#34;,
+            sub.selftext,
+            &#34;*Comments*: &#34;,
+            &#34;\n&#34;.join(comments_res),
+        ]
+        rec = {&#34;title&#34;: sub.title, &#34;url&#34;: sub.url, &#34;content&#34;: sub.selftext, &#34;raw_content&#34;: &#34;\n&#34;.join(raw_content)}
+        results.append(rec)
+    return results</code></pre>
+</details>
+<div class="desc"><p>Search Reddit for posts and comments.</p>
+<p>Searches Reddit for posts matching a query, optionally within a specific subreddit.
+Special query words 'hot', 'new', or 'controversial' can be used to fetch posts
+sorted by those criteria instead of performing a text search.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The search query. Special values: 'hot', 'new', 'controversial'
+will fetch posts sorted by those criteria instead of searching.</dd>
+<dt><strong><code>subreddit</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The subreddit to search. Defaults to 'all'.</dd>
+<dt><strong><code>max_comments</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of comments to return per post.
+Defaults to 0 (no comments).</dd>
+<dt><strong><code>max_results</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of posts to return.
+Defaults to 3.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of search results, where each dict contains:
+title (str): Title of the Reddit post
+url (str): URL of the post
+content (str): Post text content
+raw_content (str): Formatted post content including metadata and comments</dd>
+</dl>
+<h2 id="note">Note</h2>
+<p>If the specified subreddit is not found, falls back to searching 'all'.</p></div>
+</dd>
+<dt id="par_ai_core.search_utils.serper_search"><code class="name flex">
+<span>def <span class="ident">serper_search</span></span>(<span>query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def serper_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Search the web using Google Serper.
+
+    Args:
+        query (str): The search query to execute.
+        days (int, optional): Number of days to search back. Must be &gt;= 0. Defaults to 0 meaning all time.
+        max_results (int, optional): Maximum number of results to return. Defaults to 3.
+        scrape (bool, optional): Whether to scrape the search result urls. Defaults to False.
+
+    Returns:
+        list[dict[str, Any]]: List of search results.
+
+    Raises:
+        ValueError: If days is negative.
+    &#34;&#34;&#34;
+    if days &lt; 0:
+        raise ValueError(&#34;days parameter must be &gt;= 0&#34;)
+    &#34;&#34;&#34;Search the web using Google Serper.
+
+    Args:
+        query (str): The search query to execute
+        days (int): Number of days to search (default is 0 meaning all time)
+        max_results (int): Maximum number of results to return
+        scrape (bool): Whether to scrape the search result urls (default is False)
+
+    Returns:
+        - results (list): List of search result dictionaries, each containing:
+            - title (str): Title of the search result
+            - url (str): URL of the search result
+            - description (str): Snippet/summary of the content
+            - raw_content (str): Full content of the page if available
+    &#34;&#34;&#34;
+    search = GoogleSerperAPIWrapper(type=&#34;news&#34; if days &gt; 0 else &#34;search&#34;)
+    res = search.results(query)
+    # console_err.print(res)
+    result_type = &#34;news&#34; if days &gt; 0 else &#34;organic&#34;
+    results_list = res.get(result_type, [])[:max_results]
+    # console_err.print(results_list)
+
+    if scrape:
+        urls = [r[&#34;link&#34;] for r in results_list]
+        content = fetch_url_and_convert_to_markdown(urls)
+        for r, c in zip(results_list, content):
+            r[&#34;raw_content&#34;] = c
+
+    return [
+        {
+            &#34;title&#34;: r[&#34;title&#34;],
+            &#34;url&#34;: r[&#34;link&#34;],
+            &#34;content&#34;: r.get(&#34;snippet&#34;, r.get(&#34;section&#34;)) or &#34;&#34;,
+            &#34;raw_content&#34;: r.get(&#34;raw_content&#34;) or &#34;&#34;,
+        }
+        for r in results_list
+    ]</code></pre>
+</details>
+<div class="desc"><p>Search the web using Google Serper.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The search query to execute.</dd>
+<dt><strong><code>days</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of days to search back. Must be &gt;= 0. Defaults to 0 meaning all time.</dd>
+<dt><strong><code>max_results</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of results to return. Defaults to 3.</dd>
+<dt><strong><code>scrape</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to scrape the search result urls. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of search results.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If days is negative.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.search_utils.tavily_search"><code class="name flex">
+<span>def <span class="ident">tavily_search</span></span>(<span>query: str,<br>*,<br>include_raw_content: bool = True,<br>topic: "Literal['general', 'news']" = 'general',<br>days: int = 3,<br>max_results: int = 3) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tavily_search(
+    query: str,
+    *,
+    include_raw_content: bool = True,
+    topic: Literal[&#34;general&#34;, &#34;news&#34;] = &#34;general&#34;,
+    days: int = 3,
+    max_results: int = 3,
+) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Search the web using the Tavily API.
+
+    Performs a web search using Tavily&#39;s AI-powered search engine. Can search for
+    either general web content or recent news articles.
+
+    Args:
+        query (str): The search query to execute.
+        include_raw_content (bool, optional): Whether to include raw content from Tavily.
+            Defaults to True.
+        topic (Literal[&#34;general&#34;, &#34;news&#34;], optional): Topic of search, either &#34;general&#34;
+            or &#34;news&#34;. Defaults to &#34;general&#34;.
+        days (int, optional): Number of days to search back when topic is &#34;news&#34;.
+            Defaults to 3.
+        max_results (int, optional): Maximum number of results to return.
+            Defaults to 3.
+
+    Returns:
+        list[dict[str, Any]]: List of search results, where each dict contains:
+            title (str): Title of the search result
+            url (str): URL of the search result
+            content (str): Snippet/summary of the content
+            raw_content (str): Full content if available and requested
+
+    Raises:
+        TavilyError: If the Tavily API request fails or returns an error response.
+    &#34;&#34;&#34;
+    tavily_client = TavilyClient()
+    return tavily_client.search(
+        query, max_results=max_results, topic=topic, days=days, include_raw_content=include_raw_content
+    )[&#34;results&#34;]</code></pre>
+</details>
+<div class="desc"><p>Search the web using the Tavily API.</p>
+<p>Performs a web search using Tavily's AI-powered search engine. Can search for
+either general web content or recent news articles.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The search query to execute.</dd>
+<dt><strong><code>include_raw_content</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to include raw content from Tavily.
+Defaults to True.</dd>
+<dt>topic (Literal["general", "news"], optional): Topic of search, either "general"</dt>
+<dt>or "news". Defaults to "general".</dt>
+<dt><strong><code>days</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of days to search back when topic is "news".
+Defaults to 3.</dd>
+<dt><strong><code>max_results</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of results to return.
+Defaults to 3.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of search results, where each dict contains:
+title (str): Title of the search result
+url (str): URL of the search result
+content (str): Snippet/summary of the content
+raw_content (str): Full content if available and requested</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>TavilyError</code></dt>
+<dd>If the Tavily API request fails or returns an error response.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.search_utils.youtube_get_comments"><code class="name flex">
+<span>def <span class="ident">youtube_get_comments</span></span>(<span>youtube, video_id: str, max_results: int = 10) ‑> list[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def youtube_get_comments(youtube, video_id: str, max_results: int = 10) -&gt; list[str]:
+    &#34;&#34;&#34;Fetch comments for a YouTube video.&#34;&#34;&#34;
+    comments = []
+
+    # Fetch top-level comments
+    request = youtube.commentThreads().list(
+        part=&#34;snippet,replies&#34;,
+        videoId=video_id,
+        textFormat=&#34;plainText&#34;,
+        maxResults=max_results,  # Adjust based on needs
+    )
+
+    while request:
+        try:
+            response = request.execute()
+
+            for item in response[&#34;items&#34;]:
+                # Top-level comment
+                top_level_comment = item[&#34;snippet&#34;][&#34;topLevelComment&#34;][&#34;snippet&#34;][&#34;textDisplay&#34;]
+                comments.append(top_level_comment)
+
+                # Check if there are replies in the thread
+                if &#34;replies&#34; in item and &#34;comments&#34; in item[&#34;replies&#34;]:
+                    for reply in item[&#34;replies&#34;][&#34;comments&#34;][:max_results]:
+                        reply_text = reply[&#34;snippet&#34;][&#34;textDisplay&#34;]
+                        # Add incremental spacing and a dash for replies
+                        comments.append(&#34;    - &#34; + reply_text)
+
+            # Prepare the next page of comments, if available
+            if &#34;nextPageToken&#34; in response:
+                request = youtube.commentThreads().list_next(previous_request=request, previous_response=response)
+            else:
+                request = None
+        except Exception as _:
+            break
+
+    return comments</code></pre>
+</details>
+<div class="desc"><p>Fetch comments for a YouTube video.</p></div>
+</dd>
+<dt id="par_ai_core.search_utils.youtube_get_transcript"><code class="name flex">
+<span>def <span class="ident">youtube_get_transcript</span></span>(<span>video_id: str, languages: list[str] | None = None) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def youtube_get_transcript(video_id: str, languages: list[str] | None = None) -&gt; str:
+    &#34;&#34;&#34;Fetch transcript for a YouTube video.&#34;&#34;&#34;
+    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or [&#34;en&#34;])
+    transcript_text = &#34; &#34;.join([item[&#34;text&#34;] for item in transcript_list])
+    return transcript_text.replace(&#34;\n&#34;, &#34; &#34;)</code></pre>
+</details>
+<div class="desc"><p>Fetch transcript for a YouTube video.</p></div>
+</dd>
+<dt id="par_ai_core.search_utils.youtube_get_video_id"><code class="name flex">
+<span>def <span class="ident">youtube_get_video_id</span></span>(<span>url: str) ‑> str | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def youtube_get_video_id(url: str) -&gt; str | None:
+    &#34;&#34;&#34;Extract the video ID from a YouTube URL.
+
+    Supports various YouTube URL formats including standard watch URLs,
+    shortened youtu.be URLs, and embed URLs.
+
+    Args:
+        url (str): The YouTube URL to parse.
+
+    Returns:
+        str | None: The 11-character video ID if found, None if no match.
+    &#34;&#34;&#34;
+    pattern = r&#34;(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&amp;]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})&#34;  # pylint: disable=line-too-long
+    match = re.search(pattern, url)
+    return match.group(1) if match else None</code></pre>
+</details>
+<div class="desc"><p>Extract the video ID from a YouTube URL.</p>
+<p>Supports various YouTube URL formats including standard watch URLs,
+shortened youtu.be URLs, and embed URLs.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The YouTube URL to parse.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str | None</code></dt>
+<dd>The 11-character video ID if found, None if no match.</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.search_utils.youtube_search"><code class="name flex">
+<span>def <span class="ident">youtube_search</span></span>(<span>query: str,<br>*,<br>days: int = 0,<br>max_comments: int = 0,<br>max_results: int = 3,<br>fetch_transcript: bool = False,<br>summarize_llm: BaseChatModel | None = None) ‑> list[dict[str, typing.Any]]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def youtube_search(
+    query: str,
+    *,
+    days: int = 0,
+    max_comments: int = 0,
+    max_results: int = 3,
+    fetch_transcript: bool = False,
+    summarize_llm: BaseChatModel | None = None,
+) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Search YouTube for videos with optional transcript and comment fetching.
+
+    Performs a YouTube search and can optionally fetch video transcripts,
+    comments, and generate transcript summaries using an LLM.
+
+    Args:
+        query (str): The search query to execute.
+        days (int, optional): Number of days to search back. Must be &gt;= 0.
+            Defaults to 0 meaning all time.
+        max_comments (int, optional): Maximum number of comments to fetch per video.
+            Defaults to 0 meaning no comments.
+        max_results (int, optional): Maximum number of results to return.
+            Defaults to 3.
+        fetch_transcript (bool, optional): Whether to fetch video transcripts.
+            Defaults to False.
+        summarize_llm (BaseChatModel | None, optional): LLM to use for summarizing
+            transcripts. Defaults to None meaning no summarization.
+
+    Returns:
+        list[dict[str, Any]]: List of search results, where each dict contains:
+            title (str): Title of the video
+            url (str): URL of the video
+            content (str): Description, metadata, and optionally comments and
+                transcript summary
+            raw_content (str): Full transcript text if fetched
+
+    Raises:
+        ValueError: If days parameter is negative.
+        googleapiclient.errors.HttpError: If the YouTube API request fails.
+    &#34;&#34;&#34;
+    if days &lt; 0:
+        raise ValueError(&#34;days parameter must be &gt;= 0&#34;)
+    api_key = os.environ.get(&#34;GOOGLE_API_KEY&#34;)
+    youtube = build(&#34;youtube&#34;, &#34;v3&#34;, developerKey=api_key)
+
+    start_date = date.today() - timedelta(days=days)
+
+    request = youtube.search().list(
+        part=&#34;snippet&#34;,
+        q=query,
+        type=&#34;video&#34;,
+        maxResults=max_results,
+        videoCaption=&#34;closedCaption&#34; if fetch_transcript else &#34;any&#34;,
+        # order=&#34;date&#34;, # broken
+        publishedAfter=start_date.strftime(&#34;%Y-%m-%dT%H:%M:%SZ&#34;) if days &gt; 0 else None,
+    )
+    response = request.execute()
+
+    results = []
+    for item in response[&#34;items&#34;]:
+        # console.print(item)
+        video_id = item[&#34;id&#34;][&#34;videoId&#34;]
+        video_title = item[&#34;snippet&#34;][&#34;title&#34;]
+        video_url = f&#34;https://www.youtube.com/watch?v={video_id}&#34;
+        content = (
+            f&#34;PublishTime: {item[&#39;snippet&#39;][&#39;publishedAt&#39;]}\n&#34;
+            + f&#34;ChannelId: {item[&#39;snippet&#39;][&#39;channelId&#39;]}\n&#34;
+            + f&#34;Description: {item[&#39;snippet&#39;][&#39;description&#39;]}&#34;
+        )
+        if max_comments &gt; 0:
+            comments = youtube_get_comments(youtube, video_id)
+        else:
+            comments = []
+
+        if comments:
+            content += &#34;\n\nComments:\n&#34; + &#34;\n&#34;.join(comments)
+
+        # requires Oauth to download transcript so we use a workaround lib which uses scraping
+        # tracks = youtube.captions().list(
+        #     part=&#34;snippet&#34;,
+        #     videoId=video_id,
+        # ).execute()
+        # tracks = [t for t in tracks[&#34;items&#34;] if t[&#34;snippet&#34;][&#34;language&#34;] == &#34;en&#34; and t[&#34;snippet&#34;][&#34;trackKind&#34;] == &#34;standard&#34;]
+        # console.print(tracks)
+        # if tracks:
+        #     transcript = youtube.captions().download(id=tracks[0][&#34;id&#34;]).execute()
+        #     console.print(transcript)
+
+        if fetch_transcript:
+            transcript_text = youtube_get_transcript(video_id, languages=[&#34;en&#34;])
+            transcript_summary = &#34;&#34;
+            if transcript_text and summarize_llm is not None:
+                transcript_summary = summarize_content(transcript_text, summarize_llm)
+                content += &#34;\n\nTranscript Summary:\n&#34; + transcript_summary
+            else:
+                content += &#34;\n\nTranscript:\n&#34; + transcript_text
+        else:
+            transcript_text = &#34;&#34;
+            transcript_summary = &#34;&#34;
+
+        results.append({&#34;title&#34;: video_title, &#34;url&#34;: video_url, &#34;content&#34;: content, &#34;raw_content&#34;: transcript_text})
+
+    return results</code></pre>
+</details>
+<div class="desc"><p>Search YouTube for videos with optional transcript and comment fetching.</p>
+<p>Performs a YouTube search and can optionally fetch video transcripts,
+comments, and generate transcript summaries using an LLM.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The search query to execute.</dd>
+<dt><strong><code>days</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of days to search back. Must be &gt;= 0.
+Defaults to 0 meaning all time.</dd>
+<dt><strong><code>max_comments</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of comments to fetch per video.
+Defaults to 0 meaning no comments.</dd>
+<dt><strong><code>max_results</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of results to return.
+Defaults to 3.</dd>
+<dt><strong><code>fetch_transcript</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to fetch video transcripts.
+Defaults to False.</dd>
+<dt><strong><code>summarize_llm</code></strong> :&ensp;<code>BaseChatModel | None</code>, optional</dt>
+<dd>LLM to use for summarizing
+transcripts. Defaults to None meaning no summarization.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict[str, Any]]</code></dt>
+<dd>List of search results, where each dict contains:
+title (str): Title of the video
+url (str): URL of the video
+content (str): Description, metadata, and optionally comments and
+transcript summary
+raw_content (str): Full transcript text if fetched</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If days parameter is negative.</dd>
+<dt><code>googleapiclient.errors.HttpError</code></dt>
+<dd>If the YouTube API request fails.</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="par_ai_core" href="index.html">par_ai_core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="par_ai_core.search_utils.brave_search" href="#par_ai_core.search_utils.brave_search">brave_search</a></code></li>
+<li><code><a title="par_ai_core.search_utils.jina_search" href="#par_ai_core.search_utils.jina_search">jina_search</a></code></li>
+<li><code><a title="par_ai_core.search_utils.reddit_search" href="#par_ai_core.search_utils.reddit_search">reddit_search</a></code></li>
+<li><code><a title="par_ai_core.search_utils.serper_search" href="#par_ai_core.search_utils.serper_search">serper_search</a></code></li>
+<li><code><a title="par_ai_core.search_utils.tavily_search" href="#par_ai_core.search_utils.tavily_search">tavily_search</a></code></li>
+<li><code><a title="par_ai_core.search_utils.youtube_get_comments" href="#par_ai_core.search_utils.youtube_get_comments">youtube_get_comments</a></code></li>
+<li><code><a title="par_ai_core.search_utils.youtube_get_transcript" href="#par_ai_core.search_utils.youtube_get_transcript">youtube_get_transcript</a></code></li>
+<li><code><a title="par_ai_core.search_utils.youtube_get_video_id" href="#par_ai_core.search_utils.youtube_get_video_id">youtube_get_video_id</a></code></li>
+<li><code><a title="par_ai_core.search_utils.youtube_search" href="#par_ai_core.search_utils.youtube_search">youtube_search</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+</footer>
+</body>
+</html>

@@ -26,11 +26,11 @@ app_help:		# Show app help
 ##############################################################################
 .PHONY: uv-lock
 uv-lock:
-	uv lock --python 3.12
+	uv lock
 
 .PHONY: uv-sync
 uv-sync:
-	uv sync --python 3.12
+	uv sync
 
 .PHONY: setup
 setup: uv-lock uv-sync	        # use this for first time run
@@ -44,7 +44,7 @@ remove-venv:			# Remove the virtual environment
 
 .PHONY: depsupdate
 depsupdate:			# Update all dependencies
-	uv sync --python 3.12 -U
+	uv sync --python -U
 
 .PHONY: depsshow
 depsshow:			# Show the dependency graph
@@ -122,6 +122,9 @@ coverage:			# Generate coverage report and output xml report
 ##############################################################################
 # Utility.
 
+.PHONY: docs
+docs:			# Generate html documentation
+	$(run) pdoc3 --html --force par_ai_core
 
 .PHONY: repl
 repl:				# Start a Python REPL

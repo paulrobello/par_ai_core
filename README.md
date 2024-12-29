@@ -35,6 +35,9 @@ for my AI projects, encapsulating common functionalities and best practices for 
 * **Cost Tracking:**  Optional integration to display the cost of LLM calls.
 * **Tool Call Handling:** Support for handling tool calls within LLM interactions.
 
+## Documentation
+[Library Documentation](./html/par_ai_core/index.html)
+
 ## Installation
 ```shell
 uv add par_ai_core
