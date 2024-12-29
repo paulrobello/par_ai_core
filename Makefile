@@ -125,7 +125,8 @@ coverage:			# Generate coverage report and output xml report
 .PHONY: docs
 docs:			# Generate html documentation
 	$(run) pdoc3 --html --force -o ./src/par_ai_core/html par_ai_core
-	mv ./src/par_ai_core/html/par_ai_core ./src/par_ai_core/docs
+	rm -rf ./src/par_ai_core/docs/*
+	mv ./src/par_ai_core/html/par_ai_core/* ./src/par_ai_core/docs/
 
 .PHONY: repl
 repl:				# Start a Python REPL

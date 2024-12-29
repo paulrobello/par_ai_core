@@ -36,7 +36,7 @@ for my AI projects, encapsulating common functionalities and best practices for 
 * **Tool Call Handling:** Support for handling tool calls within LLM interactions.
 
 ## Documentation
-[Library Documentation](https://htmlpreview.github.io/?https://github.com/paulrobello/par_ai_core/blob/main/html/par_ai_core/index.html)
+[Library Documentation](https://htmlpreview.github.io/?https://github.com/paulrobello/par_ai_core/blob/main/src/par_ai_core/docs/index.html)
 
 ## Installation
 ```shell
