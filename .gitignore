@@ -76,3 +76,4 @@ __pypackages__/
 **/.ruff_cache/
 **/*~
 **/uv.lock
+**/.DS_Store
