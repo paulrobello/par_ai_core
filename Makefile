@@ -95,7 +95,7 @@ spackage:			# Create a source package for the library
 	$(build) -s
 
 .PHONY: packagecheck
-packagecheck: clean package spackage		# Check the packaging.
+packagecheck: clean package spackage docs		# Check the packaging.
 	$(twine) check dist/*
 
 .PHONY: testdist
@@ -124,7 +124,8 @@ coverage:			# Generate coverage report and output xml report
 
 .PHONY: docs
 docs:			# Generate html documentation
-	$(run) pdoc3 --html --force par_ai_core
+	$(run) pdoc3 --html --force -o ./src/par_ai_core/html par_ai_core
+	mv ./src/par_ai_core/html/par_ai_core ./src/par_ai_core/docs
 
 .PHONY: repl
 repl:				# Start a Python REPL

@@ -76,9 +76,10 @@ par_ai_core = "par_ai_core.__main__:main"
 [tool.setuptools.package-data]
 par_ai_core = [
     "py.typed",
+    "*/*.html",
     "*/*.png",
     "*/*.md",
-    "*.png",
+    "*.png"
 ]
 
 [build-system]
