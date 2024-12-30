@@ -1,4 +1,5 @@
 """Tests for the time_display module."""
+
 from datetime import UTC, datetime
 
 from par_ai_core.time_display import (

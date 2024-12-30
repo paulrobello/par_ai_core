@@ -210,7 +210,13 @@ class LlmConfig:
         if &#34;class_name&#34; in data and data[&#34;class_name&#34;] != &#34;LlmConfig&#34;:
             raise ValueError(f&#34;Invalid config class: {data[&#39;class_name&#39;]}&#34;)
         class_fields = {f.name for f in fields(cls)}
-        return LlmConfig(**{k: v for k, v in data.items() if k in class_fields})
+        allowed_data = {k: v for k, v in data.items() if k in class_fields}
+        if not isinstance(allowed_data[&#34;provider&#34;], LlmProvider):
+            allowed_data[&#34;provider&#34;] = LlmProvider(allowed_data[&#34;provider&#34;])
+        if not isinstance(allowed_data[&#34;mode&#34;], LlmMode):
+            allowed_data[&#34;mode&#34;] = LlmMode(allowed_data[&#34;mode&#34;])
+
+        return LlmConfig(**allowed_data)
 
     def clone(self) -&gt; LlmConfig:
         &#34;&#34;&#34;Creates a deep copy of the current LlmConfig instance.
