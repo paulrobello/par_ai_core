@@ -1,13 +1,10 @@
 """Tests for the time_display module."""
-from datetime import UTC, datetime, timedelta
-import time
-
-import pytest
+from datetime import UTC, datetime
 
 from par_ai_core.time_display import (
+    convert_to_local,
     format_datetime,
     format_timestamp,
-    convert_to_local,
     get_local_timezone,
 )
 
@@ -58,7 +55,7 @@ def test_convert_to_local_datetime():
     """Test convert_to_local with datetime object."""
     utc_dt = datetime.now(UTC)
     local_dt = convert_to_local(utc_dt)
-    
+
     assert local_dt is not None
     assert local_dt.tzinfo == get_local_timezone()
     # The timestamp should be the same, just in different timezone
@@ -70,7 +67,7 @@ def test_convert_to_local_string():
     utc_dt = datetime.now(UTC)
     iso_str = utc_dt.isoformat()
     local_dt = convert_to_local(iso_str)
-    
+
     assert local_dt is not None
     assert local_dt.tzinfo == get_local_timezone()
     assert utc_dt.timestamp() == local_dt.timestamp()
@@ -80,7 +77,7 @@ def test_get_local_timezone():
     """Test get_local_timezone returns a valid timezone."""
     local_tz = get_local_timezone()
     assert local_tz is not None
-    
+
     # Verify the timezone works for actual conversions
     utc_now = datetime.now(UTC)
     local_now = utc_now.astimezone(local_tz)
