@@ -104,7 +104,11 @@ def get_parai_callback(
         ...     # All token usage and cost information will be captured
     &#34;&#34;&#34;
     cb = ParAICallbackHandler(
-        llm_config=llm_config, show_prompts=show_prompts, show_end=show_end, show_tool_calls=show_tool_calls, console=console,
+        llm_config=llm_config,
+        show_prompts=show_prompts,
+        show_end=show_end,
+        show_tool_calls=show_tool_calls,
+        console=console,
     )
     parai_callback_var.set(cb)
     yield cb
@@ -217,7 +221,7 @@ def get_parai_callback(
     def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -&gt; None:
         &#34;&#34;&#34;Print out the prompts.&#34;&#34;&#34;
         if self.show_prompts:
-            console = kwargs.get(&#34;console&#34;, self.console)
+            console = kwargs.get(&#34;console&#34;, self._console)
             console.print(Panel(f&#34;Prompt: {prompts[0]}&#34;, title=&#34;Prompt&#34;))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -&gt; None:
@@ -227,7 +231,7 @@ def get_parai_callback(
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -&gt; None:
         &#34;&#34;&#34;Collect token usage.&#34;&#34;&#34;
 
-        console = kwargs.get(&#34;console&#34;, self.console)
+        console = kwargs.get(&#34;console&#34;, self._console)
         if self.show_end:
             console.print(Panel(Pretty(response), title=&#34;LLM END&#34;))
             console.print(Panel(Pretty(kwargs), title=&#34;LLM END KWARGS&#34;))
@@ -286,7 +290,7 @@ def get_parai_callback(
         &#34;&#34;&#34;Run when the tool starts running.&#34;&#34;&#34;
         if not self.show_tool_calls:
             return
-        console = kwargs.get(&#34;console&#34;, self.console)
+        console = kwargs.get(&#34;console&#34;, self._console)
         console.print(Panel(Pretty(inputs), title=f&#34;Tool Call: {serialized[&#39;name&#39;]}&#34;))
 
     def __copy__(self) -&gt; &#34;ParAICallbackHandler&#34;:
@@ -400,7 +404,7 @@ def usage_metadata(self) -&gt; dict[str, dict[str, int | float]]:
 <pre><code class="python">def on_llm_end(self, response: LLMResult, **kwargs: Any) -&gt; None:
     &#34;&#34;&#34;Collect token usage.&#34;&#34;&#34;
 
-    console = kwargs.get(&#34;console&#34;, self.console)
+    console = kwargs.get(&#34;console&#34;, self._console)
     if self.show_end:
         console.print(Panel(Pretty(response), title=&#34;LLM END&#34;))
         console.print(Panel(Pretty(kwargs), title=&#34;LLM END KWARGS&#34;))
@@ -471,7 +475,7 @@ def usage_metadata(self) -&gt; dict[str, dict[str, int | float]]:
 <pre><code class="python">def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -&gt; None:
     &#34;&#34;&#34;Print out the prompts.&#34;&#34;&#34;
     if self.show_prompts:
-        console = kwargs.get(&#34;console&#34;, self.console)
+        console = kwargs.get(&#34;console&#34;, self._console)
         console.print(Panel(f&#34;Prompt: {prompts[0]}&#34;, title=&#34;Prompt&#34;))</code></pre>
 </details>
 <div class="desc"><p>Print out the prompts.</p></div>
@@ -499,7 +503,7 @@ def usage_metadata(self) -&gt; dict[str, dict[str, int | float]]:
     &#34;&#34;&#34;Run when the tool starts running.&#34;&#34;&#34;
     if not self.show_tool_calls:
         return
-    console = kwargs.get(&#34;console&#34;, self.console)
+    console = kwargs.get(&#34;console&#34;, self._console)
     console.print(Panel(Pretty(inputs), title=f&#34;Tool Call: {serialized[&#39;name&#39;]}&#34;))</code></pre>
 </details>
 <div class="desc"><p>Run when the tool starts running.</p></div>
