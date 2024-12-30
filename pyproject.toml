@@ -120,8 +120,12 @@ packages = ["src/par_ai_core"]
 include = [
     "*.py",
     "py.typed",
-    "*.png",
-    "*.md",
+    "*/*.gif",
+    "*/*.png",
+    "*/*.jpg",
+    "*/*.html",
+    "*/*.md",
+    "*/*.tcss",
 ]
 
 [tool.hatch.build.targets.sdist]
