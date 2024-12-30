@@ -69,7 +69,7 @@ various LLM providers through the LlmConfig system.</p>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="par_ai_core.provider_cb_info.get_parai_callback"><code class="name flex">
-<span>def <span class="ident">get_parai_callback</span></span>(<span>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a> | None = None,<br>*,<br>show_prompts: bool = False,<br>show_end: bool = False,<br>show_pricing: <a title="par_ai_core.pricing_lookup.PricingDisplay" href="pricing_lookup.html#par_ai_core.pricing_lookup.PricingDisplay">PricingDisplay</a> = none,<br>show_tool_calls: bool = False) ‑> Generator[<a title="par_ai_core.provider_cb_info.ParAICallbackHandler" href="#par_ai_core.provider_cb_info.ParAICallbackHandler">ParAICallbackHandler</a>, None, None]</span>
+<span>def <span class="ident">get_parai_callback</span></span>(<span>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a> | None = None,<br>*,<br>show_prompts: bool = False,<br>show_end: bool = False,<br>show_pricing: <a title="par_ai_core.pricing_lookup.PricingDisplay" href="pricing_lookup.html#par_ai_core.pricing_lookup.PricingDisplay">PricingDisplay</a> = none,<br>show_tool_calls: bool = False,<br>console: rich.console.Console | None = None) ‑> Generator[<a title="par_ai_core.provider_cb_info.ParAICallbackHandler" href="#par_ai_core.provider_cb_info.ParAICallbackHandler">ParAICallbackHandler</a>, None, None]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -84,6 +84,7 @@ def get_parai_callback(
     show_end: bool = False,
     show_pricing: PricingDisplay = PricingDisplay.NONE,
     show_tool_calls: bool = False,
+    console: Console | None = None,
 ) -&gt; Generator[ParAICallbackHandler, None, None]:
     &#34;&#34;&#34;Get the llm callback handler in a context manager which exposes token / cost and debug information.
 
@@ -93,16 +94,17 @@ def get_parai_callback(
         show_end (bool, optional): Whether to show end. Defaults to False.
         show_pricing (PricingDisplay, optional): Whether to show pricing. Defaults to PricingDisplay.NONE.
         show_tool_calls (bool, optional): Whether to show tool calls. Defaults to False.
+        console (Console, optional): The console. Defaults to None.
 
     Returns:
         ParAICallbackHandler: The LLM callback handler.
 
     Example:
         &gt;&gt;&gt; with get_parai_callback() as cb:
-        ...     # Use the LLM callback handler
+        ...     # All token usage and cost information will be captured
     &#34;&#34;&#34;
     cb = ParAICallbackHandler(
-        llm_config=llm_config, show_prompts=show_prompts, show_end=show_end, show_tool_calls=show_tool_calls
+        llm_config=llm_config, show_prompts=show_prompts, show_end=show_end, show_tool_calls=show_tool_calls, console=console,
     )
     parai_callback_var.set(cb)
     yield cb
@@ -122,6 +124,8 @@ def get_parai_callback(
 <dd>Whether to show pricing. Defaults to PricingDisplay.NONE.</dd>
 <dt><strong><code>show_tool_calls</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Whether to show tool calls. Defaults to False.</dd>
+<dt><strong><code>console</code></strong> :&ensp;<code>Console</code>, optional</dt>
+<dd>The console. Defaults to None.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -130,7 +134,7 @@ def get_parai_callback(
 </dl>
 <h2 id="example">Example</h2>
 <pre><code class="language-python-repl">&gt;&gt;&gt; with get_parai_callback() as cb:
-...     # Use the LLM callback handler
+...     # All token usage and cost information will be captured
 </code></pre></div>
 </dd>
 </dl>
@@ -140,7 +144,7 @@ def get_parai_callback(
 <dl>
 <dt id="par_ai_core.provider_cb_info.ParAICallbackHandler"><code class="flex name class">
 <span>class <span class="ident">ParAICallbackHandler</span></span>
-<span>(</span><span>*,<br>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a> | None = None,<br>show_prompts: bool = False,<br>show_end: bool = False,<br>show_tool_calls: bool = False)</span>
+<span>(</span><span>*,<br>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a> | None = None,<br>show_prompts: bool = False,<br>show_end: bool = False,<br>show_tool_calls: bool = False,<br>console: rich.console.Console | None = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -173,10 +177,12 @@ def get_parai_callback(
         show_prompts: bool = False,
         show_end: bool = False,
         show_tool_calls: bool = False,
+        console: Console | None = None,
     ) -&gt; None:
         super().__init__()
         self._lock = threading.Lock()
         self._usage_metadata = {}
+        self._console = console or console_err
         self.llm_config = llm_config
         self.show_prompts = show_prompts
         self.show_end = show_end
@@ -211,7 +217,7 @@ def get_parai_callback(
     def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -&gt; None:
         &#34;&#34;&#34;Print out the prompts.&#34;&#34;&#34;
         if self.show_prompts:
-            console = kwargs.get(&#34;console&#34;, console_err)
+            console = kwargs.get(&#34;console&#34;, self.console)
             console.print(Panel(f&#34;Prompt: {prompts[0]}&#34;, title=&#34;Prompt&#34;))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -&gt; None:
@@ -221,7 +227,7 @@ def get_parai_callback(
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -&gt; None:
         &#34;&#34;&#34;Collect token usage.&#34;&#34;&#34;
 
-        console = kwargs.get(&#34;console&#34;, console_err)
+        console = kwargs.get(&#34;console&#34;, self.console)
         if self.show_end:
             console.print(Panel(Pretty(response), title=&#34;LLM END&#34;))
             console.print(Panel(Pretty(kwargs), title=&#34;LLM END KWARGS&#34;))
@@ -280,7 +286,7 @@ def get_parai_callback(
         &#34;&#34;&#34;Run when the tool starts running.&#34;&#34;&#34;
         if not self.show_tool_calls:
             return
-        console = kwargs.get(&#34;console&#34;, console_err)
+        console = kwargs.get(&#34;console&#34;, self.console)
         console.print(Panel(Pretty(inputs), title=f&#34;Tool Call: {serialized[&#39;name&#39;]}&#34;))
 
     def __copy__(self) -&gt; &#34;ParAICallbackHandler&#34;:
@@ -394,7 +400,7 @@ def usage_metadata(self) -&gt; dict[str, dict[str, int | float]]:
 <pre><code class="python">def on_llm_end(self, response: LLMResult, **kwargs: Any) -&gt; None:
     &#34;&#34;&#34;Collect token usage.&#34;&#34;&#34;
 
-    console = kwargs.get(&#34;console&#34;, console_err)
+    console = kwargs.get(&#34;console&#34;, self.console)
     if self.show_end:
         console.print(Panel(Pretty(response), title=&#34;LLM END&#34;))
         console.print(Panel(Pretty(kwargs), title=&#34;LLM END KWARGS&#34;))
@@ -465,7 +471,7 @@ def usage_metadata(self) -&gt; dict[str, dict[str, int | float]]:
 <pre><code class="python">def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -&gt; None:
     &#34;&#34;&#34;Print out the prompts.&#34;&#34;&#34;
     if self.show_prompts:
-        console = kwargs.get(&#34;console&#34;, console_err)
+        console = kwargs.get(&#34;console&#34;, self.console)
         console.print(Panel(f&#34;Prompt: {prompts[0]}&#34;, title=&#34;Prompt&#34;))</code></pre>
 </details>
 <div class="desc"><p>Print out the prompts.</p></div>
@@ -493,7 +499,7 @@ def usage_metadata(self) -&gt; dict[str, dict[str, int | float]]:
     &#34;&#34;&#34;Run when the tool starts running.&#34;&#34;&#34;
     if not self.show_tool_calls:
         return
-    console = kwargs.get(&#34;console&#34;, console_err)
+    console = kwargs.get(&#34;console&#34;, self.console)
     console.print(Panel(Pretty(inputs), title=f&#34;Tool Call: {serialized[&#39;name&#39;]}&#34;))</code></pre>
 </details>
 <div class="desc"><p>Run when the tool starts running.</p></div>

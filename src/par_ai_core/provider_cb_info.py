@@ -40,6 +40,7 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.load.serializable import Serializable
 from langchain_core.outputs import ChatGeneration, LLMResult
 from langchain_core.tracers.context import register_configure_hook
+from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
 
@@ -80,10 +81,12 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         show_prompts: bool = False,
         show_end: bool = False,
         show_tool_calls: bool = False,
+        console: Console | None = None,
     ) -> None:
         super().__init__()
         self._lock = threading.Lock()
         self._usage_metadata = {}
+        self._console = console or console_err
         self.llm_config = llm_config
         self.show_prompts = show_prompts
         self.show_end = show_end
@@ -118,7 +121,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
     def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -> None:
         """Print out the prompts."""
         if self.show_prompts:
-            console = kwargs.get("console", console_err)
+            console = kwargs.get("console", self.console)
             console.print(Panel(f"Prompt: {prompts[0]}", title="Prompt"))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
@@ -128,7 +131,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Collect token usage."""
 
-        console = kwargs.get("console", console_err)
+        console = kwargs.get("console", self.console)
         if self.show_end:
             console.print(Panel(Pretty(response), title="LLM END"))
             console.print(Panel(Pretty(kwargs), title="LLM END KWARGS"))
@@ -187,7 +190,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         """Run when the tool starts running."""
         if not self.show_tool_calls:
             return
-        console = kwargs.get("console", console_err)
+        console = kwargs.get("console", self.console)
         console.print(Panel(Pretty(inputs), title=f"Tool Call: {serialized['name']}"))
 
     def __copy__(self) -> "ParAICallbackHandler":
@@ -212,6 +215,7 @@ def get_parai_callback(
     show_end: bool = False,
     show_pricing: PricingDisplay = PricingDisplay.NONE,
     show_tool_calls: bool = False,
+    console: Console | None = None,
 ) -> Generator[ParAICallbackHandler, None, None]:
     """Get the llm callback handler in a context manager which exposes token / cost and debug information.
 
@@ -221,16 +225,17 @@ def get_parai_callback(
         show_end (bool, optional): Whether to show end. Defaults to False.
         show_pricing (PricingDisplay, optional): Whether to show pricing. Defaults to PricingDisplay.NONE.
         show_tool_calls (bool, optional): Whether to show tool calls. Defaults to False.
+        console (Console, optional): The console. Defaults to None.
 
     Returns:
         ParAICallbackHandler: The LLM callback handler.
 
     Example:
         >>> with get_parai_callback() as cb:
-        ...     # Use the LLM callback handler
+        ...     # All token usage and cost information will be captured
     """
     cb = ParAICallbackHandler(
-        llm_config=llm_config, show_prompts=show_prompts, show_end=show_end, show_tool_calls=show_tool_calls
+        llm_config=llm_config, show_prompts=show_prompts, show_end=show_end, show_tool_calls=show_tool_calls, console=console,
     )
     parai_callback_var.set(cb)
     yield cb
