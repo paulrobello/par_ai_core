@@ -224,6 +224,9 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.8:
+  - Added time display utils
+  - Made LlmConfig.from_json more robust
 - Version 0.1.7:
   - Fix documentation issues
 - Version 0.1.6:
