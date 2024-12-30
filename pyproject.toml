@@ -73,15 +73,6 @@ Wiki = "https://github.com/paulrobello/par_ai_core/wiki"
 [project.scripts]
 par_ai_core = "par_ai_core.__main__:main"
 
-[tool.setuptools.package-data]
-par_ai_core = [
-    "py.typed",
-    "*/*.html",
-    "*/*.png",
-    "*/*.md",
-    "*.png"
-]
-
 [build-system]
 requires = ["hatchling", "wheel"]
 build-backend = "hatchling.build"
@@ -118,14 +109,13 @@ path = "src/par_ai_core/__init__.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/par_ai_core"]
 include = [
-    "*.py",
     "py.typed",
-    "*/*.gif",
-    "*/*.png",
-    "*/*.jpg",
-    "*/*.html",
-    "*/*.md",
-    "*/*.tcss",
+    "**/*.py",
+    "**/*.html",
+    "**/*.gif",
+    "**/*.jpg",
+    "**/*.png",
+    "**/*.md",
 ]
 
 [tool.hatch.build.targets.sdist]
