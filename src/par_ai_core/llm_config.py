@@ -516,7 +516,7 @@ class LlmConfig:
 
         if self.mode == LlmMode.CHAT:
             return ChatMistralAI(
-                model=self.model_name,
+                model=self.model_name,  # type: ignore
                 temperature=self.temperature,
                 timeout=self.timeout if self.timeout is not None else 10,
                 top_p=self.top_p if self.top_p is not None else 1,
