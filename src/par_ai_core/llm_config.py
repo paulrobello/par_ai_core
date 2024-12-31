@@ -503,6 +503,34 @@ class LlmConfig:
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
+    def _build_mistral_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
+        """Build the MISTRAL LLM."""
+
+        if self.provider != LlmProvider.MISTRAL:
+            raise ValueError(f"LLM provider is '{self.provider.value}' but MISTRAL requested.")
+
+        from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
+
+        if self.mode == LlmMode.BASE:
+            raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
+
+        if self.mode == LlmMode.CHAT:
+            return ChatMistralAI(
+                model=self.model_name,
+                temperature=self.temperature,
+                timeout=self.timeout if self.timeout is not None else 10,
+                top_p=self.top_p if self.top_p is not None else 1,
+                max_tokens=self.num_ctx or None,
+                disable_streaming=not self.streaming,
+            )
+        if self.mode == LlmMode.EMBEDDINGS:
+            return MistralAIEmbeddings(
+                model=self.model_name,
+                timeout=self.timeout if self.timeout is not None else 10,
+            )
+
+        raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
+
     def _build_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
         """Build the LLM."""
         if not isinstance(self.provider, LlmProvider):
@@ -522,6 +550,8 @@ class LlmConfig:
             return self._build_google_llm()
         if self.provider == LlmProvider.BEDROCK:
             return self._build_bedrock_llm()
+        if self.provider == LlmProvider.MISTRAL:
+            return self._build_mistral_llm()
 
         raise ValueError(f"Invalid LLM provider '{self.provider.value}' or mode '{self.mode.value}'")
 

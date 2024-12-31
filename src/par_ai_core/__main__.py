@@ -14,8 +14,6 @@ from par_ai_core.par_logging import console_out
 from par_ai_core.pricing_lookup import PricingDisplay
 from par_ai_core.provider_cb_info import get_parai_callback
 
-load_dotenv()
-
 
 def main() -> None:
     """
@@ -32,6 +30,9 @@ def main() -> None:
     - OPENAI_API_KEY environment variable to be set
     - A prompt provided as the first command-line argument
     """
+
+    load_dotenv()
+
     # Validate OpenAI API key is available
     if not is_provider_api_key_set(LlmProvider.OPENAI):
         console_out.print("OpenAI API key not set. Please set the OPENAI_API_KEY environment variable.")

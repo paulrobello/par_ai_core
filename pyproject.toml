@@ -58,6 +58,7 @@ dependencies = [
     "tavily-python>=0.5.0",
     "youtube-transcript-api>=0.6.3",
     "strenum>=0.4.15",
+    "langchain-mistralai>=0.2.4",
 ]
 packages = ["src/par_ai_core"]
 

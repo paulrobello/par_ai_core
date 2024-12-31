@@ -61,6 +61,7 @@ class LlmProvider(str, Enum):
 
     Supported providers:
         OLLAMA: Local Ollama instance
+        LLAMACPP: Local LlamaCpp instance
         OPENAI: OpenAI API
         GROQ: Groq API
         XAI: X.AI (formerly Twitter) API
@@ -68,10 +69,11 @@ class LlmProvider(str, Enum):
         GOOGLE: Google AI (Gemini) API
         BEDROCK: AWS Bedrock API
         GITHUB: GitHub Copilot API
-        LLAMACPP: Local LlamaCpp instance
+        MISTRAL: Mistral AI API
     """
 
     OLLAMA = "Ollama"
+    LLAMACPP = "LlamaCpp"
     OPENAI = "OpenAI"
     GROQ = "Groq"
     XAI = "XAI"
@@ -79,7 +81,7 @@ class LlmProvider(str, Enum):
     GOOGLE = "Google"
     BEDROCK = "Bedrock"
     GITHUB = "Github"
-    LLAMACPP = "LlamaCpp"
+    MISTRAL = "Mistral"
 
 
 llm_provider_types: list[LlmProvider] = list(LlmProvider)
@@ -95,6 +97,7 @@ provider_base_urls: dict[LlmProvider, str | None] = {
     LlmProvider.GOOGLE: None,
     LlmProvider.BEDROCK: None,
     LlmProvider.GITHUB: "https://models.inference.ai.azure.com",
+    LlmProvider.MISTRAL: None,
 }
 
 provider_default_models: dict[LlmProvider, str] = {
@@ -107,6 +110,7 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.GOOGLE: "gemini-1.5-pro-002",
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
+    LlmProvider.MISTRAL: "mistral-large-2411",
 }
 
 provider_light_models: dict[LlmProvider, str] = {
@@ -119,6 +123,7 @@ provider_light_models: dict[LlmProvider, str] = {
     LlmProvider.GOOGLE: "gemini-2.0-flash-exp",
     LlmProvider.BEDROCK: "anthropic.claude-3-haiku-20240307-v1:0",
     LlmProvider.GITHUB: "gpt-4o-mini",
+    LlmProvider.MISTRAL: "mistral-small-2409",
 }
 
 provider_vision_models: dict[LlmProvider, str] = {
@@ -131,6 +136,7 @@ provider_vision_models: dict[LlmProvider, str] = {
     LlmProvider.GOOGLE: "gemini-1.5-pro-002",
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
+    LlmProvider.MISTRAL: "pixtral-large-2411",
 }
 
 provider_default_embed_models: dict[LlmProvider, str] = {
@@ -143,6 +149,7 @@ provider_default_embed_models: dict[LlmProvider, str] = {
     LlmProvider.GOOGLE: "text-embedding-005",
     LlmProvider.BEDROCK: "amazon.titan-embed-text-v2:0",
     LlmProvider.GITHUB: "text-embedding-3-large",
+    LlmProvider.MISTRAL: "mistral-embed",
 }
 
 provider_env_key_names: dict[LlmProvider, str] = {
@@ -155,6 +162,7 @@ provider_env_key_names: dict[LlmProvider, str] = {
     LlmProvider.GOOGLE: "GOOGLE_API_KEY",
     LlmProvider.BEDROCK: "BEDROCK_API_KEY",
     LlmProvider.GITHUB: "GITHUB_TOKEN",
+    LlmProvider.MISTRAL: "MISTRAL_API_KEY",
 }
 
 
@@ -219,6 +227,14 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
         supports_base_url=True,
         env_key_name=provider_env_key_names[LlmProvider.OLLAMA],
     ),
+    LlmProvider.LLAMACPP: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.LLAMACPP],
+        default_light_model=provider_light_models[LlmProvider.LLAMACPP],
+        default_vision_model=provider_vision_models[LlmProvider.LLAMACPP],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.LLAMACPP],
+        supports_base_url=True,
+        env_key_name=provider_env_key_names[LlmProvider.LLAMACPP],
+    ),
     LlmProvider.OPENAI: LlmProviderConfig(
         default_model=provider_default_models[LlmProvider.OPENAI],
         default_light_model=provider_light_models[LlmProvider.OPENAI],
@@ -275,13 +291,13 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
         supports_base_url=True,
         env_key_name=provider_env_key_names[LlmProvider.GITHUB],
     ),
-    LlmProvider.LLAMACPP: LlmProviderConfig(
-        default_model=provider_default_models[LlmProvider.LLAMACPP],
-        default_light_model=provider_light_models[LlmProvider.LLAMACPP],
-        default_vision_model=provider_vision_models[LlmProvider.LLAMACPP],
-        default_embeddings_model=provider_default_embed_models[LlmProvider.LLAMACPP],
+    LlmProvider.MISTRAL: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.MISTRAL],
+        default_light_model=provider_light_models[LlmProvider.MISTRAL],
+        default_vision_model=provider_vision_models[LlmProvider.MISTRAL],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.MISTRAL],
         supports_base_url=True,
-        env_key_name=provider_env_key_names[LlmProvider.LLAMACPP],
+        env_key_name=provider_env_key_names[LlmProvider.MISTRAL],
     ),
 }
 
