@@ -83,7 +83,8 @@ def test_has_stdin_content(monkeypatch):
         def isatty(self): return False
         def seekable(self): return True
         def tell(self): return 0
-        def fileno(self): return -1  # Invalid file descriptor to prevent select() from working
+        def fileno(self): return 0  # Use a valid file descriptor
+        def readable(self): return False  # Indicate no content available
 
     mock_stdin = MockStdin()
     monkeypatch.setattr(sys, "stdin", mock_stdin)
