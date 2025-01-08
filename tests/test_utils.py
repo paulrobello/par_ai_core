@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 class MockConsole:
     """Mock console for testing display output."""
     def __init__(self):
