@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+class MockConsole:
+    """Mock console for testing display output."""
+    def __init__(self):
+        self.last_output = ""
+
+    def print(self, content: str) -> None:
+        """Store the last printed output."""
+        self.last_output = str(content)
+
 import csv
 import io
 import os
@@ -73,7 +82,7 @@ def test_has_stdin_content(monkeypatch):
         def isatty(self): return False
         def seekable(self): return True
         def tell(self): return 0
-        def fileno(self): return 0
+        def fileno(self): return -1  # Invalid file descriptor to prevent select() from working
 
     mock_stdin = MockStdin()
     monkeypatch.setattr(sys, "stdin", mock_stdin)
