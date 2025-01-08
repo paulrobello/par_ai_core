@@ -12,7 +12,6 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
 
 import pytest
 from bs4 import BeautifulSoup
