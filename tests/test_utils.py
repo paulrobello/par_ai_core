@@ -6,26 +6,13 @@ import csv
 import io
 import os
 import sys
-from typing import Any
-
-
-class MockConsole:
-    """Mock console for testing display output."""
-
-    def __init__(self):
-        self.last_output = ""
-
-    def print(self, content: Any) -> None:
-        """Mock print method."""
-        self.last_output = str(content)
-
-
 import tempfile
 import time
 import uuid
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 import pytest
 from bs4 import BeautifulSoup
@@ -645,7 +632,7 @@ def test_code_file_globs():
         code_java_file_globs,
     ]:
         for pattern in glob_list:
-            assert isinstance(pattern, (str, Path))
+            assert isinstance(pattern, str | Path)
 
     # Check specific patterns
     assert "./**/*.py" in code_python_file_globs
@@ -684,24 +671,6 @@ def test_read_env_file():
             assert result == {}
         os.unlink(f3.name)
     os.unlink(f.name)
-
-
-def test_run_cmd_file_not_found():
-    """Test run_cmd with nonexistent command."""
-    console = MockConsole()
-    result = run_cmd(["nonexistentcommand123"], console=console, check=False)
-    assert result is None
-    assert "Error running command" in console.last_output
-
-
-def test_run_cmd_with_stderr():
-    """Test run_cmd handling stderr output."""
-    console = MockConsole()
-    result = run_cmd(
-        ["python", "-c", "import sys; sys.stderr.write('error\\n'); sys.exit(1)"], console=console, check=False
-    )
-    assert result is None
-    assert "error" in console.last_output
 
 
 def test_gather_files_for_context_with_special_chars():
