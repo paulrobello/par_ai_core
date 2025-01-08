@@ -82,10 +82,15 @@ def test_has_stdin_content(monkeypatch):
     monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
     assert not has_stdin_content()
 
-    # Mock sys.stdin.isatty to return False (piped input)
-    monkeypatch.setattr(sys.stdin, "isatty", lambda: False)
-    monkeypatch.setattr(sys.stdin, "seekable", lambda: True)
-    monkeypatch.setattr(sys.stdin, "tell", lambda: 0)
+    # Test with non-terminal input but no content
+    class MockStdin:
+        def isatty(self): return False
+        def seekable(self): return True
+        def tell(self): return 0
+        def fileno(self): return 0
+
+    mock_stdin = MockStdin()
+    monkeypatch.setattr(sys, "stdin", mock_stdin)
     assert not has_stdin_content()
 
 
