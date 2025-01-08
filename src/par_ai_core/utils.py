@@ -62,14 +62,19 @@ def has_stdin_content() -> bool:
     Returns:
         bool: True if there is content available on stdin, False otherwise.
     """
-    try:
-        if sys.stdin.isatty():
-            return False
-        data = sys.stdin.buffer.read(1)
-        sys.stdin.buffer.seek(0)  # Reset the buffer position
-        return data != b""
-    except (OSError, AttributeError):
+    if sys.stdin.isatty():
         return False
+
+    # For Windows
+    if os.name == 'nt':
+        import msvcrt
+        return msvcrt.kbhit()
+
+    # For Unix-like systems (Linux and macOS)
+    else:
+        import select
+        rlist, _, _ = select.select([sys.stdin], [], [], 0)
+        return bool(rlist)
 
 
 def md(soup: BeautifulSoup, **options: Any) -> str:
