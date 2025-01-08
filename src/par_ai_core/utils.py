@@ -66,17 +66,19 @@ def has_stdin_content() -> bool:
         return False
 
     # For Windows
-    if os.name == 'nt':
+    if os.name == "nt":
         import msvcrt
+
         return msvcrt.kbhit()
 
     # For Unix-like systems (Linux and macOS)
     else:
         # First check if stdin is readable
-        if hasattr(sys.stdin, 'readable') and not sys.stdin.readable():
+        if hasattr(sys.stdin, "readable") and not sys.stdin.readable():
             return False
 
         import select
+
         rlist, _, _ = select.select([sys.stdin], [], [], 0)
         return bool(rlist)
 

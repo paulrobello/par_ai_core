@@ -24,9 +24,10 @@ classifiers = [
 keywords = ["ai", "langchain", "openai", "anthropic", "ollama", "llamacpp"]
 
 dependencies = [
-    "beautifulsoup4>=4.12.3",
-    "html2text>=2024.2.26",
-    "markdownify>=0.13.1",
+    "requests>=2.32.3",
+    "rich>=13.7.1",
+    "orjson>=3.10.7",
+    "strenum>=0.4.15",
     "boto3>=1.34.0",
     "botocore>=1.34.0",
     "langchain-anthropic>=0.1.23",
@@ -42,6 +43,7 @@ dependencies = [
     "langchain-qdrant>=0.1.3",
     "langchain-text-splitters>=0.2.4",
     "langchain-xai>=0.1.0",
+    "langchain-mistralai>=0.2.4",
     "langchain-google-community>=2.0.3",
     "langchain>=0.2.14",
     "langgraph>=0.2.14",
@@ -49,16 +51,15 @@ dependencies = [
     "pydantic>=2.8.2",
     "playwright>=1.47.0",
     "python-dotenv>=1.0.1",
-    "requests>=2.32.3",
-    "rich>=13.7.1",
-    "orjson>=3.10.7",
     "selenium>=4.25.0",
     "webdriver-manager>=4.0.2",
     "praw>=7.8.1",
     "tavily-python>=0.5.0",
     "youtube-transcript-api>=0.6.3",
-    "strenum>=0.4.15",
-    "langchain-mistralai>=0.2.4",
+    "beautifulsoup4>=4.12.3",
+    "html2text>=2024.2.26",
+    "markdownify>=0.13.1",
+
 ]
 packages = ["src/par_ai_core"]
 

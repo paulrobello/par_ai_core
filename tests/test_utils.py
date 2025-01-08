@@ -5,12 +5,14 @@ from __future__ import annotations
 
 class MockConsole:
     """Mock console for testing display output."""
+
     def __init__(self):
         self.last_output = ""
 
     def print(self, content: str) -> None:
         """Store the last printed output."""
         self.last_output = str(content)
+
 
 import csv
 import io
@@ -80,11 +82,20 @@ def test_has_stdin_content(monkeypatch):
 
     # Test with non-terminal input but no content
     class MockStdin:
-        def isatty(self): return False
-        def seekable(self): return True
-        def tell(self): return 0
-        def fileno(self): return 0  # Use a valid file descriptor
-        def readable(self): return False  # Indicate no content available
+        def isatty(self):
+            return False
+
+        def seekable(self):
+            return True
+
+        def tell(self):
+            return 0
+
+        def fileno(self):
+            return 0  # Use a valid file descriptor
+
+        def readable(self):
+            return False  # Indicate no content available
 
     mock_stdin = MockStdin()
     monkeypatch.setattr(sys, "stdin", mock_stdin)

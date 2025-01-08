@@ -225,6 +225,9 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.10:
+  - Add format param to LlmConfig for Ollama output format
+  - Fixed bug with util function has_stdin_content
 - Version 0.1.9:
   - Added Mistral support
   - Fix dotenv loading bug

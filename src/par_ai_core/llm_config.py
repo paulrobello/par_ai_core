@@ -23,6 +23,7 @@ import uuid
 import warnings
 from dataclasses import dataclass, fields
 from enum import Enum
+from typing import Literal
 
 from langchain._api import LangChainDeprecationWarning
 from langchain_core.embeddings import Embeddings
@@ -148,6 +149,8 @@ class LlmConfig:
     the same prompt."""
     env_prefix: str = "PARAI"
     """Prefix to use for environment variables"""
+    format: Literal["", "json"] = ""
+    """Ollama output format. Valid options are empty string (default) and 'json'"""
 
     def to_json(self) -> dict:
         """Converts the configuration to a JSON-serializable dictionary.
@@ -178,6 +181,7 @@ class LlmConfig:
             "top_p": self.top_p,
             "seed": self.seed,
             "env_prefix": self.env_prefix,
+            "format": self.format,
         }
 
     @classmethod
@@ -230,6 +234,7 @@ class LlmConfig:
             top_p=self.top_p,
             seed=self.seed,
             env_prefix=self.env_prefix,
+            format=self.format,
         )
 
     def gen_runnable_config(self) -> RunnableConfig:
@@ -262,6 +267,7 @@ class LlmConfig:
                 tfs_z=self.tfs_z,
                 top_k=self.top_k,
                 top_p=self.top_p,
+                format=self.format,
             )
         if self.mode == LlmMode.CHAT:
             return ChatOllama(
@@ -281,6 +287,7 @@ class LlmConfig:
                 top_p=self.top_p,
                 seed=self.seed,
                 disable_streaming=not self.streaming,
+                format=self.format,
             )
         if self.mode == LlmMode.EMBEDDINGS:
             return OllamaEmbeddings(
