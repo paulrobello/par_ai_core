@@ -75,7 +75,7 @@ def has_stdin_content() -> bool:
         # First check if stdin is readable
         if hasattr(sys.stdin, 'readable') and not sys.stdin.readable():
             return False
-            
+
         import select
         rlist, _, _ = select.select([sys.stdin], [], [], 0)
         return bool(rlist)
