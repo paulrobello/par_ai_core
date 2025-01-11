@@ -43,6 +43,7 @@ from par_ai_core.utils import (
     detect_syntax,
     dict_keys_to_lower,
     gather_files_for_context,
+    get_file_list_for_context,
     get_files,
     has_stdin_content,
     has_value,
