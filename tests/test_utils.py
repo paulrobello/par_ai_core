@@ -766,3 +766,57 @@ def test_gather_files_for_context_skips_node_modules():
         result = gather_files_for_context([str(Path(tmpdir) / "repo" / "**/*")])
         assert "{}" not in result
         assert "test content" in result
+
+
+def test_get_file_list_for_context():
+    """Test get_file_list_for_context function with various scenarios."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create test directory structure
+        base_dir = Path(tmpdir)
+        
+        # Regular files
+        (base_dir / "test.txt").write_text("regular file")
+        (base_dir / "test.py").write_text("python file")
+        
+        # Hidden file
+        (base_dir / ".hidden").write_text("hidden file")
+        
+        # Special directories and their contents
+        (base_dir / ".git" / "config").parent.mkdir(parents=True)
+        (base_dir / ".git" / "config").write_text("git config")
+        
+        (base_dir / "node_modules" / "package.json").parent.mkdir(parents=True)
+        (base_dir / "node_modules" / "package.json").write_text("{}")
+        
+        (base_dir / "__pycache__" / "cache.pyc").parent.mkdir(parents=True)
+        (base_dir / "__pycache__" / "cache.pyc").write_text("cache")
+        
+        (base_dir / ".venv" / "lib").parent.mkdir(parents=True)
+        (base_dir / ".venv" / "lib" / "site-packages").mkdir(parents=True)
+        
+        # Test with string pattern
+        files = get_file_list_for_context([str(base_dir / "**/*")])
+        file_paths = [f.name for f in files]
+        
+        # Should include regular files
+        assert "test.txt" in file_paths
+        assert "test.py" in file_paths
+        
+        # Should exclude hidden and special files/directories
+        assert ".hidden" not in file_paths
+        assert "config" not in file_paths  # from .git
+        assert "package.json" not in file_paths  # from node_modules
+        assert "cache.pyc" not in file_paths  # from __pycache__
+        
+        # Test with Path object pattern
+        files_path_pattern = get_file_list_for_context([base_dir / "**/*.txt"])
+        assert len(files_path_pattern) == 1
+        assert files_path_pattern[0].name == "test.txt"
+        
+        # Test with multiple patterns
+        files_multi = get_file_list_for_context([
+            str(base_dir / "**/*.txt"),
+            str(base_dir / "**/*.py")
+        ])
+        assert len(files_multi) == 2
+        assert set(f.name for f in files_multi) == {"test.txt", "test.py"}
