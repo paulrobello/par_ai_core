@@ -97,9 +97,9 @@ def test_csv_to_table_inconsistent_fields() -> None:
     table = csv_to_table(data)
     assert isinstance(table, Table)
     assert table.columns[0].header == "Error"
-    # Get the first row's cells
-    first_row = next(iter(table.rows))
-    assert "Failed to parse CSV data: Inconsistent number of fields" in str(first_row)
+    # Check the rendered content of the first row
+    rendered_cells = [cell.renderable for cell in next(iter(table.rows)).cells]
+    assert any("Failed to parse CSV data: Inconsistent number of fields" in str(cell) for cell in rendered_cells)
 
 
 def test_csv_file_to_table(temp_csv_file: Path) -> None:
