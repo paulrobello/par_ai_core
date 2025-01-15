@@ -385,7 +385,7 @@ def test_fetch_url_selenium_string_url():
     mock_driver = MagicMock()
     mock_driver.page_source = "<html><body>Test content</body></html>"
     mock_console = MagicMock()
-    
+
     with patch("selenium.webdriver.Chrome", return_value=mock_driver):
         result = fetch_url(
             "https://example.com",
@@ -393,10 +393,10 @@ def test_fetch_url_selenium_string_url():
             verbose=True,
             console=mock_console
         )
-        
+
         # Verify the URL was processed as a string
         mock_driver.get.assert_called_once_with("https://example.com")
-        
+
         # Verify the result is a list with one item
         assert isinstance(result, list)
         assert len(result) == 1
