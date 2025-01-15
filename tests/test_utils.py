@@ -651,7 +651,7 @@ def test_is_url():
     assert not is_url("ftp://example.com")  # Only http/https supported
     assert not is_url("http://")  # No domain
     assert not is_url("example.com")  # No protocol
-    
+
     # Test URL that raises ValueError
     assert not is_url("http://[invalid]/path")  # Invalid IPv6 address format
 
