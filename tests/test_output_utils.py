@@ -86,8 +86,8 @@ def test_csv_to_table_no_fields() -> None:
 
 def test_csv_to_table_no_header_fields() -> None:
     """Test csv_to_table when CSV data has no header fields."""
-    # Create CSV data with just a newline or empty string
-    csv_data = "\n"
+    # Create CSV data with just spaces
+    csv_data = "   "
     table = csv_to_table(csv_data)
 
     assert isinstance(table, Table)
