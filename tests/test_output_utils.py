@@ -84,6 +84,22 @@ def test_csv_to_table_no_fields() -> None:
     assert table.columns[0].header == "Empty"
 
 
+def test_csv_to_table_no_header_fields() -> None:
+    """Test csv_to_table when CSV data has no header fields."""
+    # Create CSV data with just a newline or empty string
+    csv_data = "\n"
+    table = csv_to_table(csv_data)
+    
+    assert isinstance(table, Table)
+    assert len(table.columns) == 1
+    assert table.columns[0].header == "Error"
+    
+    # Get the first row's content to verify error message
+    # Note: This is implementation specific based on Rich Table internals
+    first_row = table.rows[0]
+    assert first_row.cells[0] == "No fields found in CSV data"
+
+
 def test_csv_to_table_invalid_data() -> None:
     """Test csv_to_table with invalid CSV data."""
     table = csv_to_table("invalid,csv\ndata,missing,field")
