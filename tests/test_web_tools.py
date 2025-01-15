@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 from bs4 import BeautifulSoup
 from rich.console import Console
-from unittest.mock import MagicMock, patch
-import html2text
 
 from par_ai_core.web_tools import (
     GoogleSearchResult,
-    get_html_element,
-    web_search,
     fetch_url,
     fetch_url_and_convert_to_markdown,
+    get_html_element,
+    web_search,
 )
 
 
@@ -383,15 +383,15 @@ def test_fetch_url_playwright_verbose():
 def test_fetch_url_selenium_browser_launch_error():
     """Test handling of selenium browser launch errors."""
     mock_console = MagicMock()
-    
+
     with patch("selenium.webdriver.Chrome", side_effect=Exception("Failed to launch browser")):
         result = fetch_url("https://example.com", fetch_using="selenium", verbose=True, console=mock_console)
-        
+
         # Verify error message was printed
         mock_console.print.assert_called_with(
             "[bold red]Error fetching URL: Failed to launch browser[/bold red]"
         )
-        
+
         # Verify empty string is returned
         assert result == [""]
 
