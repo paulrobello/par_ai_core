@@ -380,6 +380,22 @@ def test_fetch_url_playwright_verbose():
         assert len(result) == 1
 
 
+def test_fetch_url_selenium_browser_launch_error():
+    """Test handling of selenium browser launch errors."""
+    mock_console = MagicMock()
+    
+    with patch("selenium.webdriver.Chrome", side_effect=Exception("Failed to launch browser")):
+        result = fetch_url("https://example.com", fetch_using="selenium", verbose=True, console=mock_console)
+        
+        # Verify error message was printed
+        mock_console.print.assert_called_with(
+            "[bold red]Error fetching URL: Failed to launch browser[/bold red]"
+        )
+        
+        # Verify empty string is returned
+        assert result == [""]
+
+
 def test_fetch_url_selenium_verbose_error():
     """Test fetch_url_selenium error handling with verbose output."""
     mock_driver = MagicMock()
