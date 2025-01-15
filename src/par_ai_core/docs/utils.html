@@ -308,17 +308,7 @@ def catch_to_logger(logger: object, re_throw: bool = False) -&gt; Generator[None
     Returns:
         str: xml formatted list of files and their contents
     &#34;&#34;&#34;
-    files = []
-    for pattern in file_patterns:
-        try:
-            if isinstance(pattern, Path):
-                pattern = pattern.as_posix()
-            if sys.version_info &gt;= (3, 11):
-                files += glob.glob(pattern, recursive=True, include_hidden=False)
-            else:
-                files += glob.glob(pattern, recursive=True)
-        except Exception as _:
-            raise _
+    files = get_file_list_for_context(file_patterns)
 
     if not files:
         return &#34;&lt;files&gt;\n&lt;/files&gt;\n&#34;
@@ -331,24 +321,12 @@ def catch_to_logger(logger: object, re_throw: bool = False) -&gt; Generator[None
     curr_len = 17
     for file in files:
         try:
-            f = Path(file)
-            if f.is_file():
-                f_path = str(f.as_posix())
-                if (
-                    f.name.startswith(&#34;.&#34;)
-                    or &#34;/.git/&#34; in f_path
-                    or &#34;/.venv/&#34; in f_path
-                    or &#34;/venv/&#34; in f_path
-                    or &#34;/node_modules/&#34; in f_path
-                    or &#34;/__pycache__/&#34; in f_path
-                ):
-                    continue
-                st = f&#34;&#34;&#34;&lt;file index=&#34;{i}&#34;&gt;\n&lt;source&gt;{html.escape(f.as_posix(), quote=True)}&lt;/source&gt;\n&lt;file-content&gt;{html.escape(f.read_text(encoding=&#39;utf-8&#39;), quote=True)}&lt;/file-content&gt;\n&lt;/file&gt;\n&#34;&#34;&#34;
-                if max_context_length and curr_len + len(st) &gt; max_context_length:
-                    break
-                doc.write(st)
-                curr_len += len(st)
-                i += 1
+            st = f&#34;&#34;&#34;&lt;file index=&#34;{i}&#34;&gt;\n&lt;source&gt;{html.escape(file.as_posix(), quote=True)}&lt;/source&gt;\n&lt;file-content&gt;{html.escape(file.read_text(encoding=&#34;utf-8&#34;), quote=True)}&lt;/file-content&gt;\n&lt;/file&gt;\n&#34;&#34;&#34;
+            if max_context_length and curr_len + len(st) &gt; max_context_length:
+                break
+            doc.write(st)
+            curr_len += len(st)
+            i += 1
         except Exception as _:
             pass
 
@@ -367,6 +345,65 @@ def catch_to_logger(logger: object, re_throw: bool = False) -&gt; Generator[None
 <dl>
 <dt><code>str</code></dt>
 <dd>xml formatted list of files and their contents</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.utils.get_file_list_for_context"><code class="name flex">
+<span>def <span class="ident">get_file_list_for_context</span></span>(<span>file_patterns: list[str | Path]) ‑> list[pathlib.Path]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_file_list_for_context(file_patterns: list[str | Path]) -&gt; list[Path]:
+    &#34;&#34;&#34;
+    Gather files for context.
+
+    Args:
+        file_patterns (list[str | Path]): List of file glob patterns to match
+
+    Returns:
+        list[Path]: List of files matching the patterns
+    &#34;&#34;&#34;
+    files = []
+    for pattern in file_patterns:
+        try:
+            if isinstance(pattern, Path):
+                pattern = pattern.as_posix()
+            if sys.version_info &gt;= (3, 11):
+                files += glob.glob(pattern, recursive=True, include_hidden=False)
+            else:
+                files += glob.glob(pattern, recursive=True)
+        except Exception as _:
+            raise _
+    result = []
+    for file in files:
+        f = Path(file)
+        if f.is_file():
+            f_path = str(f.as_posix())
+            if (
+                f.name.startswith(&#34;.&#34;)
+                or &#34;/.git/&#34; in f_path
+                or &#34;/.venv/&#34; in f_path
+                or &#34;/venv/&#34; in f_path
+                or &#34;/node_modules/&#34; in f_path
+                or &#34;/__pycache__/&#34; in f_path
+            ):
+                continue
+            result.append(f)
+
+    return result</code></pre>
+</details>
+<div class="desc"><p>Gather files for context.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_patterns</code></strong> :&ensp;<code>list[str | Path]</code></dt>
+<dd>List of file glob patterns to match</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[Path]</code></dt>
+<dd>List of files matching the patterns</dd>
 </dl></div>
 </dd>
 <dt id="par_ai_core.utils.get_files"><code class="name flex">
@@ -407,6 +444,44 @@ def catch_to_logger(logger: object, re_throw: bool = False) -&gt; Generator[None
 excluding files ending with the specified extension if provided.</dd>
 </dl></div>
 </dd>
+<dt id="par_ai_core.utils.get_url_file_suffix"><code class="name flex">
+<span>def <span class="ident">get_url_file_suffix</span></span>(<span>url: str, default='.jpg') ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_url_file_suffix(url: str, default=&#34;.jpg&#34;) -&gt; str:
+    &#34;&#34;&#34;
+    Get url file suffix
+
+    Args:
+        url (str): URL
+        default (str): Default file suffix if none found
+
+    Returns:
+        str: File suffix in lowercase with leading dot
+    &#34;&#34;&#34;
+    parsed_url = urlparse(url)
+    filename = os.path.basename(parsed_url.path)
+    suffix = os.path.splitext(filename)[1].lower()
+    return suffix or default</code></pre>
+</details>
+<div class="desc"><p>Get url file suffix</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>URL</dd>
+<dt><strong><code>default</code></strong> :&ensp;<code>str</code></dt>
+<dd>Default file suffix if none found</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>File suffix in lowercase with leading dot</dd>
+</dl></div>
+</dd>
 <dt id="par_ai_core.utils.has_stdin_content"><code class="name flex">
 <span>def <span class="ident">has_stdin_content</span></span>(<span>) ‑> bool</span>
 </code></dt>
@@ -421,14 +496,25 @@ excluding files ending with the specified extension if provided.</dd>
     Returns:
         bool: True if there is content available on stdin, False otherwise.
     &#34;&#34;&#34;
-    try:
-        if sys.stdin.isatty():
+    if sys.stdin.isatty():
+        return False
+
+    # For Windows
+    if os.name == &#34;nt&#34;:
+        import msvcrt
+
+        return msvcrt.kbhit()
+
+    # For Unix-like systems (Linux and macOS)
+    else:
+        # First check if stdin is readable
+        if hasattr(sys.stdin, &#34;readable&#34;) and not sys.stdin.readable():
             return False
-        data = sys.stdin.buffer.read(1)
-        sys.stdin.buffer.seek(0)  # Reset the buffer position
-        return data != b&#34;&#34;
-    except (OSError, AttributeError):
-        return False</code></pre>
+
+        import select
+
+        rlist, _, _ = select.select([sys.stdin], [], [], 0)
+        return bool(rlist)</code></pre>
 </details>
 <div class="desc"><p>Check if there is content available on stdin.</p>
 <h2 id="returns">Returns</h2>
@@ -707,6 +793,43 @@ True
 &gt;&gt;&gt; is_int(&quot;3.14&quot;)
 False
 </code></pre></div>
+</dd>
+<dt id="par_ai_core.utils.is_url"><code class="name flex">
+<span>def <span class="ident">is_url</span></span>(<span>url: str) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_url(url: str) -&gt; bool:
+    &#34;&#34;&#34;
+    Return True if the given string is a valid URL.
+
+    Args:
+        url (str): The string to check.
+
+    Returns:
+        bool: True if the string is a valid URL, False otherwise.
+    &#34;&#34;&#34;
+    try:
+        result = urlparse(url)
+        matches = re.match(r&#34;^https?://&#34;, url) is not None
+        return all([result.scheme, result.netloc, matches])
+    except ValueError:
+        return False</code></pre>
+</details>
+<div class="desc"><p>Return True if the given string is a valid URL.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The string to check.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if the string is a valid URL, False otherwise.</dd>
+</dl></div>
 </dd>
 <dt id="par_ai_core.utils.is_valid_uuid_v4"><code class="name flex">
 <span>def <span class="ident">is_valid_uuid_v4</span></span>(<span>value: str) ‑> bool</span>
@@ -1453,7 +1576,9 @@ def timer_block(label: str = &#34;Timer&#34;, console: Console | None = None) -&
 <li><code><a title="par_ai_core.utils.detect_syntax" href="#par_ai_core.utils.detect_syntax">detect_syntax</a></code></li>
 <li><code><a title="par_ai_core.utils.dict_keys_to_lower" href="#par_ai_core.utils.dict_keys_to_lower">dict_keys_to_lower</a></code></li>
 <li><code><a title="par_ai_core.utils.gather_files_for_context" href="#par_ai_core.utils.gather_files_for_context">gather_files_for_context</a></code></li>
+<li><code><a title="par_ai_core.utils.get_file_list_for_context" href="#par_ai_core.utils.get_file_list_for_context">get_file_list_for_context</a></code></li>
 <li><code><a title="par_ai_core.utils.get_files" href="#par_ai_core.utils.get_files">get_files</a></code></li>
+<li><code><a title="par_ai_core.utils.get_url_file_suffix" href="#par_ai_core.utils.get_url_file_suffix">get_url_file_suffix</a></code></li>
 <li><code><a title="par_ai_core.utils.has_stdin_content" href="#par_ai_core.utils.has_stdin_content">has_stdin_content</a></code></li>
 <li><code><a title="par_ai_core.utils.has_value" href="#par_ai_core.utils.has_value">has_value</a></code></li>
 <li><code><a title="par_ai_core.utils.hash_list_by_key" href="#par_ai_core.utils.hash_list_by_key">hash_list_by_key</a></code></li>
@@ -1461,6 +1586,7 @@ def timer_block(label: str = &#34;Timer&#34;, console: Console | None = None) -&
 <li><code><a title="par_ai_core.utils.is_date" href="#par_ai_core.utils.is_date">is_date</a></code></li>
 <li><code><a title="par_ai_core.utils.is_float" href="#par_ai_core.utils.is_float">is_float</a></code></li>
 <li><code><a title="par_ai_core.utils.is_int" href="#par_ai_core.utils.is_int">is_int</a></code></li>
+<li><code><a title="par_ai_core.utils.is_url" href="#par_ai_core.utils.is_url">is_url</a></code></li>
 <li><code><a title="par_ai_core.utils.is_valid_uuid_v4" href="#par_ai_core.utils.is_valid_uuid_v4">is_valid_uuid_v4</a></code></li>
 <li><code><a title="par_ai_core.utils.is_zero" href="#par_ai_core.utils.is_zero">is_zero</a></code></li>
 <li><code><a title="par_ai_core.utils.json_serial" href="#par_ai_core.utils.json_serial">json_serial</a></code></li>

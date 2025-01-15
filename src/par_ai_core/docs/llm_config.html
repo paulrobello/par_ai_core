@@ -62,7 +62,7 @@ LlmRunManager: Manager class for tracking LLM runs</p>
 <dl>
 <dt id="par_ai_core.llm_config.LlmConfig"><code class="flex name class">
 <span>class <span class="ident">LlmConfig</span></span>
-<span>(</span><span>provider: LlmProvider,<br>model_name: str,<br>temperature: float = 0.8,<br>mode: <a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a> = LlmMode.CHAT,<br>streaming: bool = True,<br>base_url: str | None = None,<br>timeout: int | None = None,<br>user_agent_appid: str | None = None,<br>class_name: str = 'LlmConfig',<br>num_ctx: int | None = None,<br>num_predict: int | None = None,<br>repeat_last_n: int | None = None,<br>repeat_penalty: float | None = None,<br>mirostat: int | None = None,<br>mirostat_eta: float | None = None,<br>mirostat_tau: float | None = None,<br>tfs_z: float | None = None,<br>top_k: int | None = None,<br>top_p: float | None = None,<br>seed: int | None = None,<br>env_prefix: str = 'PARAI')</span>
+<span>(</span><span>provider: LlmProvider,<br>model_name: str,<br>temperature: float = 0.8,<br>mode: <a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a> = LlmMode.CHAT,<br>streaming: bool = True,<br>base_url: str | None = None,<br>timeout: int | None = None,<br>user_agent_appid: str | None = None,<br>class_name: str = 'LlmConfig',<br>num_ctx: int | None = None,<br>num_predict: int | None = None,<br>repeat_last_n: int | None = None,<br>repeat_penalty: float | None = None,<br>mirostat: int | None = None,<br>mirostat_eta: float | None = None,<br>mirostat_tau: float | None = None,<br>tfs_z: float | None = None,<br>top_k: int | None = None,<br>top_p: float | None = None,<br>seed: int | None = None,<br>env_prefix: str = 'PARAI',<br>format: "Literal['', 'json']" = '')</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -162,6 +162,8 @@ class LlmConfig:
     the same prompt.&#34;&#34;&#34;
     env_prefix: str = &#34;PARAI&#34;
     &#34;&#34;&#34;Prefix to use for environment variables&#34;&#34;&#34;
+    format: Literal[&#34;&#34;, &#34;json&#34;] = &#34;&#34;
+    &#34;&#34;&#34;Ollama output format. Valid options are empty string (default) and &#39;json&#39;&#34;&#34;&#34;
 
     def to_json(self) -&gt; dict:
         &#34;&#34;&#34;Converts the configuration to a JSON-serializable dictionary.
@@ -192,6 +194,7 @@ class LlmConfig:
             &#34;top_p&#34;: self.top_p,
             &#34;seed&#34;: self.seed,
             &#34;env_prefix&#34;: self.env_prefix,
+            &#34;format&#34;: self.format,
         }
 
     @classmethod
@@ -244,6 +247,7 @@ class LlmConfig:
             top_p=self.top_p,
             seed=self.seed,
             env_prefix=self.env_prefix,
+            format=self.format,
         )
 
     def gen_runnable_config(self) -&gt; RunnableConfig:
@@ -276,6 +280,7 @@ class LlmConfig:
                 tfs_z=self.tfs_z,
                 top_k=self.top_k,
                 top_p=self.top_p,
+                format=self.format,
             )
         if self.mode == LlmMode.CHAT:
             return ChatOllama(
@@ -295,6 +300,7 @@ class LlmConfig:
                 top_p=self.top_p,
                 seed=self.seed,
                 disable_streaming=not self.streaming,
+                format=self.format,
             )
         if self.mode == LlmMode.EMBEDDINGS:
             return OllamaEmbeddings(
@@ -517,6 +523,34 @@ class LlmConfig:
 
         raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
 
+    def _build_mistral_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
+        &#34;&#34;&#34;Build the MISTRAL LLM.&#34;&#34;&#34;
+
+        if self.provider != LlmProvider.MISTRAL:
+            raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but MISTRAL requested.&#34;)
+
+        from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
+
+        if self.mode == LlmMode.BASE:
+            raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+
+        if self.mode == LlmMode.CHAT:
+            return ChatMistralAI(
+                model=self.model_name,  # type: ignore
+                temperature=self.temperature,
+                timeout=self.timeout if self.timeout is not None else 10,
+                top_p=self.top_p if self.top_p is not None else 1,
+                max_tokens=self.num_ctx or None,
+                disable_streaming=not self.streaming,
+            )
+        if self.mode == LlmMode.EMBEDDINGS:
+            return MistralAIEmbeddings(
+                model=self.model_name,
+                timeout=self.timeout if self.timeout is not None else 10,
+            )
+
+        raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
+
     def _build_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
         &#34;&#34;&#34;Build the LLM.&#34;&#34;&#34;
         if not isinstance(self.provider, LlmProvider):
@@ -536,6 +570,8 @@ class LlmConfig:
             return self._build_google_llm()
         if self.provider == LlmProvider.BEDROCK:
             return self._build_bedrock_llm()
+        if self.provider == LlmProvider.MISTRAL:
+            return self._build_mistral_llm()
 
         raise ValueError(f&#34;Invalid LLM provider &#39;{self.provider.value}&#39; or mode &#39;{self.mode.value}&#39;&#34;)
 
@@ -674,6 +710,10 @@ different types of language models across various providers.</p>
 <dt id="par_ai_core.llm_config.LlmConfig.env_prefix"><code class="name">var <span class="ident">env_prefix</span> : str</code></dt>
 <dd>
 <div class="desc"><p>Prefix to use for environment variables</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.format"><code class="name">var <span class="ident">format</span> : Literal['', 'json']</code></dt>
+<dd>
+<div class="desc"><p>Ollama output format. Valid options are empty string (default) and 'json'</p></div>
 </dd>
 <dt id="par_ai_core.llm_config.LlmConfig.mirostat"><code class="name">var <span class="ident">mirostat</span> : int | None</code></dt>
 <dd>
@@ -891,6 +931,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
         top_p=self.top_p,
         seed=self.seed,
         env_prefix=self.env_prefix,
+        format=self.format,
     )</code></pre>
 </details>
 <div class="desc"><p>Creates a deep copy of the current LlmConfig instance.</p>
@@ -1015,6 +1056,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
         &#34;top_p&#34;: self.top_p,
         &#34;seed&#34;: self.seed,
         &#34;env_prefix&#34;: self.env_prefix,
+        &#34;format&#34;: self.format,
     }</code></pre>
 </details>
 <div class="desc"><p>Converts the configuration to a JSON-serializable dictionary.</p>
@@ -1532,6 +1574,7 @@ This method is thread-safe and can be called from multiple threads.</p></div>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.class_name" href="#par_ai_core.llm_config.LlmConfig.class_name">class_name</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.clone" href="#par_ai_core.llm_config.LlmConfig.clone">clone</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.env_prefix" href="#par_ai_core.llm_config.LlmConfig.env_prefix">env_prefix</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.format" href="#par_ai_core.llm_config.LlmConfig.format">format</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.from_json" href="#par_ai_core.llm_config.LlmConfig.from_json">from_json</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.gen_runnable_config" href="#par_ai_core.llm_config.LlmConfig.gen_runnable_config">gen_runnable_config</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.is_api_key_set" href="#par_ai_core.llm_config.LlmConfig.is_api_key_set">is_api_key_set</a></code></li>

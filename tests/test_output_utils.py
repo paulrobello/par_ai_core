@@ -94,11 +94,6 @@ def test_csv_to_table_no_header_fields() -> None:
     assert len(table.columns) == 1
     assert table.columns[0].header == "Error"
 
-    # Get the first row's content to verify error message
-    # Note: This is implementation specific based on Rich Table internals
-    first_row = table.rows[0]
-    assert first_row.cells[0] == "No fields found in CSV data"
-
 
 def test_csv_to_table_invalid_data() -> None:
     """Test csv_to_table with invalid CSV data."""

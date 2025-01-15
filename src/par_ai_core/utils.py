@@ -46,6 +46,7 @@ from io import StringIO
 from os.path import isfile, join
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from markdownify import MarkdownConverter
@@ -54,6 +55,41 @@ from rich.console import Console
 from par_ai_core.par_logging import console_err
 
 DECIMAL_PRECESSION = 5
+
+
+def is_url(url: str) -> bool:
+    """
+    Return True if the given string is a valid URL.
+
+    Args:
+        url (str): The string to check.
+
+    Returns:
+        bool: True if the string is a valid URL, False otherwise.
+    """
+    try:
+        result = urlparse(url)
+        matches = re.match(r"^https?://", url) is not None
+        return all([result.scheme, result.netloc, matches])
+    except ValueError:
+        return False
+
+
+def get_url_file_suffix(url: str, default=".jpg") -> str:
+    """
+    Get url file suffix
+
+    Args:
+        url (str): URL
+        default (str): Default file suffix if none found
+
+    Returns:
+        str: File suffix in lowercase with leading dot
+    """
+    parsed_url = urlparse(url)
+    filename = os.path.basename(parsed_url.path)
+    suffix = os.path.splitext(filename)[1].lower()
+    return suffix or default
 
 
 def has_stdin_content() -> bool:
@@ -744,16 +780,15 @@ code_java_file_globs: list[str | Path] = [
 ]
 
 
-def gather_files_for_context(file_patterns: list[str | Path], max_context_length: int = 0) -> str:
+def get_file_list_for_context(file_patterns: list[str | Path]) -> list[Path]:
     """
     Gather files for context.
 
     Args:
         file_patterns (list[str | Path]): List of file glob patterns to match
-        max_context_length (int, optional): Maximum context length. Defaults to 0 (no limit).
 
     Returns:
-        str: xml formatted list of files and their contents
+        list[Path]: List of files matching the patterns
     """
     files = []
     for pattern in file_patterns:
@@ -766,6 +801,37 @@ def gather_files_for_context(file_patterns: list[str | Path], max_context_length
                 files += glob.glob(pattern, recursive=True)
         except Exception as _:
             raise _
+    result = []
+    for file in files:
+        f = Path(file)
+        if f.is_file():
+            f_path = str(f.as_posix())
+            if (
+                f.name.startswith(".")
+                or "/.git/" in f_path
+                or "/.venv/" in f_path
+                or "/venv/" in f_path
+                or "/node_modules/" in f_path
+                or "/__pycache__/" in f_path
+            ):
+                continue
+            result.append(f)
+
+    return result
+
+
+def gather_files_for_context(file_patterns: list[str | Path], max_context_length: int = 0) -> str:
+    """
+    Gather files for context.
+
+    Args:
+        file_patterns (list[str | Path]): List of file glob patterns to match
+        max_context_length (int, optional): Maximum context length. Defaults to 0 (no limit).
+
+    Returns:
+        str: xml formatted list of files and their contents
+    """
+    files = get_file_list_for_context(file_patterns)
 
     if not files:
         return "<files>\n</files>\n"
@@ -778,24 +844,12 @@ def gather_files_for_context(file_patterns: list[str | Path], max_context_length
     curr_len = 17
     for file in files:
         try:
-            f = Path(file)
-            if f.is_file():
-                f_path = str(f.as_posix())
-                if (
-                    f.name.startswith(".")
-                    or "/.git/" in f_path
-                    or "/.venv/" in f_path
-                    or "/venv/" in f_path
-                    or "/node_modules/" in f_path
-                    or "/__pycache__/" in f_path
-                ):
-                    continue
-                st = f"""<file index="{i}">\n<source>{html.escape(f.as_posix(), quote=True)}</source>\n<file-content>{html.escape(f.read_text(encoding='utf-8'), quote=True)}</file-content>\n</file>\n"""
-                if max_context_length and curr_len + len(st) > max_context_length:
-                    break
-                doc.write(st)
-                curr_len += len(st)
-                i += 1
+            st = f"""<file index="{i}">\n<source>{html.escape(file.as_posix(), quote=True)}</source>\n<file-content>{html.escape(file.read_text(encoding="utf-8"), quote=True)}</file-content>\n</file>\n"""
+            if max_context_length and curr_len + len(st) > max_context_length:
+                break
+            doc.write(st)
+            curr_len += len(st)
+            i += 1
         except Exception as _:
             pass
 

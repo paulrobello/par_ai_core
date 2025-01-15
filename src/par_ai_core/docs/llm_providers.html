@@ -336,6 +336,7 @@ class LangChainConfig:
 
     Supported providers:
         OLLAMA: Local Ollama instance
+        LLAMACPP: Local LlamaCpp instance
         OPENAI: OpenAI API
         GROQ: Groq API
         XAI: X.AI (formerly Twitter) API
@@ -343,10 +344,11 @@ class LangChainConfig:
         GOOGLE: Google AI (Gemini) API
         BEDROCK: AWS Bedrock API
         GITHUB: GitHub Copilot API
-        LLAMACPP: Local LlamaCpp instance
+        MISTRAL: Mistral AI API
     &#34;&#34;&#34;
 
     OLLAMA = &#34;Ollama&#34;
+    LLAMACPP = &#34;LlamaCpp&#34;
     OPENAI = &#34;OpenAI&#34;
     GROQ = &#34;Groq&#34;
     XAI = &#34;XAI&#34;
@@ -354,11 +356,12 @@ class LangChainConfig:
     GOOGLE = &#34;Google&#34;
     BEDROCK = &#34;Bedrock&#34;
     GITHUB = &#34;Github&#34;
-    LLAMACPP = &#34;LlamaCpp&#34;</code></pre>
+    MISTRAL = &#34;Mistral&#34;</code></pre>
 </details>
 <div class="desc"><p>Enumeration of supported LLM providers.</p>
 <p>Supported providers:
 OLLAMA: Local Ollama instance
+LLAMACPP: Local LlamaCpp instance
 OPENAI: OpenAI API
 GROQ: Groq API
 XAI: X.AI (formerly Twitter) API
@@ -366,7 +369,7 @@ ANTHROPIC: Anthropic Claude API
 GOOGLE: Google AI (Gemini) API
 BEDROCK: AWS Bedrock API
 GITHUB: GitHub Copilot API
-LLAMACPP: Local LlamaCpp instance</p></div>
+MISTRAL: Mistral AI API</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.str</li>
@@ -395,6 +398,10 @@ LLAMACPP: Local LlamaCpp instance</p></div>
 <div class="desc"></div>
 </dd>
 <dt id="par_ai_core.llm_providers.LlmProvider.LLAMACPP"><code class="name">var <span class="ident">LLAMACPP</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.MISTRAL"><code class="name">var <span class="ident">MISTRAL</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -527,6 +534,7 @@ class LlmProviderConfig:
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.GOOGLE" href="#par_ai_core.llm_providers.LlmProvider.GOOGLE">GOOGLE</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.GROQ" href="#par_ai_core.llm_providers.LlmProvider.GROQ">GROQ</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.LLAMACPP" href="#par_ai_core.llm_providers.LlmProvider.LLAMACPP">LLAMACPP</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.MISTRAL" href="#par_ai_core.llm_providers.LlmProvider.MISTRAL">MISTRAL</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.OLLAMA" href="#par_ai_core.llm_providers.LlmProvider.OLLAMA">OLLAMA</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.OPENAI" href="#par_ai_core.llm_providers.LlmProvider.OPENAI">OPENAI</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.XAI" href="#par_ai_core.llm_providers.LlmProvider.XAI">XAI</a></code></li>

@@ -14,6 +14,8 @@ from par_ai_core.web_tools import (
     fetch_url_and_convert_to_markdown,
     get_html_element,
     web_search,
+    fetch_url_selenium,
+    fetch_url_playwright,
 )
 
 
@@ -140,6 +142,25 @@ def test_fetch_url_playwright_success(monkeypatch):
 
     with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
         result = fetch_url("https://example.com", fetch_using="playwright")
+        assert result[0] == "<html><body>Test content</body></html>"
+
+
+def test_fetch_url_playwright_direct_success(monkeypatch):
+    """Test successful URL fetch using playwright."""
+    mock_page = MagicMock()
+    mock_page.content.return_value = "<html><body>Test content</body></html>"
+
+    mock_context = MagicMock()
+    mock_context.new_page.return_value = mock_page
+
+    mock_browser = MagicMock()
+    mock_browser.new_context.return_value = mock_context
+
+    mock_playwright = MagicMock()
+    mock_playwright.chromium.launch.return_value = mock_browser
+
+    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
+        result = fetch_url_playwright("https://example.com")
         assert result[0] == "<html><body>Test content</body></html>"
 
 
@@ -380,19 +401,14 @@ def test_fetch_url_playwright_verbose():
         assert len(result) == 1
 
 
-def test_fetch_url_selenium_string_url():
+def test_fetch_url_selenium_direct():
     """Test fetch_url_selenium with a string URL parameter."""
     mock_driver = MagicMock()
     mock_driver.page_source = "<html><body>Test content</body></html>"
     mock_console = MagicMock()
 
     with patch("selenium.webdriver.Chrome", return_value=mock_driver):
-        result = fetch_url(
-            "https://example.com",
-            fetch_using="selenium",
-            verbose=True,
-            console=mock_console
-        )
+        result = fetch_url_selenium("https://example.com", verbose=True, console=mock_console)
 
         # Verify the URL was processed as a string
         mock_driver.get.assert_called_once_with("https://example.com")
@@ -411,9 +427,7 @@ def test_fetch_url_selenium_browser_launch_error():
         result = fetch_url("https://example.com", fetch_using="selenium", verbose=True, console=mock_console)
 
         # Verify error message was printed
-        mock_console.print.assert_called_with(
-            "[bold red]Error fetching URL: Failed to launch browser[/bold red]"
-        )
+        mock_console.print.assert_called_with("[bold red]Error fetching URL: Failed to launch browser[/bold red]")
 
         # Verify empty string is returned
         assert result == [""]
