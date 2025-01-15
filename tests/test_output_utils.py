@@ -76,6 +76,16 @@ def test_csv_to_table_empty_data() -> None:
     assert table.columns[0].header == "Empty"
 
 
+def test_csv_to_table_no_fields() -> None:
+    """Test csv_to_table with data containing no fields."""
+    table = csv_to_table("\n\n")  # Only newlines, no actual fields
+    assert isinstance(table, Table)
+    assert len(table.columns) == 1
+    assert table.columns[0].header == "Error"
+    # Check if the error message is in the first row
+    assert "No fields found in CSV data" in table.rows[0]._cells[0]
+
+
 def test_csv_to_table_invalid_data() -> None:
     """Test csv_to_table with invalid CSV data."""
     table = csv_to_table("invalid,csv\ndata,missing,field")
