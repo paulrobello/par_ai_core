@@ -41,6 +41,8 @@ from par_ai_core.utils import (
     code_python_file_globs,
     code_rust_file_globs,
     detect_syntax,
+    get_url_file_suffix,
+    is_url,
     dict_keys_to_lower,
     gather_files_for_context,
     get_file_list_for_context,
