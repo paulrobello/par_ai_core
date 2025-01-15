@@ -815,9 +815,6 @@ def test_get_file_list_for_context():
         assert files_path_pattern[0].name == "test.txt"
 
         # Test with multiple patterns
-        files_multi = get_file_list_for_context([
-            str(base_dir / "**/*.txt"),
-            str(base_dir / "**/*.py")
-        ])
+        files_multi = get_file_list_for_context([str(base_dir / "**/*.txt"), str(base_dir / "**/*.py")])
         assert len(files_multi) == 2
         assert set(f.name for f in files_multi) == {"test.txt", "test.py"}
