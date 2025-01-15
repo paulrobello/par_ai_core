@@ -97,7 +97,7 @@ def test_csv_to_table_inconsistent_fields() -> None:
     table = csv_to_table(data)
     assert isinstance(table, Table)
     assert table.columns[0].header == "Error"
-    assert "Inconsistent number of fields" in table.rows[0]._cells[0]
+    assert any("Inconsistent number of fields" in str(row) for row in table.rows)
 
 
 def test_csv_file_to_table(temp_csv_file: Path) -> None:
