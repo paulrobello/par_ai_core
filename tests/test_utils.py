@@ -637,6 +637,36 @@ def test_run_cmd():
     assert "Error running command" in console.last_output
 
 
+def test_is_url():
+    """Test is_url function."""
+    # Test valid URLs
+    assert is_url("http://example.com")
+    assert is_url("https://example.com")
+    assert is_url("https://example.com/path?param=value")
+    
+    # Test invalid URLs
+    assert not is_url("not a url")
+    assert not is_url("ftp://example.com")  # Only http/https supported
+    assert not is_url("http://")  # No domain
+    assert not is_url("example.com")  # No protocol
+
+
+def test_get_url_file_suffix():
+    """Test get_url_file_suffix function."""
+    # Test URLs with file extensions
+    assert get_url_file_suffix("http://example.com/image.jpg") == ".jpg"
+    assert get_url_file_suffix("https://example.com/doc.PDF") == ".pdf"
+    assert get_url_file_suffix("http://example.com/path/file.PNG") == ".png"
+    
+    # Test URLs without file extensions
+    assert get_url_file_suffix("http://example.com/path") == ".jpg"  # Default extension
+    assert get_url_file_suffix("http://example.com/") == ".jpg"
+    
+    # Test with custom default extension
+    assert get_url_file_suffix("http://example.com/path", default=".png") == ".png"
+    assert get_url_file_suffix("http://example.com/file.txt", default=".png") == ".txt"
+
+
 def test_code_file_globs():
     """Test code file glob pattern constants."""
     assert isinstance(code_python_file_globs, list)
