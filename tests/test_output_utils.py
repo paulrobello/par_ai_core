@@ -179,5 +179,5 @@ def test_display_formatted_output(format_type: DisplayOutputFormat, content: str
         assert len(mock_console.printed) == 0
     else:
         assert len(mock_console.printed) == 1
-        if expected_type != str:
+        if expected_type is not str:
             assert isinstance(mock_console.printed[0], expected_type)
