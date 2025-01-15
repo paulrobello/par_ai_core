@@ -90,8 +90,9 @@ def csv_to_table(data: str, title: str = "Results") -> Table:
     try:
         reader = csv.reader(io.StringIO(data))
         headers = next(reader, None)
-
-        if not headers:
+        
+        # Check if headers is None or contains only empty strings
+        if not headers or all(not field.strip() for field in headers):
             table.add_column("Error", justify="left", style="red")
             table.add_row("No fields found in CSV data")
             return table
