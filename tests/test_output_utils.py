@@ -89,11 +89,11 @@ def test_csv_to_table_no_header_fields() -> None:
     # Create CSV data with just a newline or empty string
     csv_data = "\n"
     table = csv_to_table(csv_data)
-    
+
     assert isinstance(table, Table)
     assert len(table.columns) == 1
     assert table.columns[0].header == "Error"
-    
+
     # Get the first row's content to verify error message
     # Note: This is implementation specific based on Rich Table internals
     first_row = table.rows[0]
