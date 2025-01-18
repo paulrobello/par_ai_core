@@ -92,6 +92,26 @@ def get_url_file_suffix(url: str, default=".jpg") -> str:
     return suffix or default
 
 
+def get_file_suffix(path: str, default=".jpg") -> str:
+    """
+    Get file suffix
+
+    Args:
+        path (str): file path or url
+        default (str): Default file suffix if none found
+
+    Returns:
+        str: File suffix in lowercase with leading dot
+    """
+    if is_url(path):
+        return get_url_file_suffix(path)
+    try:
+        suffix = os.path.splitext(Path(path).name)[1].lower()
+        return suffix or default
+    except Exception:
+        return default
+
+
 def has_stdin_content() -> bool:
     """Check if there is content available on stdin.
 
