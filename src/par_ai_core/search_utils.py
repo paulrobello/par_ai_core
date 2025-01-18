@@ -200,11 +200,20 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
     ]
 
 
-def serper_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -> list[dict[str, Any]]:
+def serper_search(
+    query: str,
+    *,
+    type: Literal["news", "search", "places", "images"] = "search",
+    days: int = 0,
+    max_results: int = 3,
+    scrape: bool = False,
+    include_images: bool = False,
+) -> list[dict[str, Any]]:
     """Search the web using Google Serper.
 
     Args:
         query (str): The search query to execute.
+        type (Literal["news", "search", "places", "images"], optional): Type of search
         days (int, optional): Number of days to search back. Must be >= 0. Defaults to 0 meaning all time.
         max_results (int, optional): Maximum number of results to return. Defaults to 3.
         scrape (bool, optional): Whether to scrape the search result urls. Defaults to False.
@@ -232,16 +241,16 @@ def serper_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bo
             - description (str): Snippet/summary of the content
             - raw_content (str): Full content of the page if available
     """
-    search = GoogleSerperAPIWrapper(type="news" if days > 0 else "search")
+    search = GoogleSerperAPIWrapper(type=type)
     res = search.results(query)
     # console_err.print(res)
-    result_type = "news" if days > 0 else "organic"
-    results_list = res.get(result_type, [])[:max_results]
+    # result_type = "news" if type == "news" else "organic"
+    results_list = res.get(type, [])[:max_results]
     # console_err.print(results_list)
 
     if scrape:
         urls = [r["link"] for r in results_list]
-        content = fetch_url_and_convert_to_markdown(urls)
+        content = fetch_url_and_convert_to_markdown(urls, include_images=include_images)
         for r, c in zip(results_list, content):
             r["raw_content"] = c
 
