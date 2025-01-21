@@ -159,6 +159,7 @@ def test_serper_search(mock_serper):
     assert results[0]["content"] == "News snippet"
 
     # Test with scraping enabled
+    mock_serper.return_value.results.return_value = {"search": mock_results}  # Reset mock response
     with patch("par_ai_core.search_utils.fetch_url_and_convert_to_markdown") as mock_fetch:
         mock_fetch.return_value = ["Scraped content"]
         results = serper_search("test query", max_results=1, scrape=True)
