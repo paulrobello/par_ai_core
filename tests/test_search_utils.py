@@ -153,7 +153,7 @@ def test_serper_search(mock_serper):
     }
     mock_serper.return_value.results.return_value = mock_news_results
 
-    results = serper_search("test query", days=7, max_results=1)
+    results = serper_search("test query", type="news", days=7, max_results=1)
     assert len(results) == 1
     assert results[0]["title"] == "News Title"
     assert results[0]["content"] == "News snippet"
