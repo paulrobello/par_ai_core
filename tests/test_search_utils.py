@@ -131,7 +131,7 @@ def test_serper_search(mock_serper):
             "snippet": "Test snippet",
         }
     ]
-    mock_serper.return_value.results.return_value = {"organic": mock_results}
+    mock_serper.return_value.results.return_value = {"search": mock_results}
 
     results = serper_search("test query", max_results=1)
     assert len(results) == 1
@@ -149,15 +149,7 @@ def test_serper_search(mock_serper):
                 "snippet": "News snippet",
                 "section": "News section",
             }
-        ],
-        "organic": [
-            {
-                "title": "News Title",
-                "link": "https://news.com",
-                "snippet": "News snippet",
-                "section": "News section",
-            }
-        ],
+        ]
     }
     mock_serper.return_value.results.return_value = mock_news_results
 
