@@ -228,6 +228,7 @@ if __name__ == "__main__":
 - Version 0.1.11:
   - Updated some utility functions
   - Fixed dotenv loading issue
+  - Updated pricing for o1 and Deepseek R1
 - Version 0.1.10:
   - Add format param to LlmConfig for Ollama output format
   - Fixed bug with util function has_stdin_content

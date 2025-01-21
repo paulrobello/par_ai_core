@@ -68,6 +68,12 @@ pricing_lookup = {
         "cache_read": 0.5,
         "cache_write": 1,
     },
+    "o1": {
+        "input": (15.0 / 1_000_000),
+        "output": (60.0 / 1_000_000),
+        "cache_read": 0.5,
+        "cache_write": 1,
+    },
     "o1-preview": {
         "input": (15.0 / 1_000_000),
         "output": (60.0 / 1_000_000),
@@ -250,7 +256,13 @@ pricing_lookup = {
     "deepseek-chat": {
         "input": (0.14 / 1_000_000),
         "output": (0.28 / 1_000_000),
-        "cache_read": 1,
+        "cache_read": 0.1,
+        "cache_write": 1,
+    },
+    "deepseek-reasoner": {
+        "input": (0.55 / 1_000_000),
+        "output": (2.19 / 1_000_000),
+        "cache_read": 0.25,
         "cache_write": 1,
     },
 }
