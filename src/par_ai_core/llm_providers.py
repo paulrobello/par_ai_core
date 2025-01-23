@@ -38,6 +38,8 @@ import os
 from dataclasses import dataclass
 from enum import Enum
 
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+
 
 @dataclass
 class LangChainConfig:
@@ -88,7 +90,7 @@ llm_provider_types: list[LlmProvider] = list(LlmProvider)
 llm_provider_names: list[str] = [p.value.lower() for p in llm_provider_types]
 
 provider_base_urls: dict[LlmProvider, str | None] = {
-    LlmProvider.OLLAMA: "http://localhost:11434",
+    LlmProvider.OLLAMA: OLLAMA_HOST,
     LlmProvider.LLAMACPP: "http://localhost:8080/v1",
     LlmProvider.OPENAI: None,
     LlmProvider.GROQ: None,

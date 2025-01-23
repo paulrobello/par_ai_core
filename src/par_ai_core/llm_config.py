@@ -32,11 +32,9 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import SecretStr
 
 # from langchain_experimental import
-from par_ai_core.llm_providers import LlmProvider, is_provider_api_key_set, provider_base_urls
+from par_ai_core.llm_providers import OLLAMA_HOST, LlmProvider, is_provider_api_key_set, provider_base_urls
 
 warnings.simplefilter("ignore", category=LangChainDeprecationWarning)
-
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 
 class LlmMode(str, Enum):
@@ -255,7 +253,7 @@ class LlmConfig:
             return OllamaLLM(
                 model=self.model_name,
                 temperature=self.temperature,
-                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                base_url=self.base_url,
                 client_kwargs={"timeout": self.timeout},
                 num_ctx=self.num_ctx or None,
                 num_predict=self.num_predict,
