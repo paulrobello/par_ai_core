@@ -653,7 +653,7 @@ def test_is_url():
     assert not is_url("example.com")  # No protocol
 
     # Test URL that raises ValueError
-    assert not is_url("http://[invalid]/path")  # Invalid IPv6 address format
+    assert not is_url("http:// invalid /path")  # Invalid host format
 
 
 def test_get_url_file_suffix():

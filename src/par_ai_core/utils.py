@@ -70,7 +70,7 @@ def is_url(url: str) -> bool:
     try:
         result = urlparse(url)
         matches = re.match(r"^https?://", url) is not None
-        return all([result.scheme, result.netloc, matches])
+        return all([result.scheme, result.netloc, matches, " " not in url])
     except ValueError:
         return False
 
