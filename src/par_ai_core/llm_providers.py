@@ -84,6 +84,7 @@ class LlmProvider(str, Enum):
     BEDROCK = "Bedrock"
     GITHUB = "Github"
     MISTRAL = "Mistral"
+    OPENROUTER = "OpenRouter"
 
 
 llm_provider_types: list[LlmProvider] = list(LlmProvider)
@@ -100,6 +101,7 @@ provider_base_urls: dict[LlmProvider, str | None] = {
     LlmProvider.BEDROCK: None,
     LlmProvider.GITHUB: "https://models.inference.ai.azure.com",
     LlmProvider.MISTRAL: None,
+    LlmProvider.OPENROUTER: "https://openrouter.ai/api/v1",
 }
 
 provider_default_models: dict[LlmProvider, str] = {
@@ -113,6 +115,7 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "mistral-large-2411",
+    LlmProvider.OPENROUTER: "deepseek/deepseek_v3",
 }
 
 provider_light_models: dict[LlmProvider, str] = {
@@ -126,6 +129,7 @@ provider_light_models: dict[LlmProvider, str] = {
     LlmProvider.BEDROCK: "anthropic.claude-3-haiku-20240307-v1:0",
     LlmProvider.GITHUB: "gpt-4o-mini",
     LlmProvider.MISTRAL: "mistral-small-2409",
+    LlmProvider.OPENROUTER: "google/gemini-2.0-flash-exp:free",
 }
 
 provider_vision_models: dict[LlmProvider, str] = {
@@ -139,6 +143,7 @@ provider_vision_models: dict[LlmProvider, str] = {
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "pixtral-large-2411",
+    LlmProvider.OPENROUTER: "google/gemini-2.0-flash-exp:free",
 }
 
 provider_default_embed_models: dict[LlmProvider, str] = {
@@ -152,6 +157,7 @@ provider_default_embed_models: dict[LlmProvider, str] = {
     LlmProvider.BEDROCK: "amazon.titan-embed-text-v2:0",
     LlmProvider.GITHUB: "text-embedding-3-large",
     LlmProvider.MISTRAL: "mistral-embed",
+    LlmProvider.OPENROUTER: "",
 }
 
 provider_env_key_names: dict[LlmProvider, str] = {
@@ -162,9 +168,10 @@ provider_env_key_names: dict[LlmProvider, str] = {
     LlmProvider.XAI: "XAI_API_KEY",
     LlmProvider.ANTHROPIC: "ANTHROPIC_API_KEY",
     LlmProvider.GOOGLE: "GOOGLE_API_KEY",
-    LlmProvider.BEDROCK: "BEDROCK_API_KEY",
+    LlmProvider.BEDROCK: "AWS_PROFILE",
     LlmProvider.GITHUB: "GITHUB_TOKEN",
     LlmProvider.MISTRAL: "MISTRAL_API_KEY",
+    LlmProvider.OPENROUTER: "OPENROUTER_API_KEY",
 }
 
 
@@ -300,6 +307,14 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
         default_embeddings_model=provider_default_embed_models[LlmProvider.MISTRAL],
         supports_base_url=True,
         env_key_name=provider_env_key_names[LlmProvider.MISTRAL],
+    ),
+    LlmProvider.OPENROUTER: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.OPENROUTER],
+        default_light_model=provider_light_models[LlmProvider.OPENROUTER],
+        default_vision_model=provider_vision_models[LlmProvider.OPENROUTER],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.OPENROUTER],
+        supports_base_url=True,
+        env_key_name=provider_env_key_names[LlmProvider.OPENROUTER],
     ),
 }
 

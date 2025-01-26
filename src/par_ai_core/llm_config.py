@@ -32,7 +32,13 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import SecretStr
 
 # from langchain_experimental import
-from par_ai_core.llm_providers import OLLAMA_HOST, LlmProvider, is_provider_api_key_set, provider_base_urls
+from par_ai_core.llm_providers import (
+    OLLAMA_HOST,
+    LlmProvider,
+    is_provider_api_key_set,
+    provider_base_urls,
+    provider_env_key_names,
+)
 
 warnings.simplefilter("ignore", category=LangChainDeprecationWarning)
 
@@ -89,6 +95,8 @@ class LlmConfig:
     """AI Provider to use."""
     model_name: str
     """Model name to use."""
+    fallback_models: list[str] | None = None
+    """Fallback models to use if the primary model fails. Only supported by OpenRouter"""
     temperature: float = 0.8
     """The temperature of the model. Increasing the temperature will
     make the model answer more creatively. (Default: 0.8)"""
@@ -161,6 +169,7 @@ class LlmConfig:
             "class_name": self.__class__.__name__,
             "provider": self.provider,
             "model_name": self.model_name,
+            "fallback_models": self.fallback_models,
             "mode": self.mode,
             "temperature": self.temperature,
             "streaming": self.streaming,
@@ -215,6 +224,7 @@ class LlmConfig:
         return LlmConfig(
             provider=self.provider,
             model_name=self.model_name,
+            fallback_models=self.fallback_models,
             mode=self.mode,
             temperature=self.temperature,
             streaming=self.streaming,
@@ -297,12 +307,14 @@ class LlmConfig:
 
     def _build_openai_compat_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
         """Build the OPENAI LLM."""
-        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.OPENROUTER]:
             raise ValueError(f"LLM provider is '{self.provider.value}' but OPENAI requested.")
         if self.provider == LlmProvider.GITHUB:
-            api_key = SecretStr(os.environ.get("GITHUB_TOKEN", ""))
+            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.GITHUB], ""))
+        elif self.provider == LlmProvider.OPENROUTER:
+            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENROUTER], ""))
         else:
-            api_key = SecretStr(os.environ.get("OPENAI_API_KEY", ""))
+            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENAI], ""))
 
         from langchain_openai import ChatOpenAI, OpenAI, OpenAIEmbeddings
 
@@ -310,6 +322,7 @@ class LlmConfig:
             return OpenAI(
                 api_key=api_key,
                 model=self.model_name,
+                # models=self.fallback_models,
                 temperature=self.temperature,
                 streaming=self.streaming,
                 base_url=self.base_url,
@@ -323,6 +336,7 @@ class LlmConfig:
             return ChatOpenAI(
                 api_key=api_key,
                 model=self.model_name,
+                # models=self.fallback_models,
                 temperature=self.temperature,
                 stream_usage=True,
                 streaming=self.streaming,
@@ -334,6 +348,13 @@ class LlmConfig:
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
+            if self.provider not in [
+                LlmProvider.OPENAI,
+                LlmProvider.GITHUB,
+                LlmProvider.LLAMACPP,
+            ]:
+                raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
+
             return OpenAIEmbeddings(
                 api_key=api_key,
                 model=self.model_name,
@@ -543,7 +564,7 @@ class LlmConfig:
         self.base_url = self.base_url or provider_base_urls.get(self.provider)
         if self.provider == LlmProvider.OLLAMA:
             return self._build_ollama_llm()
-        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.OPENROUTER]:
             return self._build_openai_compat_llm()
         if self.provider == LlmProvider.GROQ:
             return self._build_groq_llm()
