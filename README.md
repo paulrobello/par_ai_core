@@ -122,6 +122,13 @@ PARAI_SEED=
   already be authenticated with AWS.
 * No key required to use with Ollama or LlamaCpp.
 
+### Open AI Compatible Providers
+
+If a specify provider is not listed but has an OpenAI compatible endpoint you can use the following combo of vars:
+* PARAI_AI_PROVIDER=OpenAI
+* PARAI_MODEL=Your selected model
+* PARAI_AI_BASE_URL=The providers OpenAI endpoint URL
+
 ### Search
 
 * TAVILY_API_KEY is required for Tavily AI search. Get a free key from https://tavily.com/. Tavily is much better than
@@ -150,12 +157,7 @@ PARAI_SEED=
 * PARAI_NUM_CTX sets the context window size. Max size varies by model
 * Other PARAI related params are to tweak model responses not all are supported / used by all providers
 
-### Open AI Compatible Providers
 
-If a specify provider is not listed but has an OpenAI compatible endpoint you can use the following combo of vars:
-* PARAI_AI_PROVIDER=OpenAI
-* PARAI_MODEL=Your selected model
-* PARAI_AI_BASE_URL=The providers OpenAI endpoint URL
 
 ## Example
 
@@ -175,6 +177,7 @@ from par_ai_core.llm_providers import (
 from par_ai_core.par_logging import console_out
 from par_ai_core.pricing_lookup import PricingDisplay
 from par_ai_core.provider_cb_info import get_parai_callback
+from par_ai_core.output_utils import DisplayOutputFormat, display_formatted_output
 
 
 def main() -> None:
@@ -221,7 +224,7 @@ def main() -> None:
         result = chat_model.invoke(messages, config=llm_run_manager.get_runnable_config(chat_model.name or ""))
 
         # Print the model's response
-        console_out.print(result.content)
+        display_formatted_output(result.content, DisplayOutputFormat.MD)
 
 
 if __name__ == "__main__":
