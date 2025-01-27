@@ -23,7 +23,7 @@ import uuid
 import warnings
 from dataclasses import dataclass, fields
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from langchain._api import LangChainDeprecationWarning
 from langchain_core.embeddings import Embeddings
@@ -157,6 +157,8 @@ class LlmConfig:
     """Prefix to use for environment variables"""
     format: Literal["", "json"] = ""
     """Ollama output format. Valid options are empty string (default) and 'json'"""
+    extra_body: dict[str, Any] | None = None
+    """Extra body parameters to send with the API request. Only used by OpenAI compatible providers"""
 
     def to_json(self) -> dict:
         """Converts the configuration to a JSON-serializable dictionary.
@@ -189,6 +191,7 @@ class LlmConfig:
             "seed": self.seed,
             "env_prefix": self.env_prefix,
             "format": self.format,
+            "extra_body": self.extra_body,
         }
 
     @classmethod
@@ -243,6 +246,7 @@ class LlmConfig:
             seed=self.seed,
             env_prefix=self.env_prefix,
             format=self.format,
+            extra_body=self.extra_body,
         )
 
     def gen_runnable_config(self) -> RunnableConfig:
@@ -313,6 +317,10 @@ class LlmConfig:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.GITHUB], ""))
         elif self.provider == LlmProvider.OPENROUTER:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENROUTER], ""))
+            if self.fallback_models:
+                if not self.extra_body:
+                    self.extra_body = {}
+                self.extra_body = self.extra_body | {"models": self.fallback_models}
         else:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENAI], ""))
 
@@ -322,7 +330,7 @@ class LlmConfig:
             return OpenAI(
                 api_key=api_key,
                 model=self.model_name,
-                # models=self.fallback_models,
+                extra_body=self.extra_body,
                 temperature=self.temperature,
                 streaming=self.streaming,
                 base_url=self.base_url,
@@ -336,7 +344,7 @@ class LlmConfig:
             return ChatOpenAI(
                 api_key=api_key,
                 model=self.model_name,
-                # models=self.fallback_models,
+                extra_body=self.extra_body,
                 temperature=self.temperature,
                 stream_usage=True,
                 streaming=self.streaming,
@@ -405,6 +413,7 @@ class LlmConfig:
                 streaming=self.streaming,
                 max_tokens=self.num_ctx,
                 disable_streaming=not self.streaming,
+                extra_body=self.extra_body,
             )  # type: ignore
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
