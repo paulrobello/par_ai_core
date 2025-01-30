@@ -292,7 +292,8 @@ def mk_usage_metadata() -> dict[str, int | float]:
 
 def get_api_cost_model_name(model_name: str = "") -> str:
     """Get API cost model name"""
-
+    if "/" in model_name:
+        model_name = model_name.split("/")[-1]
     if model_name not in pricing_lookup:
         keys = pricing_lookup.keys()
         keys = sorted(keys, key=len, reverse=True)

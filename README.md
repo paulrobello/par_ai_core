@@ -234,6 +234,7 @@ if __name__ == "__main__":
 ## Whats New
 - Version 0.1.13:
   - Added support for supplying extra body params to OpenAI compatible providers like OpenRouter
+  - Better handling of model names for pricing lookup
 - Version 0.1.12:
   - Added support for OpenRouter
 - Version 0.1.11:
