@@ -86,6 +86,12 @@ pricing_lookup = {
         "cache_read": 0.5,
         "cache_write": 1,
     },
+    "o3-mini": {
+        "input": (1.10 / 1_000_000),
+        "output": (4.40 / 1_000_000),
+        "cache_read": 0.5,
+        "cache_write": 1,
+    },
     "gpt-4": {
         "input": (30.0 / 1_000_000),
         "output": (60.0 / 1_000_000),

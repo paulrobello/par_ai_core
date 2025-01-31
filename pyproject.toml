@@ -1,13 +1,18 @@
 [project]
 name = "par_ai_core"
-dynamic = ["version"]
+dynamic = [
+    "version",
+]
 description = "PAR AI Core"
 url = "https://github.com/paulrobello/par_ai_core"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
-authors = [{ name = "Paul Robello", email = "probello@gmail.com" }]
-maintainers = [{ name = "Paul Robello", email = "probello@gmail.com" }]
+authors = [
+    { name = "Paul Robello", email = "probello@gmail.com" },
+]
+maintainers = [
+    { name = "Paul Robello", email = "probello@gmail.com" },
+]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Environment :: Console",
@@ -22,37 +27,43 @@ classifiers = [
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: Microsoft :: Windows :: Windows 11",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed"
+    "Typing :: Typed",
 ]
-keywords = ["ai", "langchain", "openai", "anthropic", "ollama", "llamacpp"]
-
+keywords = [
+    "ai",
+    "langchain",
+    "openai",
+    "anthropic",
+    "ollama",
+    "llamacpp",
+]
 dependencies = [
     "requests>=2.32.3",
     "rich>=13.9.4",
     "orjson>=3.10.15",
     "strenum>=0.4.15",
-    "boto3>=1.36.6",
-    "botocore>=1.36.6",
-    "langchain-anthropic>=0.3.4",
+    "boto3>=1.36.11",
+    "botocore>=1.36.11",
+    "langchain-anthropic>=0.3.5",
     "langchain-aws>=0.2.11",
-    "langchain-chroma>=0.2.0",
-    "langchain-community>=0.3.15",
-    "langchain-core>=0.3.31",
+    "langchain-chroma>=0.2.1",
+    "langchain-community>=0.3.16",
+    "langchain-core>=0.3.33",
     "langchain-experimental>=0.3.4",
     "langchain-google-genai>=2.0.9",
-    "langchain-groq>=0.2.3",
-    "langchain-ollama>=0.2.2",
-    "langchain-openai>=0.3.2",
+    "langchain-groq>=0.2.4",
+    "langchain-ollama>=0.2.3",
+    "langchain-openai>=0.3.3",
     "langchain-qdrant>=0.2.0",
     "langchain-text-splitters>=0.3.5",
     "langchain-xai>=0.2.0",
-    "langchain-mistralai>=0.2.4",
+    "langchain-mistralai>=0.2.6",
     "langchain-google-community>=2.0.4",
-    "langchain>=0.3.15",
-    "langgraph>=0.2.67",
+    "langchain>=0.3.17",
+    "langgraph>=0.2.69",
     "pydantic-core>=2.27.2",
     "pydantic>=2.10.6",
-    "playwright>=1.48.1",
+    "playwright>=1.49.1",
     "python-dotenv>=1.0.1",
     "selenium>=4.28.1",
     "webdriver-manager>=4.0.2",
@@ -62,9 +73,13 @@ dependencies = [
     "beautifulsoup4>=4.12.3",
     "html2text>=2024.2.26",
     "markdownify>=0.14.1",
-
 ]
-packages = ["src/par_ai_core"]
+packages = [
+    "src/par_ai_core",
+]
+
+[project.license]
+file = "LICENSE"
 
 [project.urls]
 Homepage = "https://github.com/paulrobello/par_ai_core"
@@ -74,12 +89,14 @@ Issues = "https://github.com/paulrobello/par_ai_core/issues"
 Discussions = "https://github.com/paulrobello/par_ai_core/discussions"
 Wiki = "https://github.com/paulrobello/par_ai_core/wiki"
 
-
 [project.scripts]
 par_ai_core = "par_ai_core.__main__:main"
 
 [build-system]
-requires = ["hatchling", "wheel"]
+requires = [
+    "hatchling",
+    "wheel",
+]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -112,7 +129,9 @@ asyncio_default_fixture_loop_scope = "function"
 path = "src/par_ai_core/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/par_ai_core"]
+packages = [
+    "src/par_ai_core",
+]
 include = [
     "py.typed",
     "**/*.py",
@@ -129,11 +148,11 @@ include = [
     "LICENSE",
     "README.md",
     "extraction_prompt.md",
-    "pyproject.toml"
+    "pyproject.toml",
 ]
 exclude = [
     "*.pyc",
     "__pycache__",
     "*.so",
-    "*.dylib"
+    "*.dylib",
 ]

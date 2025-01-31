@@ -232,6 +232,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.14:
+  - Added o3-mini pricing
 - Version 0.1.13:
   - Added support for supplying extra body params to OpenAI compatible providers like OpenRouter
   - Better handling of model names for pricing lookup
