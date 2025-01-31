@@ -320,7 +320,8 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
 
 
 def provider_name_to_enum(name: str) -> LlmProvider:
-    """Convert provider name string to LlmProvider enum.
+    """
+    Convert provider name string to LlmProvider enum.
 
     Args:
         name: Provider name string (case-sensitive)
@@ -335,7 +336,8 @@ def provider_name_to_enum(name: str) -> LlmProvider:
 
 
 def is_provider_api_key_set(provider: LlmProvider) -> bool:
-    """Check if API key is set for the given provider.
+    """
+    Check if API key is set for the given provider.
 
     Args:
         provider: LLM provider to check
@@ -349,18 +351,29 @@ def is_provider_api_key_set(provider: LlmProvider) -> bool:
     return len(os.environ.get(provider_env_key_names[provider], "")) > 0
 
 
-def get_providers_with_api_keys() -> list[LlmProvider]:
-    """Get list of providers that have valid API keys configured.
+def get_providers_with_api_keys(exclude_local: bool = False) -> list[LlmProvider]:
+    """
+    Get list of providers that have valid API keys configured.
+
+    Args:
+        exclude_local: Exclude providers that require local environment
+            variable (Ollama/LlamaCpp) for API key configuration.
+            Defaults to False.
 
     Returns:
         list[LlmProvider]: List of providers that are ready to use
             (either have API key set or don't require one)
     """
-    return [p for p in LlmProvider if is_provider_api_key_set(p)]
+    return [
+        p
+        for p in LlmProvider
+        if is_provider_api_key_set(p) and (not exclude_local or p not in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP])
+    ]
 
 
 def get_provider_select_options() -> list[tuple[str, LlmProvider]]:
-    """Get provider options for UI selection.
+    """
+    Get provider options for UI selection.
 
     Returns:
         list[tuple[str, LlmProvider]]: List of tuples containing
