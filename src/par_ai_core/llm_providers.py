@@ -65,26 +65,26 @@ class LlmProvider(str, Enum):
         OLLAMA: Local Ollama instance
         LLAMACPP: Local LlamaCpp instance
         OPENAI: OpenAI API
-        GROQ: Groq API
+        GOOGLE: Google AI (Gemini) API
+        GITHUB: GitHub Copilot API
         XAI: X.AI (formerly Twitter) API
         ANTHROPIC: Anthropic Claude API
-        GOOGLE: Google AI (Gemini) API
-        BEDROCK: AWS Bedrock API
-        GITHUB: GitHub Copilot API
+        GROQ: Groq API
         MISTRAL: Mistral AI API
+        BEDROCK: AWS Bedrock API
     """
 
     OLLAMA = "Ollama"
     LLAMACPP = "LlamaCpp"
+    OPENROUTER = "OpenRouter"
     OPENAI = "OpenAI"
-    GROQ = "Groq"
+    GOOGLE = "Google"
+    GITHUB = "Github"
     XAI = "XAI"
     ANTHROPIC = "Anthropic"
-    GOOGLE = "Google"
-    BEDROCK = "Bedrock"
-    GITHUB = "Github"
+    GROQ = "Groq"
     MISTRAL = "Mistral"
-    OPENROUTER = "OpenRouter"
+    BEDROCK = "Bedrock"
 
 
 llm_provider_types: list[LlmProvider] = list(LlmProvider)
