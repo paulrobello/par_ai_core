@@ -34,7 +34,7 @@ def test_get_provider_name_fuzzy():
     assert get_provider_name_fuzzy("ANTHROPIC") == "Anthropic"
 
     # Prefix matches
-    assert get_provider_name_fuzzy("open") == "OpenAI"
+    assert get_provider_name_fuzzy("openr") == "OpenRouter"
     assert get_provider_name_fuzzy("anth") == "Anthropic"
 
     # No match
