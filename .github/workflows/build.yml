@@ -117,7 +117,7 @@ jobs:
       - name: Get version from __init__.py
         id: get_version
         run: |
-          version=$(uv run python -c "from src.parllama import __version__; print(__version__)")
+          version=$(uv run python -c "from src.par_ai_core import __version__; print(__version__)")
           echo "Raw version output: $version"
           echo "VERSION=$version" >> $GITHUB_ENV
       - name: Check version

@@ -53,7 +53,7 @@ class LangChainConfig:
     """
 
     tracing: bool = False
-    project: str = "parllama"
+    project: str = "par_ai_core"
     base_url: str = "https://api.smith.langchain.com"
     api_key: str = ""
 
