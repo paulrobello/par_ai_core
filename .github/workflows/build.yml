@@ -1,6 +1,7 @@
 name: Build and Test 🐍 distribution 📦
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
