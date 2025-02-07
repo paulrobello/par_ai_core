@@ -115,7 +115,7 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "mistral-large-2411",
-    LlmProvider.OPENROUTER: "deepseek/deepseek_v3",
+    LlmProvider.OPENROUTER: "deepseek/deepseek-chat",
 }
 
 provider_light_models: dict[LlmProvider, str] = {
