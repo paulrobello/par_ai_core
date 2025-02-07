@@ -317,7 +317,11 @@ def get_api_cost_model_name(model_name: str = "") -> str:
 
 
 def get_api_call_cost(
-    llm_config: LlmConfig, usage_metadata: dict[str, int | float], batch_pricing: bool = False
+    *,
+    llm_config: LlmConfig,
+    usage_metadata: dict[str, int | float],
+    batch_pricing: bool = False,
+    model_name_override: str | None = None,
 ) -> float:
     """Calculate the cost of API calls based on usage.
 
@@ -331,6 +335,7 @@ def get_api_call_cost(
         llm_config: Configuration of the LLM used
         usage_metadata: Dictionary containing usage statistics
         batch_pricing: Whether to apply batch pricing discount
+        model_name_override: Override the model name for pricing calculations
 
     Returns:
         Total cost in USD
@@ -338,7 +343,8 @@ def get_api_call_cost(
     if llm_config.provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.GROQ, LlmProvider.GITHUB]:
         return 0
     batch_multiplier = 0.5 if batch_pricing else 1
-    model_name = get_api_cost_model_name(llm_config.model_name)
+    model_name = get_api_cost_model_name(model_name_override or llm_config.model_name)
+    # console_err.print(f"price model name {model_name}")
 
     if model_name in pricing_lookup:
         total_cost = (
@@ -359,6 +365,8 @@ def get_api_call_cost(
             + (usage_metadata["output_tokens"] * pricing_lookup[model_name]["output"])
         )
         return total_cost * batch_multiplier
+    # else:
+    #     console_err.print(f"No pricing data found for model {model_name}")
 
     return 0
 
@@ -394,7 +402,6 @@ def show_llm_cost(
         return
     if not console:
         console = console_err
-
     grand_total: float = 0.0
     if show_pricing == PricingDisplay.PRICE:
         for m, u in usage_metadata.items():
@@ -410,7 +417,7 @@ def show_llm_cost(
             console.print(
                 Panel.fit(
                     Pretty(u),
-                    title=f"Model: [green]{model_name}[/green] Cost: [yellow]${cost:.4f}",
+                    title=f"Model: [green]{model_name}[/green] Cost: [yellow]${cost:.5f}",
                     border_style="bold",
                 )
             )
