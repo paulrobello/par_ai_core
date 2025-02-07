@@ -58,23 +58,23 @@ def test_get_api_call_cost():
         "cache_write": 10,
     }
 
-    cost = get_api_call_cost(config, usage)
+    cost = get_api_call_cost(llm_config=config, usage_metadata=usage)
     assert isinstance(cost, float)
     assert cost > 0
 
     # Test free providers
     config.provider = LlmProvider.OLLAMA
-    assert get_api_call_cost(config, usage) == 0
+    assert get_api_call_cost(llm_config=config, usage_metadata=usage) == 0
 
     # Test batch pricing
     config.provider = LlmProvider.OPENAI
-    regular_cost = get_api_call_cost(config, usage, batch_pricing=False)
-    batch_cost = get_api_call_cost(config, usage, batch_pricing=True)
+    regular_cost = get_api_call_cost(llm_config=config, usage_metadata=usage, batch_pricing=False)
+    batch_cost = get_api_call_cost(llm_config=config, usage_metadata=usage, batch_pricing=True)
     assert batch_cost == regular_cost * 0.5
 
     # Test unknown model
     config.model_name = "unknown-model"
-    assert get_api_call_cost(config, usage) == 0
+    assert get_api_call_cost(llm_config=config, usage_metadata=usage) == 0
 
 
 def test_accumulate_cost_dict():
