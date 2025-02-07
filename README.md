@@ -21,7 +21,7 @@ for my AI projects, encapsulating common functionalities and best practices for 
 
 ## Prerequisites
 
-- Python 3.11 or higher
+- Python 3.10 or higher
 - UV package manager
 - API keys for chosen AI provider (except for Ollama and LlamaCpp)
     - See (Environment Variables)[#environment-variables] below for provider-specific variables
@@ -233,7 +233,6 @@ if __name__ == "__main__":
 
 ## Whats New
 - Version 0.1.14:
-  - Require Python 3.11 or higher
   - Added o3-mini pricing
   - Now gets actual model used from OpenRouter
   - Fixed some other pricing issues
