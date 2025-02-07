@@ -234,6 +234,9 @@ if __name__ == "__main__":
 ## Whats New
 - Version 0.1.14:
   - Added o3-mini pricing
+  - Now gets actual model used from OpenRouter
+  - Fixed some other pricing issues
+  - Fixed open router default model name
 - Version 0.1.13:
   - Added support for supplying extra body params to OpenAI compatible providers like OpenRouter
   - Better handling of model names for pricing lookup
