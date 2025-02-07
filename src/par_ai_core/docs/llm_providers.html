@@ -139,7 +139,8 @@ Returns exact provider name with proper casing if matched.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_provider_select_options() -&gt; list[tuple[str, LlmProvider]]:
-    &#34;&#34;&#34;Get provider options for UI selection.
+    &#34;&#34;&#34;
+    Get provider options for UI selection.
 
     Returns:
         list[tuple[str, LlmProvider]]: List of tuples containing
@@ -162,23 +163,40 @@ Returns exact provider name with proper casing if matched.</dd>
 </dl></div>
 </dd>
 <dt id="par_ai_core.llm_providers.get_providers_with_api_keys"><code class="name flex">
-<span>def <span class="ident">get_providers_with_api_keys</span></span>(<span>) ‑> list[<a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]</span>
+<span>def <span class="ident">get_providers_with_api_keys</span></span>(<span>exclude_local: bool = False) ‑> list[<a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_providers_with_api_keys() -&gt; list[LlmProvider]:
-    &#34;&#34;&#34;Get list of providers that have valid API keys configured.
+<pre><code class="python">def get_providers_with_api_keys(exclude_local: bool = False) -&gt; list[LlmProvider]:
+    &#34;&#34;&#34;
+    Get list of providers that have valid API keys configured.
+
+    Args:
+        exclude_local: Exclude providers that require local environment
+            variable (Ollama/LlamaCpp) for API key configuration.
+            Defaults to False.
 
     Returns:
         list[LlmProvider]: List of providers that are ready to use
             (either have API key set or don&#39;t require one)
     &#34;&#34;&#34;
-    return [p for p in LlmProvider if is_provider_api_key_set(p)]</code></pre>
+    return [
+        p
+        for p in LlmProvider
+        if is_provider_api_key_set(p) and (not exclude_local or p not in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP])
+    ]</code></pre>
 </details>
 <div class="desc"><p>Get list of providers that have valid API keys configured.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>exclude_local</code></strong></dt>
+<dd>Exclude providers that require local environment
+variable (Ollama/LlamaCpp) for API key configuration.
+Defaults to False.</dd>
+</dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[<a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>]</code></dt>
@@ -195,7 +213,8 @@ Returns exact provider name with proper casing if matched.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def is_provider_api_key_set(provider: LlmProvider) -&gt; bool:
-    &#34;&#34;&#34;Check if API key is set for the given provider.
+    &#34;&#34;&#34;
+    Check if API key is set for the given provider.
 
     Args:
         provider: LLM provider to check
@@ -230,7 +249,8 @@ if required environment variable is set and non-empty</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def provider_name_to_enum(name: str) -&gt; LlmProvider:
-    &#34;&#34;&#34;Convert provider name string to LlmProvider enum.
+    &#34;&#34;&#34;
+    Convert provider name string to LlmProvider enum.
 
     Args:
         name: Provider name string (case-sensitive)
@@ -338,38 +358,39 @@ class LangChainConfig:
         OLLAMA: Local Ollama instance
         LLAMACPP: Local LlamaCpp instance
         OPENAI: OpenAI API
-        GROQ: Groq API
+        GOOGLE: Google AI (Gemini) API
+        GITHUB: GitHub Copilot API
         XAI: X.AI (formerly Twitter) API
         ANTHROPIC: Anthropic Claude API
-        GOOGLE: Google AI (Gemini) API
-        BEDROCK: AWS Bedrock API
-        GITHUB: GitHub Copilot API
+        GROQ: Groq API
         MISTRAL: Mistral AI API
+        BEDROCK: AWS Bedrock API
     &#34;&#34;&#34;
 
     OLLAMA = &#34;Ollama&#34;
     LLAMACPP = &#34;LlamaCpp&#34;
+    OPENROUTER = &#34;OpenRouter&#34;
     OPENAI = &#34;OpenAI&#34;
-    GROQ = &#34;Groq&#34;
+    GOOGLE = &#34;Google&#34;
+    GITHUB = &#34;Github&#34;
     XAI = &#34;XAI&#34;
     ANTHROPIC = &#34;Anthropic&#34;
-    GOOGLE = &#34;Google&#34;
-    BEDROCK = &#34;Bedrock&#34;
-    GITHUB = &#34;Github&#34;
-    MISTRAL = &#34;Mistral&#34;</code></pre>
+    GROQ = &#34;Groq&#34;
+    MISTRAL = &#34;Mistral&#34;
+    BEDROCK = &#34;Bedrock&#34;</code></pre>
 </details>
 <div class="desc"><p>Enumeration of supported LLM providers.</p>
 <p>Supported providers:
 OLLAMA: Local Ollama instance
 LLAMACPP: Local LlamaCpp instance
 OPENAI: OpenAI API
-GROQ: Groq API
+GOOGLE: Google AI (Gemini) API
+GITHUB: GitHub Copilot API
 XAI: X.AI (formerly Twitter) API
 ANTHROPIC: Anthropic Claude API
-GOOGLE: Google AI (Gemini) API
-BEDROCK: AWS Bedrock API
-GITHUB: GitHub Copilot API
-MISTRAL: Mistral AI API</p></div>
+GROQ: Groq API
+MISTRAL: Mistral AI API
+BEDROCK: AWS Bedrock API</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.str</li>
@@ -410,6 +431,10 @@ MISTRAL: Mistral AI API</p></div>
 <div class="desc"></div>
 </dd>
 <dt id="par_ai_core.llm_providers.LlmProvider.OPENAI"><code class="name">var <span class="ident">OPENAI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.OPENROUTER"><code class="name">var <span class="ident">OPENROUTER</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -537,6 +562,7 @@ class LlmProviderConfig:
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.MISTRAL" href="#par_ai_core.llm_providers.LlmProvider.MISTRAL">MISTRAL</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.OLLAMA" href="#par_ai_core.llm_providers.LlmProvider.OLLAMA">OLLAMA</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.OPENAI" href="#par_ai_core.llm_providers.LlmProvider.OPENAI">OPENAI</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.OPENROUTER" href="#par_ai_core.llm_providers.LlmProvider.OPENROUTER">OPENROUTER</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.XAI" href="#par_ai_core.llm_providers.LlmProvider.XAI">XAI</a></code></li>
 </ul>
 </li>

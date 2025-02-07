@@ -62,7 +62,7 @@ LlmRunManager: Manager class for tracking LLM runs</p>
 <dl>
 <dt id="par_ai_core.llm_config.LlmConfig"><code class="flex name class">
 <span>class <span class="ident">LlmConfig</span></span>
-<span>(</span><span>provider: LlmProvider,<br>model_name: str,<br>temperature: float = 0.8,<br>mode: <a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a> = LlmMode.CHAT,<br>streaming: bool = True,<br>base_url: str | None = None,<br>timeout: int | None = None,<br>user_agent_appid: str | None = None,<br>class_name: str = 'LlmConfig',<br>num_ctx: int | None = None,<br>num_predict: int | None = None,<br>repeat_last_n: int | None = None,<br>repeat_penalty: float | None = None,<br>mirostat: int | None = None,<br>mirostat_eta: float | None = None,<br>mirostat_tau: float | None = None,<br>tfs_z: float | None = None,<br>top_k: int | None = None,<br>top_p: float | None = None,<br>seed: int | None = None,<br>env_prefix: str = 'PARAI',<br>format: "Literal['', 'json']" = '')</span>
+<span>(</span><span>provider: LlmProvider,<br>model_name: str,<br>fallback_models: list[str] | None = None,<br>temperature: float = 0.8,<br>mode: <a title="par_ai_core.llm_config.LlmMode" href="#par_ai_core.llm_config.LlmMode">LlmMode</a> = LlmMode.CHAT,<br>streaming: bool = True,<br>base_url: str | None = None,<br>timeout: int | None = None,<br>user_agent_appid: str | None = None,<br>class_name: str = 'LlmConfig',<br>num_ctx: int | None = None,<br>num_predict: int | None = None,<br>repeat_last_n: int | None = None,<br>repeat_penalty: float | None = None,<br>mirostat: int | None = None,<br>mirostat_eta: float | None = None,<br>mirostat_tau: float | None = None,<br>tfs_z: float | None = None,<br>top_k: int | None = None,<br>top_p: float | None = None,<br>seed: int | None = None,<br>env_prefix: str = 'PARAI',<br>format: "Literal['', 'json']" = '',<br>extra_body: dict[str, Any] | None = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -104,6 +104,8 @@ class LlmConfig:
     &#34;&#34;&#34;AI Provider to use.&#34;&#34;&#34;
     model_name: str
     &#34;&#34;&#34;Model name to use.&#34;&#34;&#34;
+    fallback_models: list[str] | None = None
+    &#34;&#34;&#34;Fallback models to use if the primary model fails. Only supported by OpenRouter&#34;&#34;&#34;
     temperature: float = 0.8
     &#34;&#34;&#34;The temperature of the model. Increasing the temperature will
     make the model answer more creatively. (Default: 0.8)&#34;&#34;&#34;
@@ -164,6 +166,8 @@ class LlmConfig:
     &#34;&#34;&#34;Prefix to use for environment variables&#34;&#34;&#34;
     format: Literal[&#34;&#34;, &#34;json&#34;] = &#34;&#34;
     &#34;&#34;&#34;Ollama output format. Valid options are empty string (default) and &#39;json&#39;&#34;&#34;&#34;
+    extra_body: dict[str, Any] | None = None
+    &#34;&#34;&#34;Extra body parameters to send with the API request. Only used by OpenAI compatible providers&#34;&#34;&#34;
 
     def to_json(self) -&gt; dict:
         &#34;&#34;&#34;Converts the configuration to a JSON-serializable dictionary.
@@ -176,6 +180,7 @@ class LlmConfig:
             &#34;class_name&#34;: self.__class__.__name__,
             &#34;provider&#34;: self.provider,
             &#34;model_name&#34;: self.model_name,
+            &#34;fallback_models&#34;: self.fallback_models,
             &#34;mode&#34;: self.mode,
             &#34;temperature&#34;: self.temperature,
             &#34;streaming&#34;: self.streaming,
@@ -195,6 +200,7 @@ class LlmConfig:
             &#34;seed&#34;: self.seed,
             &#34;env_prefix&#34;: self.env_prefix,
             &#34;format&#34;: self.format,
+            &#34;extra_body&#34;: self.extra_body,
         }
 
     @classmethod
@@ -230,6 +236,7 @@ class LlmConfig:
         return LlmConfig(
             provider=self.provider,
             model_name=self.model_name,
+            fallback_models=self.fallback_models,
             mode=self.mode,
             temperature=self.temperature,
             streaming=self.streaming,
@@ -248,6 +255,7 @@ class LlmConfig:
             seed=self.seed,
             env_prefix=self.env_prefix,
             format=self.format,
+            extra_body=self.extra_body,
         )
 
     def gen_runnable_config(self) -&gt; RunnableConfig:
@@ -268,7 +276,7 @@ class LlmConfig:
             return OllamaLLM(
                 model=self.model_name,
                 temperature=self.temperature,
-                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                base_url=self.base_url,
                 client_kwargs={&#34;timeout&#34;: self.timeout},
                 num_ctx=self.num_ctx or None,
                 num_predict=self.num_predict,
@@ -312,12 +320,18 @@ class LlmConfig:
 
     def _build_openai_compat_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
         &#34;&#34;&#34;Build the OPENAI LLM.&#34;&#34;&#34;
-        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.OPENROUTER]:
             raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but OPENAI requested.&#34;)
         if self.provider == LlmProvider.GITHUB:
-            api_key = SecretStr(os.environ.get(&#34;GITHUB_TOKEN&#34;, &#34;&#34;))
+            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.GITHUB], &#34;&#34;))
+        elif self.provider == LlmProvider.OPENROUTER:
+            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENROUTER], &#34;&#34;))
+            if self.fallback_models:
+                if not self.extra_body:
+                    self.extra_body = {}
+                self.extra_body = self.extra_body | {&#34;models&#34;: self.fallback_models}
         else:
-            api_key = SecretStr(os.environ.get(&#34;OPENAI_API_KEY&#34;, &#34;&#34;))
+            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENAI], &#34;&#34;))
 
         from langchain_openai import ChatOpenAI, OpenAI, OpenAIEmbeddings
 
@@ -325,6 +339,7 @@ class LlmConfig:
             return OpenAI(
                 api_key=api_key,
                 model=self.model_name,
+                extra_body=self.extra_body,
                 temperature=self.temperature,
                 streaming=self.streaming,
                 base_url=self.base_url,
@@ -338,6 +353,7 @@ class LlmConfig:
             return ChatOpenAI(
                 api_key=api_key,
                 model=self.model_name,
+                extra_body=self.extra_body,
                 temperature=self.temperature,
                 stream_usage=True,
                 streaming=self.streaming,
@@ -349,6 +365,13 @@ class LlmConfig:
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
+            if self.provider not in [
+                LlmProvider.OPENAI,
+                LlmProvider.GITHUB,
+                LlmProvider.LLAMACPP,
+            ]:
+                raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+
             return OpenAIEmbeddings(
                 api_key=api_key,
                 model=self.model_name,
@@ -399,6 +422,7 @@ class LlmConfig:
                 streaming=self.streaming,
                 max_tokens=self.num_ctx,
                 disable_streaming=not self.streaming,
+                extra_body=self.extra_body,
             )  # type: ignore
 
         raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
@@ -558,7 +582,7 @@ class LlmConfig:
         self.base_url = self.base_url or provider_base_urls.get(self.provider)
         if self.provider == LlmProvider.OLLAMA:
             return self._build_ollama_llm()
-        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.OPENROUTER]:
             return self._build_openai_compat_llm()
         if self.provider == LlmProvider.GROQ:
             return self._build_groq_llm()
@@ -710,6 +734,14 @@ different types of language models across various providers.</p>
 <dt id="par_ai_core.llm_config.LlmConfig.env_prefix"><code class="name">var <span class="ident">env_prefix</span> : str</code></dt>
 <dd>
 <div class="desc"><p>Prefix to use for environment variables</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.extra_body"><code class="name">var <span class="ident">extra_body</span> : dict[str, typing.Any] | None</code></dt>
+<dd>
+<div class="desc"><p>Extra body parameters to send with the API request. Only used by OpenAI compatible providers</p></div>
+</dd>
+<dt id="par_ai_core.llm_config.LlmConfig.fallback_models"><code class="name">var <span class="ident">fallback_models</span> : list[str] | None</code></dt>
+<dd>
+<div class="desc"><p>Fallback models to use if the primary model fails. Only supported by OpenRouter</p></div>
 </dd>
 <dt id="par_ai_core.llm_config.LlmConfig.format"><code class="name">var <span class="ident">format</span> : Literal['', 'json']</code></dt>
 <dd>
@@ -914,6 +946,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
     return LlmConfig(
         provider=self.provider,
         model_name=self.model_name,
+        fallback_models=self.fallback_models,
         mode=self.mode,
         temperature=self.temperature,
         streaming=self.streaming,
@@ -932,6 +965,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
         seed=self.seed,
         env_prefix=self.env_prefix,
         format=self.format,
+        extra_body=self.extra_body,
     )</code></pre>
 </details>
 <div class="desc"><p>Creates a deep copy of the current LlmConfig instance.</p>
@@ -1038,6 +1072,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
         &#34;class_name&#34;: self.__class__.__name__,
         &#34;provider&#34;: self.provider,
         &#34;model_name&#34;: self.model_name,
+        &#34;fallback_models&#34;: self.fallback_models,
         &#34;mode&#34;: self.mode,
         &#34;temperature&#34;: self.temperature,
         &#34;streaming&#34;: self.streaming,
@@ -1057,6 +1092,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
         &#34;seed&#34;: self.seed,
         &#34;env_prefix&#34;: self.env_prefix,
         &#34;format&#34;: self.format,
+        &#34;extra_body&#34;: self.extra_body,
     }</code></pre>
 </details>
 <div class="desc"><p>Converts the configuration to a JSON-serializable dictionary.</p>
@@ -1574,6 +1610,8 @@ This method is thread-safe and can be called from multiple threads.</p></div>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.class_name" href="#par_ai_core.llm_config.LlmConfig.class_name">class_name</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.clone" href="#par_ai_core.llm_config.LlmConfig.clone">clone</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.env_prefix" href="#par_ai_core.llm_config.LlmConfig.env_prefix">env_prefix</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.extra_body" href="#par_ai_core.llm_config.LlmConfig.extra_body">extra_body</a></code></li>
+<li><code><a title="par_ai_core.llm_config.LlmConfig.fallback_models" href="#par_ai_core.llm_config.LlmConfig.fallback_models">fallback_models</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.format" href="#par_ai_core.llm_config.LlmConfig.format">format</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.from_json" href="#par_ai_core.llm_config.LlmConfig.from_json">from_json</a></code></li>
 <li><code><a title="par_ai_core.llm_config.LlmConfig.gen_runnable_config" href="#par_ai_core.llm_config.LlmConfig.gen_runnable_config">gen_runnable_config</a></code></li>

@@ -372,18 +372,27 @@ raw_content (str): Formatted post content including metadata and comments</dd>
 <p>If the specified subreddit is not found, falls back to searching 'all'.</p></div>
 </dd>
 <dt id="par_ai_core.search_utils.serper_search"><code class="name flex">
-<span>def <span class="ident">serper_search</span></span>(<span>query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) ‑> list[dict[str, typing.Any]]</span>
+<span>def <span class="ident">serper_search</span></span>(<span>query: str,<br>*,<br>type: "Literal['news', 'search', 'places', 'images']" = 'search',<br>days: int = 0,<br>max_results: int = 3,<br>scrape: bool = False,<br>include_images: bool = False) ‑> list[dict[str, typing.Any]]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def serper_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -&gt; list[dict[str, Any]]:
+<pre><code class="python">def serper_search(
+    query: str,
+    *,
+    type: Literal[&#34;news&#34;, &#34;search&#34;, &#34;places&#34;, &#34;images&#34;] = &#34;search&#34;,
+    days: int = 0,
+    max_results: int = 3,
+    scrape: bool = False,
+    include_images: bool = False,
+) -&gt; list[dict[str, Any]]:
     &#34;&#34;&#34;Search the web using Google Serper.
 
     Args:
         query (str): The search query to execute.
+        type (Literal[&#34;news&#34;, &#34;search&#34;, &#34;places&#34;, &#34;images&#34;], optional): Type of search
         days (int, optional): Number of days to search back. Must be &gt;= 0. Defaults to 0 meaning all time.
         max_results (int, optional): Maximum number of results to return. Defaults to 3.
         scrape (bool, optional): Whether to scrape the search result urls. Defaults to False.
@@ -411,16 +420,16 @@ raw_content (str): Formatted post content including metadata and comments</dd>
             - description (str): Snippet/summary of the content
             - raw_content (str): Full content of the page if available
     &#34;&#34;&#34;
-    search = GoogleSerperAPIWrapper(type=&#34;news&#34; if days &gt; 0 else &#34;search&#34;)
+    search = GoogleSerperAPIWrapper(type=type)
     res = search.results(query)
     # console_err.print(res)
-    result_type = &#34;news&#34; if days &gt; 0 else &#34;organic&#34;
-    results_list = res.get(result_type, [])[:max_results]
+    # result_type = &#34;news&#34; if type == &#34;news&#34; else &#34;organic&#34;
+    results_list = res.get(type, [])[:max_results]
     # console_err.print(results_list)
 
     if scrape:
         urls = [r[&#34;link&#34;] for r in results_list]
-        content = fetch_url_and_convert_to_markdown(urls)
+        content = fetch_url_and_convert_to_markdown(urls, include_images=include_images)
         for r, c in zip(results_list, content):
             r[&#34;raw_content&#34;] = c
 
@@ -439,6 +448,7 @@ raw_content (str): Formatted post content including metadata and comments</dd>
 <dl>
 <dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
 <dd>The search query to execute.</dd>
+<dt>type (Literal["news", "search", "places", "images"], optional): Type of search</dt>
 <dt><strong><code>days</code></strong> :&ensp;<code>int</code>, optional</dt>
 <dd>Number of days to search back. Must be &gt;= 0. Defaults to 0 meaning all time.</dd>
 <dt><strong><code>max_results</code></strong> :&ensp;<code>int</code>, optional</dt>

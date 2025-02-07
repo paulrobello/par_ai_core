@@ -94,7 +94,7 @@ especially when working with multiple AI providers and models.</p>
 <div class="desc"></div>
 </dd>
 <dt id="par_ai_core.pricing_lookup.get_api_call_cost"><code class="name flex">
-<span>def <span class="ident">get_api_call_cost</span></span>(<span>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a>,<br>usage_metadata: dict[str, int | float],<br>batch_pricing: bool = False) ‑> float</span>
+<span>def <span class="ident">get_api_call_cost</span></span>(<span>*,<br>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a>,<br>usage_metadata: dict[str, int | float],<br>batch_pricing: bool = False,<br>model_name_override: str | None = None) ‑> float</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -102,7 +102,11 @@ especially when working with multiple AI providers and models.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_api_call_cost(
-    llm_config: LlmConfig, usage_metadata: dict[str, int | float], batch_pricing: bool = False
+    *,
+    llm_config: LlmConfig,
+    usage_metadata: dict[str, int | float],
+    batch_pricing: bool = False,
+    model_name_override: str | None = None,
 ) -&gt; float:
     &#34;&#34;&#34;Calculate the cost of API calls based on usage.
 
@@ -116,6 +120,7 @@ especially when working with multiple AI providers and models.</p>
         llm_config: Configuration of the LLM used
         usage_metadata: Dictionary containing usage statistics
         batch_pricing: Whether to apply batch pricing discount
+        model_name_override: Override the model name for pricing calculations
 
     Returns:
         Total cost in USD
@@ -123,7 +128,8 @@ especially when working with multiple AI providers and models.</p>
     if llm_config.provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.GROQ, LlmProvider.GITHUB]:
         return 0
     batch_multiplier = 0.5 if batch_pricing else 1
-    model_name = get_api_cost_model_name(llm_config.model_name)
+    model_name = get_api_cost_model_name(model_name_override or llm_config.model_name)
+    # console_err.print(f&#34;price model name {model_name}&#34;)
 
     if model_name in pricing_lookup:
         total_cost = (
@@ -144,6 +150,8 @@ especially when working with multiple AI providers and models.</p>
             + (usage_metadata[&#34;output_tokens&#34;] * pricing_lookup[model_name][&#34;output&#34;])
         )
         return total_cost * batch_multiplier
+    # else:
+    #     console_err.print(f&#34;No pricing data found for model {model_name}&#34;)
 
     return 0</code></pre>
 </details>
@@ -161,6 +169,8 @@ especially when working with multiple AI providers and models.</p>
 <dd>Dictionary containing usage statistics</dd>
 <dt><strong><code>batch_pricing</code></strong></dt>
 <dd>Whether to apply batch pricing discount</dd>
+<dt><strong><code>model_name_override</code></strong></dt>
+<dd>Override the model name for pricing calculations</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>Total cost in USD</p></div>
@@ -175,7 +185,8 @@ especially when working with multiple AI providers and models.</p>
 </summary>
 <pre><code class="python">def get_api_cost_model_name(model_name: str = &#34;&#34;) -&gt; str:
     &#34;&#34;&#34;Get API cost model name&#34;&#34;&#34;
-
+    if &#34;/&#34; in model_name:
+        model_name = model_name.split(&#34;/&#34;)[-1]
     if model_name not in pricing_lookup:
         keys = pricing_lookup.keys()
         keys = sorted(keys, key=len, reverse=True)
@@ -247,7 +258,6 @@ token counts, cache operations, tool calls, and costs.</p>
         return
     if not console:
         console = console_err
-
     grand_total: float = 0.0
     if show_pricing == PricingDisplay.PRICE:
         for m, u in usage_metadata.items():
@@ -263,7 +273,7 @@ token counts, cache operations, tool calls, and costs.</p>
             console.print(
                 Panel.fit(
                     Pretty(u),
-                    title=f&#34;Model: [green]{model_name}[/green] Cost: [yellow]${cost:.4f}&#34;,
+                    title=f&#34;Model: [green]{model_name}[/green] Cost: [yellow]${cost:.5f}&#34;,
                     border_style=&#34;bold&#34;,
                 )
             )
