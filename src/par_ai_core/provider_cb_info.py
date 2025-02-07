@@ -50,6 +50,7 @@ from par_ai_core.pricing_lookup import (
     PricingDisplay,
     accumulate_cost,
     get_api_call_cost,
+    get_api_cost_model_name,
     mk_usage_metadata,
     show_llm_cost,
 )
@@ -67,12 +68,14 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         show_prompts: Whether to display input prompts
         show_end: Whether to display completion information
         show_tool_calls: Whether to display tool call information
+        verbose: Whether to display verbose output
     """
 
     llm_config: LlmConfig | None = None
     show_prompts: bool = False
     show_end: bool = False
     show_tool_calls: bool = False
+    verbose: bool = False
 
     def __init__(
         self,
@@ -81,6 +84,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         show_prompts: bool = False,
         show_end: bool = False,
         show_tool_calls: bool = False,
+        verbose: bool = False,
         console: Console | None = None,
     ) -> None:
         super().__init__()
@@ -91,6 +95,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         self.show_prompts = show_prompts
         self.show_end = show_end
         self.show_tool_calls = show_tool_calls
+        self.verbose = verbose
 
     def __repr__(self) -> str:
         with self._lock:
@@ -108,12 +113,13 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
 
     @property
     def usage_metadata(self) -> dict[str, dict[str, int | float]]:
-        """Get thread-safe copy of usage metadata."""
+        """Get thread-safe COPY of usage metadata."""
         with self._lock:
             return deepcopy(self._usage_metadata)
 
     def _get_usage_metadata(self, model_name: str) -> dict[str, int | float]:
         """Get usage metadata for model_name. Create if not found."""
+        model_name = get_api_cost_model_name(model_name)
         if model_name not in self._usage_metadata:
             self._usage_metadata[model_name] = mk_usage_metadata()
         return self._usage_metadata[model_name]
@@ -151,14 +157,23 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
                     break
 
         if not llm_config:
-            console.print(
-                "[yellow]Warning: config_id not found in on_llm_end did you forget to set a RunnableConfig?[/yellow]"
-            )
+            if self.verbose:
+                console.print(
+                    "[yellow]Warning: config_id not found in on_llm_end did you forget to set a RunnableConfig?[/yellow]"
+                )
         else:
             # update shared state behind lock
             with self._lock:
-                usage_metadata = self._get_usage_metadata(llm_config.model_name)
                 if isinstance(generation, ChatGeneration):
+                    if "model_name" in generation.message.response_metadata:
+                        model_name = generation.message.response_metadata["model_name"]
+                        # console.print(f"Overriding model_name from message.response_metadata with: {model_name}")
+                    else:
+                        model_name = llm_config.model_name
+                        # console.print(f"using default model_name: {model_name}")
+
+                    usage_metadata = self._get_usage_metadata(model_name)
+
                     if hasattr(generation.message, "tool_calls"):
                         usage_metadata["tool_call_count"] += len(generation.message.tool_calls)  # type: ignore
 
@@ -170,9 +185,13 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
                         usage_metadata["total_tokens"] += token_usage.get("total_tokens", 0)
                     accumulate_cost(generation.message, usage_metadata)
                 else:
+                    model_name = llm_config.model_name
+                    usage_metadata = self._get_usage_metadata(model_name)
                     if response.llm_output and "token_usage" in response.llm_output:
                         accumulate_cost(response.llm_output, usage_metadata)
-                usage_metadata["total_cost"] += get_api_call_cost(llm_config, usage_metadata)
+                usage_metadata["total_cost"] += get_api_call_cost(
+                    llm_config=llm_config, usage_metadata=usage_metadata, model_name_override=model_name
+                )
                 usage_metadata["successful_requests"] += 1
 
     def on_tool_start(
@@ -215,6 +234,7 @@ def get_parai_callback(
     show_end: bool = False,
     show_pricing: PricingDisplay = PricingDisplay.NONE,
     show_tool_calls: bool = False,
+    verbose: bool = False,
     console: Console | None = None,
 ) -> Generator[ParAICallbackHandler, None, None]:
     """Get the llm callback handler in a context manager which exposes token / cost and debug information.
@@ -225,6 +245,7 @@ def get_parai_callback(
         show_end (bool, optional): Whether to show end. Defaults to False.
         show_pricing (PricingDisplay, optional): Whether to show pricing. Defaults to PricingDisplay.NONE.
         show_tool_calls (bool, optional): Whether to show tool calls. Defaults to False.
+        verbose (bool, optional): Whether to be verbose. Defaults to False.
         console (Console, optional): The console. Defaults to None.
 
     Returns:
@@ -239,9 +260,10 @@ def get_parai_callback(
         show_prompts=show_prompts,
         show_end=show_end,
         show_tool_calls=show_tool_calls,
+        verbose=verbose,
         console=console,
     )
     parai_callback_var.set(cb)
     yield cb
-    show_llm_cost(cb.usage_metadata, show_pricing=show_pricing)
+    show_llm_cost(cb.usage_metadata, show_pricing=show_pricing, console=console)
     parai_callback_var.set(None)
