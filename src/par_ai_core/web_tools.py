@@ -384,12 +384,12 @@ def fetch_url_and_convert_to_markdown(
             # Convert relative links to fully qualified URLs
             for tag in soup.find_all(True):
                 for attribute in url_attributes:
-                    if tag.has_attr(attribute):
-                        attr_value = tag[attribute]
-                        if attr_value.startswith("//"):
-                            tag[attribute] = f"https:{attr_value}"
-                        elif not attr_value.startswith(("http://", "https://")):
-                            tag[attribute] = urljoin(url, attr_value)
+                    if tag.has_attr(attribute):  # type: ignore
+                        attr_value = tag[attribute]  # type: ignore
+                        if attr_value.startswith("//"):  # type: ignore
+                            tag[attribute] = f"https:{attr_value}"  # type: ignore
+                        elif not attr_value.startswith(("http://", "https://")):  # type: ignore
+                            tag[attribute] = urljoin(url, attr_value)  # type: ignore
 
         metadata = {
             "source": url,
@@ -397,10 +397,10 @@ def fetch_url_and_convert_to_markdown(
             "tags": (" ".join(tags)).strip(),
         }
         for m in soup.find_all("meta"):
-            n = m.get("name", "").strip()
+            n = m.get("name", "").strip()  # type: ignore
             if not n:
                 continue
-            v = m.get("content", "").strip()
+            v = m.get("content", "").strip()  # type: ignore
             if not v:
                 continue
             if n in meta:
