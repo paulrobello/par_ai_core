@@ -246,6 +246,15 @@ from unittest.mock import ANY
         (LlmProvider.OLLAMA, LlmMode.CHAT, "LLM provider is 'Ollama' but OPENAI requested."),
         (LlmProvider.GROQ, LlmMode.BASE, "Groq provider does not support mode Base"),
         (LlmProvider.XAI, LlmMode.EMBEDDINGS, "XAI provider does not support mode Embeddings"),
+        (LlmProvider.OPENROUTER, LlmMode.EMBEDDINGS, "OpenRouter provider does not support mode Embeddings"),
+        (LlmProvider.DEEPSEEK, LlmMode.EMBEDDINGS, "Deepseek provider does not support mode Embeddings"),
+        (LlmProvider.LITELLM, LlmMode.BASE, "LiteLLM provider does not support mode Base"),
+        (LlmProvider.XAI, LlmMode.EMBEDDINGS, "XAI provider does not support mode Embeddings"),
+        (LlmProvider.OPENROUTER, LlmMode.EMBEDDINGS, "OpenRouter provider does not support mode Embeddings"),
+        (LlmProvider.XAI, LlmMode.EMBEDDINGS, "XAI provider does not support mode Embeddings"),
+        (LlmProvider.DEEPSEEK, LlmMode.EMBEDDINGS, "Deepseek provider does not support mode Embeddings"),
+        (LlmProvider.LITELLM, LlmMode.EMBEDDINGS, "LiteLLM provider does not support mode Embeddings"),
+        (LlmProvider.ANTHROPIC, LlmMode.EMBEDDINGS, "Anthropic provider does not support mode Embeddings"),
     ],
 )
 def test_llm_config_provider_errors(provider: LlmProvider, mode: LlmMode, expected_error: str) -> None:
