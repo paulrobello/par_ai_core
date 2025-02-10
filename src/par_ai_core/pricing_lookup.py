@@ -297,21 +297,36 @@ def mk_usage_metadata() -> dict[str, int | float]:
 
 
 def get_api_cost_model_name(model_name: str = "") -> str:
-    """Get API cost model name"""
+    """
+    Get API cost model name
+
+    If the provided model name contains a '/', it will be split and the last part used as the model name.
+    If no '/', the provided model name is used as is.
+    First exact match is tried, then fuzzy match is tried.
+    If no match is found, then the model name without any '/' is used.
+
+    Args:
+        model_name: Model name to fetch cost model for
+
+    Returns:
+        API cost model name to use
+
+    """
     if "/" in model_name:
         model_name = model_name.split("/")[-1]
     if model_name not in pricing_lookup:
+        fuzzy_model = model_name
         keys = pricing_lookup.keys()
         keys = sorted(keys, key=len, reverse=True)
-        for key in keys:
-            if key.endswith(model_name) or model_name.endswith(key):
-                model_name = key
-                break
-        if not model_name:
+        while "-" in fuzzy_model:
+            # console_err.print(f"Searching for model name, {fuzzy_model}")
             for key in keys:
-                if key.startswith(model_name) or model_name.startswith(key):
-                    model_name = key
-                    break
+                if key.endswith(fuzzy_model) or fuzzy_model.endswith(key):
+                    return key
+            for key in keys:
+                if key.startswith(fuzzy_model) or fuzzy_model.startswith(key):
+                    return key
+            fuzzy_model = "-".join(fuzzy_model.split("-")[:-1])
 
     return model_name
 
@@ -382,7 +397,6 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
         usage_metadata["cache_write"] += response.get("cache_creation_input_tokens", 0)
         usage_metadata["cache_read"] += response.get("cache_read_input_tokens", 0)
         return
-
     if hasattr(response, "usage_metadata") and response.usage_metadata is not None:  # type: ignore
         for key, value in response.usage_metadata.items():  # type: ignore
             if key in usage_metadata:
@@ -392,18 +406,23 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
                 usage_metadata["cache_read"] += value.get("cache_read", value.get("cache_read", 0))
             if key == "output_token_details":
                 usage_metadata["reasoning"] += value.get("reasoning", 0)
+        return
     if (
         hasattr(response, "response_metadata")
         and response.response_metadata is not None  # type: ignore
         and "token_usage" in response.response_metadata  # type: ignore
     ):
-        for key, value in response.response_metadata["token_usage"].__dict__.items():  # type: ignore
+        if not isinstance(response.response_metadata["token_usage"], dict):  # type: ignore
+            response.response_metadata["token_usage"] = response.response_metadata["token_usage"].__dict__  # type: ignore
+
+        for key, value in response.response_metadata["token_usage"].items():  # type: ignore
             if key in usage_metadata:
                 usage_metadata[key] += value
             if key == "prompt_tokens":
                 usage_metadata["input_tokens"] += value
             if key == "completion_tokens":
                 usage_metadata["output_tokens"] += value
+        return
 
 
 def show_llm_cost(
