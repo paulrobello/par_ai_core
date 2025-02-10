@@ -236,6 +236,8 @@ if __name__ == "__main__":
 ## Whats New
 - Version 0.1.15:
   - Added support for Deepseek and LiteLLM
+  - Added Mistral pricing
+  - Better fuzzy model matching for price lookup
 - Version 0.1.14:
   - Added o3-mini pricing
   - Now gets actual model used from OpenRouter

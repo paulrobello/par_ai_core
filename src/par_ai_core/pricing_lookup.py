@@ -271,6 +271,55 @@ pricing_lookup = {
         "cache_read": 0.25,
         "cache_write": 1,
     },
+    # Mistral
+    "mistral-large": {
+        "input": (2.0 / 1_000_000),
+        "output": (6.0 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "mistral-small": {
+        "input": (0.1 / 1_000_000),
+        "output": (0.3 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "mistral-8b": {
+        "input": (0.1 / 1_000_000),
+        "output": (0.1 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "mistral-3b": {
+        "input": (0.04 / 1_000_000),
+        "output": (0.04 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "mistral-embed": {
+        "input": (0.1 / 1_000_000),
+        "output": (0.0 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "mistral-moderation": {
+        "input": (0.1 / 1_000_000),
+        "output": (0.0 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "codestral": {
+        "input": (0.3 / 1_000_000),
+        "output": (0.9 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
+    "pixtral-large": {
+        "input": (2.0 / 1_000_000),
+        "output": (6.0 / 1_000_000),
+        "cache_read": 1,
+        "cache_write": 1,
+    },
 }
 
 
