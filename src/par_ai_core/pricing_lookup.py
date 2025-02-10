@@ -373,6 +373,9 @@ def get_api_call_cost(
 
 def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | float]) -> None:
     if isinstance(response, dict):
+        usage_metadata["input_tokens"] += response.get("prompt_tokens", 0)
+        usage_metadata["output_tokens"] += response.get("completion_tokens", 0)
+
         usage_metadata["input_tokens"] += response.get("input_tokens", 0)
         usage_metadata["output_tokens"] += response.get("output_tokens", 0)
         usage_metadata["total_tokens"] += response.get("input_tokens", 0) + response.get("output_tokens", 0)
@@ -380,7 +383,7 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
         usage_metadata["cache_read"] += response.get("cache_read_input_tokens", 0)
         return
 
-    if hasattr(response, "usage_metadata"):
+    if hasattr(response, "usage_metadata") and response.usage_metadata is not None:  # type: ignore
         for key, value in response.usage_metadata.items():  # type: ignore
             if key in usage_metadata:
                 usage_metadata[key] += value
@@ -389,6 +392,18 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
                 usage_metadata["cache_read"] += value.get("cache_read", value.get("cache_read", 0))
             if key == "output_token_details":
                 usage_metadata["reasoning"] += value.get("reasoning", 0)
+    if (
+        hasattr(response, "response_metadata")
+        and response.response_metadata is not None  # type: ignore
+        and "token_usage" in response.response_metadata  # type: ignore
+    ):
+        for key, value in response.response_metadata["token_usage"].__dict__.items():  # type: ignore
+            if key in usage_metadata:
+                usage_metadata[key] += value
+            if key == "prompt_tokens":
+                usage_metadata["input_tokens"] += value
+            if key == "completion_tokens":
+                usage_metadata["output_tokens"] += value
 
 
 def show_llm_cost(
@@ -421,4 +436,4 @@ def show_llm_cost(
                     border_style="bold",
                 )
             )
-    console.print(f"Total Cost [yellow]${grand_total:.4f}")
+    console.print(f"Total Cost [yellow]${grand_total:.5f}")

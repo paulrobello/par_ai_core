@@ -311,16 +311,10 @@ class LlmConfig:
 
     def _build_openai_compat_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
         """Build the OPENAI LLM."""
-        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.OPENROUTER]:
+        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
             raise ValueError(f"LLM provider is '{self.provider.value}' but OPENAI requested.")
         if self.provider == LlmProvider.GITHUB:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.GITHUB], ""))
-        elif self.provider == LlmProvider.OPENROUTER:
-            api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENROUTER], ""))
-            if self.fallback_models:
-                if not self.extra_body:
-                    self.extra_body = {}
-                self.extra_body = self.extra_body | {"models": self.fallback_models}
         else:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENAI], ""))
 
@@ -372,6 +366,31 @@ class LlmConfig:
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
+    def _build_litellm_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
+        """Build the LiteLLM LLM."""
+        if self.provider not in [LlmProvider.LITELLM]:
+            raise ValueError(f"LLM provider is '{self.provider.value}' but LITELLM requested.")
+        if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
+            raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
+
+        from langchain_community.chat_models import ChatLiteLLM
+
+        if self.mode == LlmMode.CHAT:
+            return ChatLiteLLM(
+                model=self.model_name,
+                extra_body=self.extra_body,  # type: ignore
+                temperature=self.temperature,
+                stream_usage=True,  # type: ignore
+                streaming=self.streaming,
+                base_url=self.base_url,  # type: ignore
+                timeout=self.timeout,  # type: ignore
+                top_p=self.top_p,
+                seed=self.seed,  # type: ignore
+                max_tokens=self.num_ctx,
+                disable_streaming=not self.streaming,
+            )
+        raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
+
     def _build_groq_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
         """Build the GROQ LLM."""
         if self.provider != LlmProvider.GROQ:
@@ -407,6 +426,61 @@ class LlmConfig:
 
         if self.mode == LlmMode.CHAT:
             return ChatXAI(
+                model=self.model_name,
+                temperature=self.temperature,
+                timeout=self.timeout,
+                streaming=self.streaming,
+                max_tokens=self.num_ctx,
+                disable_streaming=not self.streaming,
+                extra_body=self.extra_body,
+            )  # type: ignore
+
+        raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
+
+    def _build_openrouter_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
+        """Build the OpenRouter LLM."""
+        if self.provider != LlmProvider.OPENROUTER:
+            raise ValueError(f"LLM provider is '{self.provider.value}' but OPENROUTER requested.")
+        if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
+            raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
+
+        api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENROUTER], ""))
+        if self.fallback_models:
+            if not self.extra_body:
+                self.extra_body = {}
+            self.extra_body = self.extra_body | {"models": self.fallback_models}
+
+        from langchain_openai import ChatOpenAI
+
+        if self.mode == LlmMode.CHAT:
+            return ChatOpenAI(
+                api_key=api_key,
+                model=self.model_name,
+                extra_body=self.extra_body,
+                temperature=self.temperature,
+                stream_usage=True,
+                streaming=self.streaming,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                top_p=self.top_p,
+                seed=self.seed,
+                max_tokens=self.num_ctx,  # type: ignore
+                disable_streaming=not self.streaming,
+            )
+
+        raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
+
+    def _build_deepseek_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
+        """Build the DEEPSEEK LLM."""
+        if self.provider != LlmProvider.DEEPSEEK:
+            raise ValueError(f"LLM provider is '{self.provider.value}' but DEEPSEEK requested.")
+        if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
+            raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
+
+        from langchain_deepseek import ChatDeepSeek
+
+        if self.mode == LlmMode.CHAT:
+            return ChatDeepSeek(
                 model=self.model_name,
                 temperature=self.temperature,
                 timeout=self.timeout,
@@ -573,10 +647,14 @@ class LlmConfig:
         self.base_url = self.base_url or provider_base_urls.get(self.provider)
         if self.provider == LlmProvider.OLLAMA:
             return self._build_ollama_llm()
-        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.OPENROUTER]:
+        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
             return self._build_openai_compat_llm()
         if self.provider == LlmProvider.GROQ:
             return self._build_groq_llm()
+        if self.provider == LlmProvider.DEEPSEEK:
+            return self._build_deepseek_llm()
+        if self.provider == LlmProvider.OPENROUTER:
+            return self._build_openrouter_llm()
         if self.provider == LlmProvider.XAI:
             return self._build_xai_llm()
         if self.provider == LlmProvider.ANTHROPIC:
@@ -587,6 +665,8 @@ class LlmConfig:
             return self._build_bedrock_llm()
         if self.provider == LlmProvider.MISTRAL:
             return self._build_mistral_llm()
+        if self.provider == LlmProvider.LITELLM:
+            return self._build_litellm_llm()
 
         raise ValueError(f"Invalid LLM provider '{self.provider.value}' or mode '{self.mode.value}'")
 

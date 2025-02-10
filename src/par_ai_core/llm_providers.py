@@ -84,6 +84,8 @@ class LlmProvider(str, Enum):
     ANTHROPIC = "Anthropic"
     GROQ = "Groq"
     MISTRAL = "Mistral"
+    DEEPSEEK = "Deepseek"
+    LITELLM = "LiteLLM"
     BEDROCK = "Bedrock"
 
 
@@ -102,6 +104,8 @@ provider_base_urls: dict[LlmProvider, str | None] = {
     LlmProvider.GITHUB: "https://models.inference.ai.azure.com",
     LlmProvider.MISTRAL: None,
     LlmProvider.OPENROUTER: "https://openrouter.ai/api/v1",
+    LlmProvider.DEEPSEEK: None,
+    LlmProvider.LITELLM: None,
 }
 
 provider_default_models: dict[LlmProvider, str] = {
@@ -116,6 +120,8 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "mistral-large-2411",
     LlmProvider.OPENROUTER: "deepseek/deepseek-chat",
+    LlmProvider.DEEPSEEK: "deepseek-chat",
+    LlmProvider.LITELLM: "gpt-4o",
 }
 
 provider_light_models: dict[LlmProvider, str] = {
@@ -130,6 +136,8 @@ provider_light_models: dict[LlmProvider, str] = {
     LlmProvider.GITHUB: "gpt-4o-mini",
     LlmProvider.MISTRAL: "mistral-small-2409",
     LlmProvider.OPENROUTER: "google/gemini-2.0-flash-exp:free",
+    LlmProvider.DEEPSEEK: "deepseek-chat",
+    LlmProvider.LITELLM: "gpt-4o-mini",
 }
 
 provider_vision_models: dict[LlmProvider, str] = {
@@ -144,6 +152,8 @@ provider_vision_models: dict[LlmProvider, str] = {
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "pixtral-large-2411",
     LlmProvider.OPENROUTER: "google/gemini-2.0-flash-exp:free",
+    LlmProvider.DEEPSEEK: "deepseek-chat",
+    LlmProvider.LITELLM: "gpt-4o",
 }
 
 provider_default_embed_models: dict[LlmProvider, str] = {
@@ -158,6 +168,8 @@ provider_default_embed_models: dict[LlmProvider, str] = {
     LlmProvider.GITHUB: "text-embedding-3-large",
     LlmProvider.MISTRAL: "mistral-embed",
     LlmProvider.OPENROUTER: "",
+    LlmProvider.DEEPSEEK: "",
+    LlmProvider.LITELLM: "text-embedding-3-large",
 }
 
 provider_env_key_names: dict[LlmProvider, str] = {
@@ -172,6 +184,8 @@ provider_env_key_names: dict[LlmProvider, str] = {
     LlmProvider.GITHUB: "GITHUB_TOKEN",
     LlmProvider.MISTRAL: "MISTRAL_API_KEY",
     LlmProvider.OPENROUTER: "OPENROUTER_API_KEY",
+    LlmProvider.DEEPSEEK: "DEEPSEEK_API_KEY",
+    LlmProvider.LITELLM: "",
 }
 
 
@@ -316,6 +330,22 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
         supports_base_url=True,
         env_key_name=provider_env_key_names[LlmProvider.OPENROUTER],
     ),
+    LlmProvider.DEEPSEEK: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.DEEPSEEK],
+        default_light_model=provider_light_models[LlmProvider.DEEPSEEK],
+        default_vision_model=provider_vision_models[LlmProvider.DEEPSEEK],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.DEEPSEEK],
+        supports_base_url=True,
+        env_key_name=provider_env_key_names[LlmProvider.DEEPSEEK],
+    ),
+    LlmProvider.LITELLM: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.LITELLM],
+        default_light_model=provider_light_models[LlmProvider.LITELLM],
+        default_vision_model=provider_vision_models[LlmProvider.LITELLM],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.LITELLM],
+        supports_base_url=True,
+        env_key_name=provider_env_key_names[LlmProvider.LITELLM],
+    ),
 }
 
 
@@ -346,7 +376,7 @@ def is_provider_api_key_set(provider: LlmProvider) -> bool:
         bool: True if provider doesn't need key (Ollama/LlamaCpp) or
             if required environment variable is set and non-empty
     """
-    if provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP]:
+    if provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP] or not provider_env_key_names[provider]:
         return True
     return len(os.environ.get(provider_env_key_names[provider], "")) > 0
 
