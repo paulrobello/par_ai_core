@@ -40,12 +40,10 @@ el.replaceWith(d);
 <p>This module provides functionality for managing and calculating costs associated with
 various AI language models across different providers. It includes:</p>
 <ul>
-<li>A comprehensive pricing lookup table for different AI models</li>
 <li>Functions to calculate API call costs based on usage</li>
 <li>Utilities for accumulating and displaying cost information</li>
 </ul>
 <p>Key components:
-- pricing_lookup: A dictionary containing pricing details for various AI models
 - PricingDisplay: An enum for controlling the level of cost display detail
 - Functions for cost calculation, usage metadata management, and cost display</p>
 <h2 id="usage">Usage</h2>
@@ -73,25 +71,58 @@ especially when working with multiple AI providers and models.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | float]) -&gt; None:
+    &#34;&#34;&#34;
+    Accumulate cost for the given response by finding token metadata in the response.
+
+    Args:
+        response: Response object or dictionary containing usage statistics
+        usage_metadata: Dictionary to accumulate usage statistics
+    &#34;&#34;&#34;
     if isinstance(response, dict):
+        usage_metadata[&#34;input_tokens&#34;] += response.get(&#34;prompt_tokens&#34;, 0)
+        usage_metadata[&#34;output_tokens&#34;] += response.get(&#34;completion_tokens&#34;, 0)
+
         usage_metadata[&#34;input_tokens&#34;] += response.get(&#34;input_tokens&#34;, 0)
         usage_metadata[&#34;output_tokens&#34;] += response.get(&#34;output_tokens&#34;, 0)
         usage_metadata[&#34;total_tokens&#34;] += response.get(&#34;input_tokens&#34;, 0) + response.get(&#34;output_tokens&#34;, 0)
         usage_metadata[&#34;cache_write&#34;] += response.get(&#34;cache_creation_input_tokens&#34;, 0)
         usage_metadata[&#34;cache_read&#34;] += response.get(&#34;cache_read_input_tokens&#34;, 0)
         return
-
-    if hasattr(response, &#34;usage_metadata&#34;):
+    if hasattr(response, &#34;usage_metadata&#34;) and response.usage_metadata is not None:  # type: ignore
         for key, value in response.usage_metadata.items():  # type: ignore
             if key in usage_metadata:
                 usage_metadata[key] += value
             if key == &#34;input_token_details&#34;:
                 usage_metadata[&#34;cache_write&#34;] += value.get(&#34;cache_creation&#34;, 0)
-                usage_metadata[&#34;cache_read&#34;] += value.get(&#34;cache_read&#34;, value.get(&#34;cache_read&#34;, 0))
+                usage_metadata[&#34;cache_read&#34;] += value.get(&#34;cache_read&#34;, 0)
             if key == &#34;output_token_details&#34;:
-                usage_metadata[&#34;reasoning&#34;] += value.get(&#34;reasoning&#34;, 0)</code></pre>
+                usage_metadata[&#34;reasoning&#34;] += value.get(&#34;reasoning&#34;, 0)
+        return
+    if (
+        hasattr(response, &#34;response_metadata&#34;)
+        and response.response_metadata is not None  # type: ignore
+        and &#34;token_usage&#34; in response.response_metadata  # type: ignore
+    ):
+        if not isinstance(response.response_metadata[&#34;token_usage&#34;], dict):  # type: ignore
+            response.response_metadata[&#34;token_usage&#34;] = response.response_metadata[&#34;token_usage&#34;].__dict__  # type: ignore
+
+        for key, value in response.response_metadata[&#34;token_usage&#34;].items():  # type: ignore
+            if key in usage_metadata:
+                usage_metadata[key] += value
+            if key == &#34;prompt_tokens&#34;:
+                usage_metadata[&#34;input_tokens&#34;] += value
+            if key == &#34;completion_tokens&#34;:
+                usage_metadata[&#34;output_tokens&#34;] += value
+        return</code></pre>
 </details>
-<div class="desc"></div>
+<div class="desc"><p>Accumulate cost for the given response by finding token metadata in the response.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>response</code></strong></dt>
+<dd>Response object or dictionary containing usage statistics</dd>
+<dt><strong><code>usage_metadata</code></strong></dt>
+<dd>Dictionary to accumulate usage statistics</dd>
+</dl></div>
 </dd>
 <dt id="par_ai_core.pricing_lookup.get_api_call_cost"><code class="name flex">
 <span>def <span class="ident">get_api_call_cost</span></span>(<span>*,<br>llm_config: <a title="par_ai_core.llm_config.LlmConfig" href="llm_config.html#par_ai_core.llm_config.LlmConfig">LlmConfig</a>,<br>usage_metadata: dict[str, int | float],<br>batch_pricing: bool = False,<br>model_name_override: str | None = None) ‑> float</span>
@@ -128,28 +159,51 @@ especially when working with multiple AI providers and models.</p>
     if llm_config.provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.GROQ, LlmProvider.GITHUB]:
         return 0
     batch_multiplier = 0.5 if batch_pricing else 1
-    model_name = get_api_cost_model_name(model_name_override or llm_config.model_name)
+
+    model_name = get_api_cost_model_name(
+        provider_name=llm_config.provider, model_name=model_name_override or llm_config.model_name
+    )
     # console_err.print(f&#34;price model name {model_name}&#34;)
 
-    if model_name in pricing_lookup:
-        total_cost = (
-            (
-                (usage_metadata[&#34;input_tokens&#34;] - usage_metadata[&#34;cache_read&#34;] - usage_metadata[&#34;cache_write&#34;])
-                * pricing_lookup[model_name][&#34;input&#34;]
-            )
-            + (
-                usage_metadata[&#34;cache_read&#34;]
-                * pricing_lookup[model_name][&#34;input&#34;]
-                * pricing_lookup[model_name][&#34;cache_read&#34;]
-            )
-            + (
-                usage_metadata[&#34;cache_write&#34;]
-                * pricing_lookup[model_name][&#34;input&#34;]
-                * pricing_lookup[model_name][&#34;cache_write&#34;]
-            )
-            + (usage_metadata[&#34;output_tokens&#34;] * pricing_lookup[model_name][&#34;output&#34;])
+    try:
+        if &#34;deepseek&#34; in model_name and &#34;deepseek/&#34; not in model_name:
+            model_name = f&#34;deepseek/{model_name}&#34;
+        model_info = get_model_info(model=model_name)
+    except Exception as _:
+        console_err.print(f&#34;No pricing data found for model {llm_config.provider.lower()}/{model_name}&#34;)
+        return 0
+    # console_err.print(usage_metadata)
+    # console_err.print(model_info)
+
+    total_cost = (
+        (
+            (usage_metadata[&#34;input_tokens&#34;] - usage_metadata[&#34;cache_read&#34;] - usage_metadata[&#34;cache_write&#34;])
+            * (model_info.get(&#34;input_cost_per_token&#34;) or 0)
         )
-        return total_cost * batch_multiplier
+        + (
+            usage_metadata[&#34;cache_read&#34;]
+            * (model_info.get(&#34;cache_read_input_token_cost&#34;) or (model_info.get(&#34;input_cost_per_token&#34;) or 0))
+        )
+        + (
+            usage_metadata[&#34;cache_write&#34;]
+            * (model_info.get(&#34;cache_creation_input_token_cost&#34;) or (model_info.get(&#34;input_cost_per_token&#34;) or 0))
+        )
+        + (usage_metadata[&#34;output_tokens&#34;] * (model_info.get(&#34;output_cost_per_token&#34;) or 0))
+    )
+    return total_cost * batch_multiplier
+
+    # if model_name in pricing_lookup:
+    #     model_info = pricing_lookup[model_name]
+    #     total_cost = (
+    #         (
+    #             (usage_metadata[&#34;input_tokens&#34;] - usage_metadata[&#34;cache_read&#34;] - usage_metadata[&#34;cache_write&#34;])
+    #             * model_info[&#34;input&#34;]
+    #         )
+    #         + (usage_metadata[&#34;cache_read&#34;] * model_info[&#34;input&#34;] * model_info[&#34;cache_read&#34;])
+    #         + (usage_metadata[&#34;cache_write&#34;] * model_info[&#34;input&#34;] * model_info[&#34;cache_write&#34;])
+    #         + (usage_metadata[&#34;output_tokens&#34;] * model_info[&#34;output&#34;])
+    #     )
+    #     return total_cost * batch_multiplier
     # else:
     #     console_err.print(f&#34;No pricing data found for model {model_name}&#34;)
 
@@ -176,33 +230,131 @@ especially when working with multiple AI providers and models.</p>
 <p>Total cost in USD</p></div>
 </dd>
 <dt id="par_ai_core.pricing_lookup.get_api_cost_model_name"><code class="name flex">
-<span>def <span class="ident">get_api_cost_model_name</span></span>(<span>model_name: str = '') ‑> str</span>
+<span>def <span class="ident">get_api_cost_model_name</span></span>(<span>*, provider_name: str = '', model_name: str) ‑> str</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_api_cost_model_name(model_name: str = &#34;&#34;) -&gt; str:
-    &#34;&#34;&#34;Get API cost model name&#34;&#34;&#34;
-    if &#34;/&#34; in model_name:
-        model_name = model_name.split(&#34;/&#34;)[-1]
-    if model_name not in pricing_lookup:
-        keys = pricing_lookup.keys()
-        keys = sorted(keys, key=len, reverse=True)
-        for key in keys:
-            if key.endswith(model_name) or model_name.endswith(key):
-                model_name = key
-                break
-        if not model_name:
-            for key in keys:
-                if key.startswith(model_name) or model_name.startswith(key):
-                    model_name = key
-                    break
+<pre><code class="python">def get_api_cost_model_name(*, provider_name: str = &#34;&#34;, model_name: str) -&gt; str:
+    &#34;&#34;&#34;
+    Get API cost model name
 
+    If model name contains &#39;inference-profile&#39;, replace it with &#39;bedrock/&#39;
+    If provider_name is specified and model does not contain a &#39;/&#39;, the provider is prepended to the model name with a &#39;/&#39;
+
+    Args:
+        provider_name: Provider name (optional, default is &#34;&#34;)
+        model_name: Model name to use
+
+    Returns:
+        API cost model name to use
+
+    &#34;&#34;&#34;
+    if &#34;inference-profile&#34; in model_name:
+        model_name = &#34;bedrock/&#34; + model_name.split(&#34;/&#34;)[-1]
+    elif provider_name and &#34;/&#34; not in model_name:
+        model_name = f&#34;{provider_name.lower()}/{model_name}&#34;
+    model_name = model_name.replace(&#34;google/&#34;, &#34;gemini/&#34;)
+    if model_name.startswith(&#34;litellm/&#34;):
+        model_name = model_name.replace(&#34;litellm/&#34;, &#34;&#34;)
     return model_name</code></pre>
 </details>
-<div class="desc"><p>Get API cost model name</p></div>
+<div class="desc"><p>Get API cost model name</p>
+<p>If model name contains 'inference-profile', replace it with 'bedrock/'
+If provider_name is specified and model does not contain a '/', the provider is prepended to the model name with a '/'</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>provider_name</code></strong></dt>
+<dd>Provider name (optional, default is "")</dd>
+<dt><strong><code>model_name</code></strong></dt>
+<dd>Model name to use</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>API cost model name to use</p></div>
+</dd>
+<dt id="par_ai_core.pricing_lookup.get_model_metadata"><code class="name flex">
+<span>def <span class="ident">get_model_metadata</span></span>(<span>provider_name: str, model_name: str) ‑> litellm.types.utils.ModelInfo</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_model_metadata(provider_name: str, model_name: str) -&gt; ModelInfo:
+    &#34;&#34;&#34;
+    Get model metadata from LiteLLM
+
+    Args:
+        provider_name: Provider name
+        model_name: Model name
+
+    Returns:
+        ModelInfo: Model metadata
+    &#34;&#34;&#34;
+    model_name = get_api_cost_model_name(provider_name=provider_name, model_name=model_name)
+    return get_model_info(model=model_name)</code></pre>
+</details>
+<div class="desc"><p>Get model metadata from LiteLLM</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>provider_name</code></strong></dt>
+<dd>Provider name</dd>
+<dt><strong><code>model_name</code></strong></dt>
+<dd>Model name</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ModelInfo</code></dt>
+<dd>Model metadata</dd>
+</dl></div>
+</dd>
+<dt id="par_ai_core.pricing_lookup.get_model_mode"><code class="name flex">
+<span>def <span class="ident">get_model_mode</span></span>(<span>provider: <a title="par_ai_core.llm_providers.LlmProvider" href="llm_providers.html#par_ai_core.llm_providers.LlmProvider">LlmProvider</a>,<br>model_name: str) ‑> Literal['completion', 'embedding', 'image_generation', 'chat', 'audio_transcription', 'unknown']</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_model_mode(
+    provider: LlmProvider, model_name: str
+) -&gt; Literal[&#34;completion&#34;, &#34;embedding&#34;, &#34;image_generation&#34;, &#34;chat&#34;, &#34;audio_transcription&#34;, &#34;unknown&#34;]:
+    &#34;&#34;&#34;
+    Get model mode
+
+    Args:
+        provider (LlmProvider): The provider
+        model_name (str): The model name
+
+    Returns:
+        str: The model mode (&#34;completion&#34;, &#34;embedding&#34;, &#34;image_generation&#34;, &#34;chat&#34;, &#34;audio_transcription&#34;, &#34;unknown&#34;)
+    &#34;&#34;&#34;
+    try:
+        if provider == LlmProvider.OLLAMA:
+            if &#34;embed&#34; in model_name:
+                return &#34;embedding&#34;
+            return &#34;chat&#34;
+        metadata = get_model_metadata(provider.value.lower(), model_name)
+        return metadata.get(&#34;mode&#34;) or &#34;unknown&#34;  # type: ignore
+    except Exception:
+        # console_err.print(f&#34;Error getting model metadata {get_api_cost_model_name(provider_name=provider.value.lower(), model_name=model_name)}: {e}&#34;, severity=&#34;error&#34;)
+        return &#34;unknown&#34;</code></pre>
+</details>
+<div class="desc"><p>Get model mode</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>provider</code></strong> :&ensp;<code>LlmProvider</code></dt>
+<dd>The provider</dd>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The model name</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The model mode ("completion", "embedding", "image_generation", "chat", "audio_transcription", "unknown")</dd>
+</dl></div>
 </dd>
 <dt id="par_ai_core.pricing_lookup.mk_usage_metadata"><code class="name flex">
 <span>def <span class="ident">mk_usage_metadata</span></span>(<span>) ‑> dict[str, int | float]</span>
@@ -253,7 +405,15 @@ token counts, cache operations, tool calls, and costs.</p>
     show_pricing: PricingDisplay = PricingDisplay.PRICE,
     console: Console | None = None,
 ) -&gt; None:
-    &#34;&#34;&#34;Show LLM cost&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Show LLM costs for all models captured in the usage_metadata dictionary.
+
+    Args:
+        usage_metadata: Dictionary containing usage statistics
+        show_pricing: Display pricing options
+        console: Optional console object to use for printing output
+
+    &#34;&#34;&#34;
     if show_pricing == PricingDisplay.NONE:
         return
     if not console:
@@ -269,17 +429,25 @@ token counts, cache operations, tool calls, and costs.</p>
             if &#34;total_cost&#34; in u:
                 cost = u[&#34;total_cost&#34;]
                 grand_total += cost
-            model_name = get_api_cost_model_name(m)
             console.print(
                 Panel.fit(
                     Pretty(u),
-                    title=f&#34;Model: [green]{model_name}[/green] Cost: [yellow]${cost:.5f}&#34;,
+                    title=f&#34;Model: [green]{m}[/green] Cost: [yellow]${cost:.5f}&#34;,
                     border_style=&#34;bold&#34;,
                 )
             )
-    console.print(f&#34;Total Cost [yellow]${grand_total:.4f}&#34;)</code></pre>
+    console.print(f&#34;Total Cost [yellow]${grand_total:.5f}&#34;)</code></pre>
 </details>
-<div class="desc"><p>Show LLM cost</p></div>
+<div class="desc"><p>Show LLM costs for all models captured in the usage_metadata dictionary.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>usage_metadata</code></strong></dt>
+<dd>Dictionary containing usage statistics</dd>
+<dt><strong><code>show_pricing</code></strong></dt>
+<dd>Display pricing options</dd>
+<dt><strong><code>console</code></strong></dt>
+<dd>Optional console object to use for printing output</dd>
+</dl></div>
 </dd>
 </dl>
 </section>
@@ -352,6 +520,8 @@ assert Example.MixedCase == "MixedCase"
 <li><code><a title="par_ai_core.pricing_lookup.accumulate_cost" href="#par_ai_core.pricing_lookup.accumulate_cost">accumulate_cost</a></code></li>
 <li><code><a title="par_ai_core.pricing_lookup.get_api_call_cost" href="#par_ai_core.pricing_lookup.get_api_call_cost">get_api_call_cost</a></code></li>
 <li><code><a title="par_ai_core.pricing_lookup.get_api_cost_model_name" href="#par_ai_core.pricing_lookup.get_api_cost_model_name">get_api_cost_model_name</a></code></li>
+<li><code><a title="par_ai_core.pricing_lookup.get_model_metadata" href="#par_ai_core.pricing_lookup.get_model_metadata">get_model_metadata</a></code></li>
+<li><code><a title="par_ai_core.pricing_lookup.get_model_mode" href="#par_ai_core.pricing_lookup.get_model_mode">get_model_mode</a></code></li>
 <li><code><a title="par_ai_core.pricing_lookup.mk_usage_metadata" href="#par_ai_core.pricing_lookup.mk_usage_metadata">mk_usage_metadata</a></code></li>
 <li><code><a title="par_ai_core.pricing_lookup.show_llm_cost" href="#par_ai_core.pricing_lookup.show_llm_cost">show_llm_cost</a></code></li>
 </ul>

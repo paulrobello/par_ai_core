@@ -1,15 +1,14 @@
 """Tests for the provider callback info module."""
 
 from uuid import UUID
-import pytest
-from langchain_core.outputs import LLMResult
+
 from langchain_core.messages import AIMessage
-from langchain_core.outputs import ChatGeneration
+from langchain_core.outputs import ChatGeneration, LLMResult
 
 from par_ai_core.llm_config import LlmConfig
 from par_ai_core.llm_providers import LlmProvider
+from par_ai_core.pricing_lookup import PricingDisplay, get_api_cost_model_name
 from par_ai_core.provider_cb_info import ParAICallbackHandler, get_parai_callback
-from par_ai_core.pricing_lookup import PricingDisplay
 
 
 def test_parai_callback_handler_init():
@@ -49,7 +48,9 @@ def test_llm_end_chat_completion():
     handler.on_llm_end(response)
 
     # Verify token usage was properly accumulated
-    metadata = handler.usage_metadata["gpt-4"]
+    metadata = handler.usage_metadata[
+        get_api_cost_model_name(provider_name=config.provider, model_name=config.model_name)
+    ]
     assert metadata["input_tokens"] == 20
     assert metadata["output_tokens"] == 40
     assert metadata["total_tokens"] == 60
@@ -157,7 +158,9 @@ def test_llm_end_non_chat_completion():
     )
     handler.on_llm_end(response)
 
-    metadata = handler.usage_metadata["gpt-4"]
+    metadata = handler.usage_metadata[
+        get_api_cost_model_name(provider_name=config.provider, model_name=config.model_name)
+    ]
     assert metadata["successful_requests"] == 1
 
 

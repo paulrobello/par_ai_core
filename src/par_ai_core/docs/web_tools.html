@@ -220,12 +220,12 @@ conjunction with other AI and web scraping related tasks.</p>
             # Convert relative links to fully qualified URLs
             for tag in soup.find_all(True):
                 for attribute in url_attributes:
-                    if tag.has_attr(attribute):
-                        attr_value = tag[attribute]
-                        if attr_value.startswith(&#34;//&#34;):
-                            tag[attribute] = f&#34;https:{attr_value}&#34;
-                        elif not attr_value.startswith((&#34;http://&#34;, &#34;https://&#34;)):
-                            tag[attribute] = urljoin(url, attr_value)
+                    if tag.has_attr(attribute):  # type: ignore
+                        attr_value = tag[attribute]  # type: ignore
+                        if attr_value.startswith(&#34;//&#34;):  # type: ignore
+                            tag[attribute] = f&#34;https:{attr_value}&#34;  # type: ignore
+                        elif not attr_value.startswith((&#34;http://&#34;, &#34;https://&#34;)):  # type: ignore
+                            tag[attribute] = urljoin(url, attr_value)  # type: ignore
 
         metadata = {
             &#34;source&#34;: url,
@@ -233,10 +233,10 @@ conjunction with other AI and web scraping related tasks.</p>
             &#34;tags&#34;: (&#34; &#34;.join(tags)).strip(),
         }
         for m in soup.find_all(&#34;meta&#34;):
-            n = m.get(&#34;name&#34;, &#34;&#34;).strip()
+            n = m.get(&#34;name&#34;, &#34;&#34;).strip()  # type: ignore
             if not n:
                 continue
-            v = m.get(&#34;content&#34;, &#34;&#34;).strip()
+            v = m.get(&#34;content&#34;, &#34;&#34;).strip()  # type: ignore
             if not v:
                 continue
             if n in meta:

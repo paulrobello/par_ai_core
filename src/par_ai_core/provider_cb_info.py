@@ -117,9 +117,18 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         with self._lock:
             return deepcopy(self._usage_metadata)
 
-    def _get_usage_metadata(self, model_name: str) -> dict[str, int | float]:
-        """Get usage metadata for model_name. Create if not found."""
-        model_name = get_api_cost_model_name(model_name)
+    def _get_usage_metadata(self, provider_name: str, model_name: str) -> dict[str, int | float]:
+        """
+        Get usage metadata for model_name. Create if not found.
+
+        Args:
+            provider_name (str): Name of the LLM provider
+            model_name (str): Name of the LLM model
+
+        Returns:
+            dict[str, int | float]: Usage metadata for model_name
+        """
+        model_name = get_api_cost_model_name(provider_name=provider_name, model_name=model_name)
         if model_name not in self._usage_metadata:
             self._usage_metadata[model_name] = mk_usage_metadata()
         return self._usage_metadata[model_name]
@@ -172,7 +181,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
                         model_name = llm_config.model_name
                         # console.print(f"using default model_name: {model_name}")
 
-                    usage_metadata = self._get_usage_metadata(model_name)
+                    usage_metadata = self._get_usage_metadata(llm_config.provider, model_name)
 
                     if hasattr(generation.message, "tool_calls"):
                         usage_metadata["tool_call_count"] += len(generation.message.tool_calls)  # type: ignore
@@ -186,7 +195,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
                     accumulate_cost(generation.message, usage_metadata)
                 else:
                     model_name = llm_config.model_name
-                    usage_metadata = self._get_usage_metadata(model_name)
+                    usage_metadata = self._get_usage_metadata(provider_name=llm_config.provider, model_name=model_name)
                     if response.llm_output and "token_usage" in response.llm_output:
                         accumulate_cost(response.llm_output, usage_metadata)
                 usage_metadata["total_cost"] += get_api_call_cost(

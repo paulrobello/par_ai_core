@@ -305,7 +305,7 @@ def test_llm_config_bedrock_setup() -> None:
 
 def test_llm_config_google_setup() -> None:
     """Test Google AI configuration setup."""
-    config = LlmConfig(provider=LlmProvider.GOOGLE, model_name="test-model")
+    config = LlmConfig(provider=LlmProvider.GEMINI, model_name="test-model")
 
     with (
         patch("langchain_google_genai.ChatGoogleGenerativeAI") as mock_chat,
@@ -340,7 +340,6 @@ def test_llm_config_anthropic_setup() -> None:
     config = LlmConfig(
         provider=LlmProvider.ANTHROPIC,
         model_name="claude-3",
-        base_url="https://custom.anthropic.com",
     )
 
     with patch("langchain_anthropic.ChatAnthropic") as mock_chat:
@@ -351,7 +350,6 @@ def test_llm_config_anthropic_setup() -> None:
             model="claude-3",
             temperature=0.8,
             streaming=True,
-            base_url="https://custom.anthropic.com",
             default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             timeout=None,
             top_k=None,

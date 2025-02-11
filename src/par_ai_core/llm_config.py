@@ -38,6 +38,7 @@ from par_ai_core.llm_providers import (
     is_provider_api_key_set,
     provider_base_urls,
     provider_env_key_names,
+    provider_name_to_enum,
 )
 
 warnings.simplefilter("ignore", category=LangChainDeprecationWarning)
@@ -212,7 +213,7 @@ class LlmConfig:
         class_fields = {f.name for f in fields(cls)}
         allowed_data = {k: v for k, v in data.items() if k in class_fields}
         if not isinstance(allowed_data["provider"], LlmProvider):
-            allowed_data["provider"] = LlmProvider(allowed_data["provider"])
+            allowed_data["provider"] = provider_name_to_enum(allowed_data["provider"])
         if not isinstance(allowed_data["mode"], LlmMode):
             allowed_data["mode"] = LlmMode(allowed_data["mode"])
 
@@ -507,7 +508,7 @@ class LlmConfig:
                 model=self.model_name,  # type: ignore
                 temperature=self.temperature,
                 streaming=self.streaming,
-                base_url=self.base_url,
+                # base_url=self.base_url,
                 default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
                 timeout=self.timeout,
                 top_k=self.top_k,
@@ -522,7 +523,7 @@ class LlmConfig:
     def _build_google_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
         """Build the GOOGLE LLM."""
 
-        if self.provider != LlmProvider.GOOGLE:
+        if self.provider != LlmProvider.GEMINI:
             raise ValueError(f"LLM provider is '{self.provider.value}' but GOOGLE requested.")
 
         from langchain_google_genai import (
@@ -659,7 +660,7 @@ class LlmConfig:
             return self._build_xai_llm()
         if self.provider == LlmProvider.ANTHROPIC:
             return self._build_anthropic_llm()
-        if self.provider == LlmProvider.GOOGLE:
+        if self.provider == LlmProvider.GEMINI:
             return self._build_google_llm()
         if self.provider == LlmProvider.BEDROCK:
             return self._build_bedrock_llm()

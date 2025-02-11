@@ -19,8 +19,14 @@ def test_llm_provider_enum():
     """Test LlmProvider enum values."""
     assert LlmProvider.OPENAI.value == "OpenAI"
     assert LlmProvider.ANTHROPIC.value == "Anthropic"
-    assert LlmProvider.GOOGLE.value == "Google"
+    assert LlmProvider.GEMINI.value == "Gemini"
     assert LlmProvider.OLLAMA.value == "Ollama"
+    assert LlmProvider.BEDROCK.value == "Bedrock"
+    assert LlmProvider.GITHUB.value == "Github"
+    assert LlmProvider.MISTRAL.value == "Mistral"
+    assert LlmProvider.OPENROUTER.value == "OpenRouter"
+    assert LlmProvider.DEEPSEEK.value == "Deepseek"
+    assert LlmProvider.LITELLM.value == "LiteLLM"
 
 
 def test_get_provider_name_fuzzy():
@@ -69,7 +75,7 @@ def test_is_provider_api_key_set():
     assert is_provider_api_key_set(LlmProvider.ANTHROPIC) is True
 
     # Provider without API key
-    assert is_provider_api_key_set(LlmProvider.GOOGLE) is False
+    assert is_provider_api_key_set(LlmProvider.GEMINI) is False
 
 
 @patch.dict(
@@ -93,7 +99,7 @@ def test_get_providers_with_api_keys():
     assert LlmProvider.ANTHROPIC in providers
 
     # Should not include providers without API keys
-    assert LlmProvider.GOOGLE not in providers
+    assert LlmProvider.GEMINI not in providers
 
 
 @patch.dict(

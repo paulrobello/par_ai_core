@@ -4,12 +4,10 @@ Pricing Lookup and Cost Calculation Module
 This module provides functionality for managing and calculating costs associated with
 various AI language models across different providers. It includes:
 
-- A comprehensive pricing lookup table for different AI models
 - Functions to calculate API call costs based on usage
 - Utilities for accumulating and displaying cost information
 
 Key components:
-- pricing_lookup: A dictionary containing pricing details for various AI models
 - PricingDisplay: An enum for controlling the level of cost display detail
 - Functions for cost calculation, usage metadata management, and cost display
 
@@ -26,6 +24,10 @@ This module is essential for tracking and managing costs in AI-powered applicati
 especially when working with multiple AI providers and models.
 """
 
+from typing import Literal
+
+from litellm.types.utils import ModelInfo
+from litellm.utils import get_model_info
 from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
@@ -345,39 +347,69 @@ def mk_usage_metadata() -> dict[str, int | float]:
     }
 
 
-def get_api_cost_model_name(model_name: str = "") -> str:
+def get_api_cost_model_name(*, provider_name: str = "", model_name: str) -> str:
     """
     Get API cost model name
 
-    If the provided model name contains a '/', it will be split and the last part used as the model name.
-    If no '/', the provided model name is used as is.
-    First exact match is tried, then fuzzy match is tried.
-    If no match is found, then the model name without any '/' is used.
+    If model name contains 'inference-profile', replace it with 'bedrock/'
+    If provider_name is specified and model does not contain a '/', the provider is prepended to the model name with a '/'
 
     Args:
-        model_name: Model name to fetch cost model for
+        provider_name: Provider name (optional, default is "")
+        model_name: Model name to use
 
     Returns:
         API cost model name to use
 
     """
-    if "/" in model_name:
-        model_name = model_name.split("/")[-1]
-    if model_name not in pricing_lookup:
-        fuzzy_model = model_name
-        keys = pricing_lookup.keys()
-        keys = sorted(keys, key=len, reverse=True)
-        while "-" in fuzzy_model:
-            # console_err.print(f"Searching for model name, {fuzzy_model}")
-            for key in keys:
-                if key.endswith(fuzzy_model) or fuzzy_model.endswith(key):
-                    return key
-            for key in keys:
-                if key.startswith(fuzzy_model) or fuzzy_model.startswith(key):
-                    return key
-            fuzzy_model = "-".join(fuzzy_model.split("-")[:-1])
-
+    if "inference-profile" in model_name:
+        model_name = "bedrock/" + model_name.split("/")[-1]
+    elif provider_name and "/" not in model_name:
+        model_name = f"{provider_name.lower()}/{model_name}"
+    model_name = model_name.replace("google/", "gemini/")
+    if model_name.startswith("litellm/"):
+        model_name = model_name.replace("litellm/", "")
     return model_name
+
+
+def get_model_metadata(provider_name: str, model_name: str) -> ModelInfo:
+    """
+    Get model metadata from LiteLLM
+
+    Args:
+        provider_name: Provider name
+        model_name: Model name
+
+    Returns:
+        ModelInfo: Model metadata
+    """
+    model_name = get_api_cost_model_name(provider_name=provider_name, model_name=model_name)
+    return get_model_info(model=model_name)
+
+
+def get_model_mode(
+    provider: LlmProvider, model_name: str
+) -> Literal["completion", "embedding", "image_generation", "chat", "audio_transcription", "unknown"]:
+    """
+    Get model mode
+
+    Args:
+        provider (LlmProvider): The provider
+        model_name (str): The model name
+
+    Returns:
+        str: The model mode ("completion", "embedding", "image_generation", "chat", "audio_transcription", "unknown")
+    """
+    try:
+        if provider == LlmProvider.OLLAMA:
+            if "embed" in model_name:
+                return "embedding"
+            return "chat"
+        metadata = get_model_metadata(provider.value.lower(), model_name)
+        return metadata.get("mode") or "unknown"  # type: ignore
+    except Exception:
+        # console_err.print(f"Error getting model metadata {get_api_cost_model_name(provider_name=provider.value.lower(), model_name=model_name)}: {e}", severity="error")
+        return "unknown"
 
 
 def get_api_call_cost(
@@ -407,28 +439,51 @@ def get_api_call_cost(
     if llm_config.provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.GROQ, LlmProvider.GITHUB]:
         return 0
     batch_multiplier = 0.5 if batch_pricing else 1
-    model_name = get_api_cost_model_name(model_name_override or llm_config.model_name)
+
+    model_name = get_api_cost_model_name(
+        provider_name=llm_config.provider, model_name=model_name_override or llm_config.model_name
+    )
     # console_err.print(f"price model name {model_name}")
 
-    if model_name in pricing_lookup:
-        total_cost = (
-            (
-                (usage_metadata["input_tokens"] - usage_metadata["cache_read"] - usage_metadata["cache_write"])
-                * pricing_lookup[model_name]["input"]
-            )
-            + (
-                usage_metadata["cache_read"]
-                * pricing_lookup[model_name]["input"]
-                * pricing_lookup[model_name]["cache_read"]
-            )
-            + (
-                usage_metadata["cache_write"]
-                * pricing_lookup[model_name]["input"]
-                * pricing_lookup[model_name]["cache_write"]
-            )
-            + (usage_metadata["output_tokens"] * pricing_lookup[model_name]["output"])
+    try:
+        if "deepseek" in model_name and "deepseek/" not in model_name:
+            model_name = f"deepseek/{model_name}"
+        model_info = get_model_info(model=model_name)
+    except Exception as _:
+        console_err.print(f"No pricing data found for model {llm_config.provider.lower()}/{model_name}")
+        return 0
+    # console_err.print(usage_metadata)
+    # console_err.print(model_info)
+
+    total_cost = (
+        (
+            (usage_metadata["input_tokens"] - usage_metadata["cache_read"] - usage_metadata["cache_write"])
+            * (model_info.get("input_cost_per_token") or 0)
         )
-        return total_cost * batch_multiplier
+        + (
+            usage_metadata["cache_read"]
+            * (model_info.get("cache_read_input_token_cost") or (model_info.get("input_cost_per_token") or 0))
+        )
+        + (
+            usage_metadata["cache_write"]
+            * (model_info.get("cache_creation_input_token_cost") or (model_info.get("input_cost_per_token") or 0))
+        )
+        + (usage_metadata["output_tokens"] * (model_info.get("output_cost_per_token") or 0))
+    )
+    return total_cost * batch_multiplier
+
+    # if model_name in pricing_lookup:
+    #     model_info = pricing_lookup[model_name]
+    #     total_cost = (
+    #         (
+    #             (usage_metadata["input_tokens"] - usage_metadata["cache_read"] - usage_metadata["cache_write"])
+    #             * model_info["input"]
+    #         )
+    #         + (usage_metadata["cache_read"] * model_info["input"] * model_info["cache_read"])
+    #         + (usage_metadata["cache_write"] * model_info["input"] * model_info["cache_write"])
+    #         + (usage_metadata["output_tokens"] * model_info["output"])
+    #     )
+    #     return total_cost * batch_multiplier
     # else:
     #     console_err.print(f"No pricing data found for model {model_name}")
 
@@ -436,6 +491,13 @@ def get_api_call_cost(
 
 
 def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | float]) -> None:
+    """
+    Accumulate cost for the given response by finding token metadata in the response.
+
+    Args:
+        response: Response object or dictionary containing usage statistics
+        usage_metadata: Dictionary to accumulate usage statistics
+    """
     if isinstance(response, dict):
         usage_metadata["input_tokens"] += response.get("prompt_tokens", 0)
         usage_metadata["output_tokens"] += response.get("completion_tokens", 0)
@@ -452,7 +514,7 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
                 usage_metadata[key] += value
             if key == "input_token_details":
                 usage_metadata["cache_write"] += value.get("cache_creation", 0)
-                usage_metadata["cache_read"] += value.get("cache_read", value.get("cache_read", 0))
+                usage_metadata["cache_read"] += value.get("cache_read", 0)
             if key == "output_token_details":
                 usage_metadata["reasoning"] += value.get("reasoning", 0)
         return
@@ -480,7 +542,15 @@ def show_llm_cost(
     show_pricing: PricingDisplay = PricingDisplay.PRICE,
     console: Console | None = None,
 ) -> None:
-    """Show LLM cost"""
+    """
+    Show LLM costs for all models captured in the usage_metadata dictionary.
+
+    Args:
+        usage_metadata: Dictionary containing usage statistics
+        show_pricing: Display pricing options
+        console: Optional console object to use for printing output
+
+    """
     if show_pricing == PricingDisplay.NONE:
         return
     if not console:
@@ -496,12 +566,16 @@ def show_llm_cost(
             if "total_cost" in u:
                 cost = u["total_cost"]
                 grand_total += cost
-            model_name = get_api_cost_model_name(m)
             console.print(
                 Panel.fit(
                     Pretty(u),
-                    title=f"Model: [green]{model_name}[/green] Cost: [yellow]${cost:.5f}",
+                    title=f"Model: [green]{m}[/green] Cost: [yellow]${cost:.5f}",
                     border_style="bold",
                 )
             )
     console.print(f"Total Cost [yellow]${grand_total:.5f}")
+
+
+if __name__ == "__main__":
+    model_info = get_model_info(model="gpt-4o", custom_llm_provider="openai")
+    console_err.print(model_info)

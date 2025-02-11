@@ -65,7 +65,7 @@ class LlmProvider(str, Enum):
         OLLAMA: Local Ollama instance
         LLAMACPP: Local LlamaCpp instance
         OPENAI: OpenAI API
-        GOOGLE: Google AI (Gemini) API
+        GEMINI: Google AI (Gemini) API
         GITHUB: GitHub Copilot API
         XAI: X.AI (formerly Twitter) API
         ANTHROPIC: Anthropic Claude API
@@ -78,7 +78,7 @@ class LlmProvider(str, Enum):
     LLAMACPP = "LlamaCpp"
     OPENROUTER = "OpenRouter"
     OPENAI = "OpenAI"
-    GOOGLE = "Google"
+    GEMINI = "Gemini"
     GITHUB = "Github"
     XAI = "XAI"
     ANTHROPIC = "Anthropic"
@@ -99,7 +99,7 @@ provider_base_urls: dict[LlmProvider, str | None] = {
     LlmProvider.GROQ: "https://api.groq.com/",
     LlmProvider.XAI: "https://api.x.ai/v1",
     LlmProvider.ANTHROPIC: "https://api.anthropic.com/v1",
-    LlmProvider.GOOGLE: "https://generativelanguage.googleapis.com/v1beta",
+    LlmProvider.GEMINI: "https://generativelanguage.googleapis.com/v1beta",
     LlmProvider.BEDROCK: None,
     LlmProvider.GITHUB: "https://models.inference.ai.azure.com",
     LlmProvider.MISTRAL: "https://api.mistral.ai/v1",
@@ -115,7 +115,7 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.GROQ: "llama3-70b-8192",
     LlmProvider.XAI: "grok-2-vision-latest",
     LlmProvider.ANTHROPIC: "claude-3-5-sonnet-20241022",
-    LlmProvider.GOOGLE: "gemini-1.5-pro-002",
+    LlmProvider.GEMINI: "gemini-1.5-pro-002",
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "mistral-large-2411",
@@ -131,7 +131,7 @@ provider_light_models: dict[LlmProvider, str] = {
     LlmProvider.GROQ: "llama3-70b-8192",
     LlmProvider.XAI: "grok-2-vision-latest",
     LlmProvider.ANTHROPIC: "claude-3-haiku-20240307",
-    LlmProvider.GOOGLE: "gemini-2.0-flash-exp",
+    LlmProvider.GEMINI: "gemini-2.0-flash-exp",
     LlmProvider.BEDROCK: "anthropic.claude-3-haiku-20240307-v1:0",
     LlmProvider.GITHUB: "gpt-4o-mini",
     LlmProvider.MISTRAL: "mistral-small-2409",
@@ -147,7 +147,7 @@ provider_vision_models: dict[LlmProvider, str] = {
     LlmProvider.GROQ: "llama-3.2-90b-vision-preview",
     LlmProvider.XAI: "grok-2-vision-latest",
     LlmProvider.ANTHROPIC: "claude-3-5-sonnet-20241022",
-    LlmProvider.GOOGLE: "gemini-1.5-pro-002",
+    LlmProvider.GEMINI: "gemini-1.5-pro-002",
     LlmProvider.BEDROCK: "anthropic.claude-3-5-sonnet-20241022-v2:0",
     LlmProvider.GITHUB: "gpt-4o",
     LlmProvider.MISTRAL: "pixtral-large-2411",
@@ -163,7 +163,7 @@ provider_default_embed_models: dict[LlmProvider, str] = {
     LlmProvider.GROQ: "",
     LlmProvider.XAI: "",
     LlmProvider.ANTHROPIC: "",
-    LlmProvider.GOOGLE: "text-embedding-005",
+    LlmProvider.GEMINI: "text-embedding-005",
     LlmProvider.BEDROCK: "amazon.titan-embed-text-v2:0",
     LlmProvider.GITHUB: "text-embedding-3-large",
     LlmProvider.MISTRAL: "mistral-embed",
@@ -179,7 +179,7 @@ provider_env_key_names: dict[LlmProvider, str] = {
     LlmProvider.GROQ: "GROQ_API_KEY",
     LlmProvider.XAI: "XAI_API_KEY",
     LlmProvider.ANTHROPIC: "ANTHROPIC_API_KEY",
-    LlmProvider.GOOGLE: "GOOGLE_API_KEY",
+    LlmProvider.GEMINI: "GOOGLE_API_KEY",
     LlmProvider.BEDROCK: "AWS_PROFILE",
     LlmProvider.GITHUB: "GITHUB_TOKEN",
     LlmProvider.MISTRAL: "MISTRAL_API_KEY",
@@ -290,13 +290,13 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
         supports_base_url=False,
         env_key_name=provider_env_key_names[LlmProvider.ANTHROPIC],
     ),
-    LlmProvider.GOOGLE: LlmProviderConfig(
-        default_model=provider_default_models[LlmProvider.GOOGLE],
-        default_light_model=provider_light_models[LlmProvider.GOOGLE],
-        default_vision_model=provider_vision_models[LlmProvider.GOOGLE],
-        default_embeddings_model=provider_default_embed_models[LlmProvider.GOOGLE],
+    LlmProvider.GEMINI: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.GEMINI],
+        default_light_model=provider_light_models[LlmProvider.GEMINI],
+        default_vision_model=provider_vision_models[LlmProvider.GEMINI],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.GEMINI],
         supports_base_url=False,
-        env_key_name=provider_env_key_names[LlmProvider.GOOGLE],
+        env_key_name=provider_env_key_names[LlmProvider.GEMINI],
     ),
     LlmProvider.BEDROCK: LlmProviderConfig(
         default_model=provider_default_models[LlmProvider.BEDROCK],
@@ -362,7 +362,7 @@ def provider_name_to_enum(name: str) -> LlmProvider:
     Raises:
         ValueError: If name doesn't match any provider
     """
-    return LlmProvider(name)
+    return LlmProvider(name.replace("Google", "Gemini"))
 
 
 def is_provider_api_key_set(provider: LlmProvider) -> bool:

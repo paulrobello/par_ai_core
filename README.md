@@ -151,7 +151,7 @@ If a specify provider is not listed but has an OpenAI compatible endpoint you ca
   from https://smith.langchain.com/settings
 
 ### PARAI Related
-* PARAI_AI_PROVIDER is one of Ollama|OpenAI|Groq|XAI|Anthropic|Google|Bedrock|Github|LlamaCpp
+* PARAI_AI_PROVIDER is one of Ollama|OpenAI|Groq|XAI|Anthropic|Gemini|Bedrock|Github|LlamaCpp,OpenRouter,LiteLLM
 * PARAI_MODEL is the model to use with the selected provider
 * PARAI_AI_BASE_URL can be used to override the base url used to call a provider
 * PARAI_TEMPERATURE sets model temperature. Range depends on provider usually 0.0 to 1.0
@@ -234,6 +234,9 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.17:
+  - Use LiteLLM for pricing data
+  - BREAKING CHANGE: Provider Google is now Gemini
 - Version 0.1.16:
   - Add more default base urls for providers
 - Version 0.1.15:

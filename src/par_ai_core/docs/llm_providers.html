@@ -223,7 +223,7 @@ Defaults to False.</dd>
         bool: True if provider doesn&#39;t need key (Ollama/LlamaCpp) or
             if required environment variable is set and non-empty
     &#34;&#34;&#34;
-    if provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP]:
+    if provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP] or not provider_env_key_names[provider]:
         return True
     return len(os.environ.get(provider_env_key_names[provider], &#34;&#34;)) &gt; 0</code></pre>
 </details>
@@ -261,7 +261,7 @@ if required environment variable is set and non-empty</dd>
     Raises:
         ValueError: If name doesn&#39;t match any provider
     &#34;&#34;&#34;
-    return LlmProvider(name)</code></pre>
+    return LlmProvider(name.replace(&#34;Google&#34;, &#34;Gemini&#34;))</code></pre>
 </details>
 <div class="desc"><p>Convert provider name string to LlmProvider enum.</p>
 <h2 id="args">Args</h2>
@@ -358,7 +358,7 @@ class LangChainConfig:
         OLLAMA: Local Ollama instance
         LLAMACPP: Local LlamaCpp instance
         OPENAI: OpenAI API
-        GOOGLE: Google AI (Gemini) API
+        GEMINI: Google AI (Gemini) API
         GITHUB: GitHub Copilot API
         XAI: X.AI (formerly Twitter) API
         ANTHROPIC: Anthropic Claude API
@@ -371,12 +371,14 @@ class LangChainConfig:
     LLAMACPP = &#34;LlamaCpp&#34;
     OPENROUTER = &#34;OpenRouter&#34;
     OPENAI = &#34;OpenAI&#34;
-    GOOGLE = &#34;Google&#34;
+    GEMINI = &#34;Gemini&#34;
     GITHUB = &#34;Github&#34;
     XAI = &#34;XAI&#34;
     ANTHROPIC = &#34;Anthropic&#34;
     GROQ = &#34;Groq&#34;
     MISTRAL = &#34;Mistral&#34;
+    DEEPSEEK = &#34;Deepseek&#34;
+    LITELLM = &#34;LiteLLM&#34;
     BEDROCK = &#34;Bedrock&#34;</code></pre>
 </details>
 <div class="desc"><p>Enumeration of supported LLM providers.</p>
@@ -384,7 +386,7 @@ class LangChainConfig:
 OLLAMA: Local Ollama instance
 LLAMACPP: Local LlamaCpp instance
 OPENAI: OpenAI API
-GOOGLE: Google AI (Gemini) API
+GEMINI: Google AI (Gemini) API
 GITHUB: GitHub Copilot API
 XAI: X.AI (formerly Twitter) API
 ANTHROPIC: Anthropic Claude API
@@ -406,15 +408,23 @@ BEDROCK: AWS Bedrock API</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.DEEPSEEK"><code class="name">var <span class="ident">DEEPSEEK</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.GEMINI"><code class="name">var <span class="ident">GEMINI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="par_ai_core.llm_providers.LlmProvider.GITHUB"><code class="name">var <span class="ident">GITHUB</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="par_ai_core.llm_providers.LlmProvider.GOOGLE"><code class="name">var <span class="ident">GOOGLE</span></code></dt>
+<dt id="par_ai_core.llm_providers.LlmProvider.GROQ"><code class="name">var <span class="ident">GROQ</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="par_ai_core.llm_providers.LlmProvider.GROQ"><code class="name">var <span class="ident">GROQ</span></code></dt>
+<dt id="par_ai_core.llm_providers.LlmProvider.LITELLM"><code class="name">var <span class="ident">LITELLM</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -555,9 +565,11 @@ class LlmProviderConfig:
 <ul class="two-column">
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.ANTHROPIC" href="#par_ai_core.llm_providers.LlmProvider.ANTHROPIC">ANTHROPIC</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.BEDROCK" href="#par_ai_core.llm_providers.LlmProvider.BEDROCK">BEDROCK</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.DEEPSEEK" href="#par_ai_core.llm_providers.LlmProvider.DEEPSEEK">DEEPSEEK</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.GEMINI" href="#par_ai_core.llm_providers.LlmProvider.GEMINI">GEMINI</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.GITHUB" href="#par_ai_core.llm_providers.LlmProvider.GITHUB">GITHUB</a></code></li>
-<li><code><a title="par_ai_core.llm_providers.LlmProvider.GOOGLE" href="#par_ai_core.llm_providers.LlmProvider.GOOGLE">GOOGLE</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.GROQ" href="#par_ai_core.llm_providers.LlmProvider.GROQ">GROQ</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.LITELLM" href="#par_ai_core.llm_providers.LlmProvider.LITELLM">LITELLM</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.LLAMACPP" href="#par_ai_core.llm_providers.LlmProvider.LLAMACPP">LLAMACPP</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.MISTRAL" href="#par_ai_core.llm_providers.LlmProvider.MISTRAL">MISTRAL</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.OLLAMA" href="#par_ai_core.llm_providers.LlmProvider.OLLAMA">OLLAMA</a></code></li>

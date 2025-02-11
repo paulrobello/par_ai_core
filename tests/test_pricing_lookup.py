@@ -45,7 +45,7 @@ def test_mk_usage_metadata():
 )
 def test_get_api_cost_model_name(input_model: str, expected_model: str):
     """Test API cost model name resolution."""
-    assert get_api_cost_model_name(input_model) == expected_model
+    assert get_api_cost_model_name(model_name=input_model) == expected_model
 
 
 def test_get_api_call_cost():
