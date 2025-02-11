@@ -234,6 +234,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.16:
+  - Add more default base urls for providers
 - Version 0.1.15:
   - Added support for Deepseek and LiteLLM
   - Added Mistral pricing

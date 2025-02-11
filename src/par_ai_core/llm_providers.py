@@ -95,17 +95,17 @@ llm_provider_names: list[str] = [p.value.lower() for p in llm_provider_types]
 provider_base_urls: dict[LlmProvider, str | None] = {
     LlmProvider.OLLAMA: OLLAMA_HOST,
     LlmProvider.LLAMACPP: "http://localhost:8080/v1",
-    LlmProvider.OPENAI: None,
-    LlmProvider.GROQ: None,
-    LlmProvider.XAI: None,
-    LlmProvider.ANTHROPIC: None,
-    LlmProvider.GOOGLE: None,
+    LlmProvider.OPENAI: "https://api.openai.com/v1",
+    LlmProvider.GROQ: "https://api.groq.com/",
+    LlmProvider.XAI: "https://api.x.ai/v1",
+    LlmProvider.ANTHROPIC: "https://api.anthropic.com/v1",
+    LlmProvider.GOOGLE: "https://generativelanguage.googleapis.com/v1beta",
     LlmProvider.BEDROCK: None,
     LlmProvider.GITHUB: "https://models.inference.ai.azure.com",
-    LlmProvider.MISTRAL: None,
+    LlmProvider.MISTRAL: "https://api.mistral.ai/v1",
     LlmProvider.OPENROUTER: "https://openrouter.ai/api/v1",
-    LlmProvider.DEEPSEEK: None,
-    LlmProvider.LITELLM: None,
+    LlmProvider.DEEPSEEK: "https://api.deepseek.com",
+    LlmProvider.LITELLM: "http://localhost:4000",
 }
 
 provider_default_models: dict[LlmProvider, str] = {
