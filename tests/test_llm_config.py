@@ -46,6 +46,7 @@ def test_llm_config_to_json() -> None:
 
 def test_llm_config_from_json() -> None:
     """Test LlmConfig from_json method."""
+    # Test with enum provider
     json_data = {
         "class_name": "LlmConfig",
         "provider": LlmProvider.OPENAI,
@@ -69,6 +70,13 @@ def test_llm_config_from_json() -> None:
         "seed": None,
         "env_prefix": "PARAI",
     }
+    config = LlmConfig.from_json(json_data)
+    assert config.provider == LlmProvider.OPENAI
+    assert config.model_name == "gpt-4"
+    assert config.temperature == 0.7
+
+    # Test with string provider
+    json_data["provider"] = "OpenAI"  # String instead of enum
     config = LlmConfig.from_json(json_data)
     assert config.provider == LlmProvider.OPENAI
     assert config.model_name == "gpt-4"
