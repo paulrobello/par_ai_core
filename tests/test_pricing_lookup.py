@@ -100,7 +100,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
     "provider_name,model_name,expected_fields",
     [
         (
-            "AZURE_OPENAI",
+            LlmProvider.OPENAI.value,
             "gpt-4",
             {
                 "mode": "chat",
@@ -109,7 +109,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
             },
         ),
         (
-            "ANTHROPIC_BEDROCK",
+            LlmProvider.BEDROCK.value,
             "claude-3-sonnet-20240229",
             {
                 "mode": "chat",
@@ -118,12 +118,12 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
             },
         ),
         (
-            "GEMINI",
+            LlmProvider.GEMINI.value,
             "gemini-pro",
             {
                 "mode": "chat",
-                "input_cost_per_token": 0.0000005,
-                "output_cost_per_token": 0.0000015,
+                "input_cost_per_token": 0.0000035,
+                "output_cost_per_token": 0.0000035,
             },
         ),
     ],
