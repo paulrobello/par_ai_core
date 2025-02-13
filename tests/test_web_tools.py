@@ -421,7 +421,7 @@ def test_fetch_url_playwright_wait_types():
             console=mock_console,
         )
         # Verify the last call was with 2000ms (2 seconds)
-        assert mock_page.wait_for_timeout.call_args_list[-1] == ((2000,),)
+        assert mock_page.wait_for_timeout.call_args_list[-1] == call(2000)
         assert result[0] == "<html><body>Test content</body></html>"
 
         # Test IDLE wait type
