@@ -10,6 +10,7 @@ from rich.console import Console
 
 from par_ai_core.web_tools import (
     GoogleSearchResult,
+    ScraperWaitType,
     fetch_url,
     fetch_url_and_convert_to_markdown,
     fetch_url_playwright,
@@ -17,7 +18,6 @@ from par_ai_core.web_tools import (
     get_html_element,
     normalize_url,
     web_search,
-    ScraperWaitType,
 )
 
 
