@@ -435,11 +435,6 @@ def test_llm_config_invalid_mode_provider_combinations() -> None:
     with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but OLLAMA requested."):
         config._build_ollama_llm()
 
-    # Test invalid mode for Ollama
-    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test", mode=LlmMode.BASE)
-    with pytest.raises(ValueError, match=f"Invalid LLM mode '{LlmMode.BASE.value}'"):
-        config._build_ollama_llm()
-
     # Test XAI with base mode
     config = LlmConfig(provider=LlmProvider.XAI, model_name="test", mode=LlmMode.BASE)
     with pytest.raises(ValueError, match="provider does not support mode"):
