@@ -394,6 +394,83 @@ def test_fetch_url_playwright_verbose_error():
         assert result == [""]
 
 
+def test_fetch_url_playwright_wait_types():
+    """Test fetch_url_playwright with different wait types."""
+    mock_page = MagicMock()
+    mock_page.content.return_value = "<html><body>Test content</body></html>"
+
+    mock_context = MagicMock()
+    mock_context.new_page.return_value = mock_page
+
+    mock_browser = MagicMock()
+    mock_browser.new_context.return_value = mock_context
+
+    mock_playwright = MagicMock()
+    mock_playwright.chromium.launch.return_value = mock_browser
+
+    mock_console = MagicMock()
+
+    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
+        # Test SLEEP wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="playwright",
+            wait_type="sleep",
+            sleep_time=2,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_page.wait_for_timeout.assert_called_with(2000)  # 2 seconds converted to milliseconds
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # Test IDLE wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="playwright",
+            wait_type="idle",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_page.wait_for_load_state.assert_called_with("networkidle", timeout=5000)
+        assert result[0] == "<html><body>Test content</body></html>"
+
+
+def test_fetch_url_selenium_wait_types():
+    """Test fetch_url_selenium with different wait types."""
+    mock_driver = MagicMock()
+    mock_driver.page_source = "<html><body>Test content</body></html>"
+    mock_console = MagicMock()
+
+    with patch("selenium.webdriver.Chrome", return_value=mock_driver), \
+         patch("time.sleep") as mock_sleep:
+        
+        # Test SLEEP wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type="sleep",
+            sleep_time=2,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_sleep.assert_called_with(2)
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # Test IDLE wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type="idle",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        # Selenium uses a simple sleep for IDLE
+        mock_sleep.assert_called_with(1)
+        assert result[0] == "<html><body>Test content</body></html>"
+
+
 def test_fetch_url_playwright_verbose():
     """Test fetch_url_playwright with verbose output."""
     mock_page = MagicMock()
