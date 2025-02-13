@@ -69,7 +69,7 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
     "provider_name,model_name,expected_mode",
     [
         ("AZURE_OPENAI", "gpt-4", "chat"),
-        ("ANTHROPIC_BEDROCK", "claude-3-sonnet-20240229", "chat"), 
+        ("ANTHROPIC_BEDROCK", "claude-3-sonnet-20240229", "chat"),
         ("GEMINI", "gemini-pro", "chat"),
         ("AZURE_OPENAI", "text-embedding-3-small", "embedding"),
         ("ANTHROPIC_BEDROCK", "claude-3-embedding", "embedding"),
