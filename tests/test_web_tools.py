@@ -451,6 +451,7 @@ def test_fetch_url_playwright_wait_types():
         assert result[0] == "<html><body>Test content</body></html>"
 
         # Test SELECTOR wait type with empty selector
+        mock_page.wait_for_selector.reset_mock()  # Reset the mock before testing
         result = fetch_url(
             "https://example.com",
             fetch_using="playwright",
