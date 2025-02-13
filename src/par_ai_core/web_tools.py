@@ -438,6 +438,130 @@ def fetch_url_selenium(
     return results
 
 
+def html_to_markdown(
+    html_content: str,
+    *,
+    url: str | None = None,
+    include_links: bool = True,
+    include_images: bool = False,
+    include_metadata: bool = False,
+    tags: list[str] | None = None,
+    meta: list[str] | None = None,
+) -> str:
+    """
+    Fetch the contents of a webpage and convert it to markdown.
+
+    Args:
+        html_content (str): The raw html.
+        url (str, optional): The URL of the webpage. Used for converting relative links. Defaults to None.
+        include_links (bool, optional): Whether to include links in the markdown. Defaults to True.
+        include_images (bool, optional): Whether to include images in the markdown. Defaults to False.
+        include_metadata (bool, optional): Whether to include a metadata section in the markdown. Defaults to False.
+        tags (list[str], optional): A list of tags to include in the markdown metadata. Defaults to None.
+        meta (list[str], optional): A list of metadata attributes to include in the markdown. Defaults to None.
+
+    Returns:
+        str: The converted markdown content
+    """
+    import html2text
+
+    if tags is None:
+        tags = []
+    if meta is None:
+        meta = []
+
+    soup = BeautifulSoup(html_content, "html.parser")
+    title = soup.title.text if soup.title else None
+
+    if include_links:
+        url_attributes = [
+            "href",
+            "src",
+            "action",
+            "data",
+            "poster",
+            "background",
+            "cite",
+            "codebase",
+            "formaction",
+            "icon",
+        ]
+
+        # Convert relative links to fully qualified URLs
+        for tag in soup.find_all(True):
+            for attribute in url_attributes:
+                if tag.has_attr(attribute):  # type: ignore
+                    attr_value = tag[attribute]  # type: ignore
+                    if attr_value.startswith("//"):  # type: ignore
+                        tag[attribute] = f"https:{attr_value}"  # type: ignore
+                    elif url and not attr_value.startswith(("http://", "https://")):  # type: ignore
+                        tag[attribute] = urljoin(url, attr_value)  # type: ignore
+
+    metadata = {
+        "source": url,
+        "title": title or "",
+        "tags": (" ".join(tags)).strip(),
+    }
+    for m in soup.find_all("meta"):
+        n = m.get("name", "").strip()  # type: ignore
+        if not n:
+            continue
+        v = m.get("content", "").strip()  # type: ignore
+        if not v:
+            continue
+        if n in meta:
+            metadata[n] = v
+
+    elements_to_remove = [
+        "head",
+        "header",
+        "footer",
+        "script",
+        "source",
+        "style",
+        "svg",
+        "iframe",
+    ]
+    if not include_links:
+        elements_to_remove.append("a")
+        elements_to_remove.append("link")
+
+    if not include_images:
+        elements_to_remove.append("img")
+
+    for element in elements_to_remove:
+        for tag in soup.find_all(element):
+            tag.decompose()
+
+    ### text separators
+    # Convert separator elements to <hr>
+    for element in soup.find_all(attrs={"role": "separator"}):
+        hr = soup.new_tag("hr")
+        element.replace_with(hr)
+        # Add extra newlines around hr to ensure proper markdown rendering
+        hr.insert_before(soup.new_string("\n"))
+        hr.insert_after(soup.new_string("\n"))
+
+    html_content = str(soup)
+
+    ### code blocks
+    html_content = html_content.replace("<pre", "```<pre")
+    html_content = html_content.replace("</pre>", "</pre>```")
+
+    ### convert to markdown
+    converter = html2text.HTML2Text()
+    converter.ignore_links = not include_links
+    converter.ignore_images = not include_images
+    markdown = converter.handle(html_content)
+
+    if include_metadata:
+        meta_markdown = "# Metadata\n\n"
+        for k, v in metadata.items():
+            meta_markdown += f"- {k}: {v}\n"
+        markdown = meta_markdown + markdown
+    return markdown.strip()
+
+
 def fetch_url_and_convert_to_markdown(
     urls: str | list[str],
     *,
@@ -476,9 +600,9 @@ def fetch_url_and_convert_to_markdown(
     if not console:
         console = console_err
 
-    if not tags:
+    if tags is None:
         tags = []
-    if not meta:
+    if meta is None:
         meta = []
 
     if isinstance(urls, str):

@@ -755,10 +755,7 @@ def test_html_to_markdown_metadata():
     </html>
     """
     result = html_to_markdown(
-        test_html,
-        url="https://example.com",
-        include_metadata=True,
-        meta=["description", "keywords"]
+        test_html, url="https://example.com", include_metadata=True, meta=["description", "keywords"]
     )
     assert "# Metadata" in result
     assert "source: https://example.com" in result
@@ -778,12 +775,7 @@ def test_html_to_markdown_relative_urls():
         </body>
     </html>
     """
-    result = html_to_markdown(
-        test_html,
-        url="https://example.com/path/",
-        include_links=True,
-        include_images=True
-    )
+    result = html_to_markdown(test_html, url="https://example.com/path/", include_links=True, include_images=True)
     assert "https://example.com/page" in result
     assert "https://example.com/image.jpg" in result
     # Form action URLs are not converted to markdown links by html2text
