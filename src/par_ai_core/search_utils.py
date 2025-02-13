@@ -513,9 +513,9 @@ def youtube_search(
     return results
 
 
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-
-    load_dotenv(Path("~/.par_gpt.env").expanduser())
-    # console.print(youtube_search("open ai", days=1, max_comments=3, fetch_transcript=False, max_results=1))
-    # console.print(serper_search("open ai", days=0, max_results=1, scrape=True))
+# if __name__ == "__main__":
+#     from dotenv import load_dotenv
+#
+#     load_dotenv(Path("~/.par_gpt.env").expanduser())
+#     # console.print(youtube_search("open ai", days=1, max_comments=3, fetch_transcript=False, max_results=1))
+#     # console.print(serper_search("open ai", days=0, max_results=1, scrape=True))

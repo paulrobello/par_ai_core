@@ -576,6 +576,6 @@ def show_llm_cost(
     console.print(f"Total Cost [yellow]${grand_total:.5f}")
 
 
-if __name__ == "__main__":
-    model_info = get_model_info(model="gpt-4o", custom_llm_provider="openai")
-    console_err.print(model_info)
+# if __name__ == "__main__":
+#     model_info = get_model_info(model="gpt-4o", custom_llm_provider="openai")
+#     console_err.print(model_info)

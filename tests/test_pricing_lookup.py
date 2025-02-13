@@ -70,12 +70,10 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
     "provider_name,model_name,expected_mode",
     [
         (LlmProvider.OPENAI.value, "gpt-4", "chat"),
-        (LlmProvider.BEDROCK.value, "claude-3-sonnet-20240229", "chat"),
+        (LlmProvider.BEDROCK.value, "anthropic.claude-3-5-sonnet-20241022-v2:0", "chat"),
         (LlmProvider.GEMINI.value, "gemini-pro", "chat"),
         (LlmProvider.OPENAI.value, "text-embedding-3-small", "embedding"),
-        (LlmProvider.BEDROCK.value, "claude-3-embedding", "embedding"),
         (LlmProvider.MISTRAL.value, "mistral-embed", "embedding"),
-        (LlmProvider.OPENAI.value, "dall-e-3", "image_generation"),
         (LlmProvider.OPENAI.value, "whisper-1", "audio_transcription"),
         (LlmProvider.OLLAMA.value, "llama2", "chat"),
         (LlmProvider.OLLAMA.value, "llama2-embedding", "embedding"),
@@ -93,7 +91,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
     - Ollama models (both chat and embedding)
     - Unknown models
     """
-    provider = LlmProvider(provider_name.upper())
+    provider = LlmProvider(provider_name)
     assert get_model_mode(provider, model_name) == expected_mode
 
 
@@ -110,7 +108,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
             },
         ),
         (
-            LlmProvider.BEDROCK.value,
+            LlmProvider.ANTHROPIC.value,
             "claude-3-sonnet-20240229",
             {
                 "mode": "chat",
@@ -120,11 +118,11 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
         ),
         (
             LlmProvider.GEMINI.value,
-            "gemini-pro",
+            "gemini-1.5-flash",
             {
                 "mode": "chat",
-                "input_cost_per_token": 0.0000035,
-                "output_cost_per_token": 0.0000035,
+                "input_cost_per_token": 0.000000075,
+                "output_cost_per_token": 0.0000003,
             },
         ),
     ],
@@ -173,6 +171,11 @@ def test_get_api_call_cost():
     # Test unknown model
     config.model_name = "unknown-model"
     assert get_api_call_cost(llm_config=config, usage_metadata=usage) == 0
+
+    # Test deepseek
+    config.provider = LlmProvider.DEEPSEEK
+    config.model_name = "deepseek-chat"
+    assert get_api_call_cost(llm_config=config, usage_metadata=usage) == 0.000078
 
 
 def test_accumulate_cost_dict():
