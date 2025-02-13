@@ -464,6 +464,26 @@ def test_fetch_url_playwright_wait_types():
         mock_page.wait_for_selector.assert_not_called()
         assert result[0] == "<html><body>Test content</body></html>"
 
+        # Test TEXT wait type with empty selector
+        mock_locator = MagicMock()
+        mock_page.locator.return_value = mock_locator
+        with patch("par_ai_core.web_tools.expect") as mock_expect:
+            mock_expect_instance = MagicMock()
+            mock_expect_instance.to_contain_text = MagicMock()
+            mock_expect.return_value = mock_expect_instance
+            result = fetch_url(
+                "https://example.com",
+                fetch_using="playwright",
+                wait_type=ScraperWaitType.TEXT,
+                wait_selector="",
+                timeout=5,
+                verbose=True,
+                console=mock_console,
+            )
+            mock_page.locator.assert_not_called()
+            mock_expect.assert_not_called()
+            assert result[0] == "<html><body>Test content</body></html>"
+
         # Test TEXT wait type
         mock_locator = MagicMock()
         mock_page.locator.return_value = mock_locator
