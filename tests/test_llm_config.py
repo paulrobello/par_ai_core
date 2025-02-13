@@ -369,9 +369,9 @@ def test_llm_config_github_api_key() -> None:
     ):
         mock_instance = MagicMock(spec=BaseChatModel)
         mock_chat.return_value = mock_instance
-        
+
         config.build_chat_model()
-        
+
         # Verify ChatOpenAI was called with GitHub API key
         mock_chat.assert_called_once()
         call_args = mock_chat.call_args[1]
