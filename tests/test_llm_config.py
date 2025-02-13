@@ -350,6 +350,34 @@ def test_llm_config_google_setup() -> None:
         mock_embeddings.assert_called_once()
 
 
+def test_llm_config_github_api_key() -> None:
+    """Test GitHub provider API key handling."""
+    config = LlmConfig(
+        provider=LlmProvider.GITHUB,
+        model_name="github-model",
+        mode=LlmMode.CHAT,
+    )
+
+    # Mock environment variables and ChatOpenAI
+    with (
+        patch.dict(
+            os.environ,
+            {"GITHUB_API_KEY": "test-github-key"},
+            clear=True,
+        ),
+        patch("langchain_openai.ChatOpenAI") as mock_chat,
+    ):
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+        
+        config.build_chat_model()
+        
+        # Verify ChatOpenAI was called with GitHub API key
+        mock_chat.assert_called_once()
+        call_args = mock_chat.call_args[1]
+        assert call_args["api_key"].get_secret_value() == "test-github-key"
+
+
 def test_llm_config_anthropic_setup() -> None:
     """Test Anthropic configuration setup."""
     config = LlmConfig(
