@@ -16,6 +16,7 @@ from par_ai_core.llm_config import (
     LlmRunManager,
     llm_run_manager,
 )
+from par_ai_core.llm_providers import provider_env_key_names
 
 
 def test_llm_config_init() -> None:
@@ -359,10 +360,7 @@ def test_llm_config_github_api_key() -> None:
     with (
         patch.dict(
             os.environ,
-            {
-                "GITHUB_API_KEY": "test-github-key",
-                "OPENAI_API_KEY": "test-openai-key",  # Required as fallback
-            },
+            {provider_env_key_names[LlmProvider.GITHUB]: "test-github-key"},
             clear=True,
         ),
         patch("langchain_openai.ChatOpenAI") as mock_chat,
@@ -376,6 +374,34 @@ def test_llm_config_github_api_key() -> None:
         mock_chat.assert_called_once()
         call_args = mock_chat.call_args[1]
         assert call_args["api_key"].get_secret_value() == "test-github-key"
+
+
+def test_llm_config_openai_api_key() -> None:
+    """Test OpenAI provider API key handling."""
+    config = LlmConfig(
+        provider=LlmProvider.OPENAI,
+        model_name="openai-model",
+        mode=LlmMode.CHAT,
+    )
+
+    # Mock environment variables and ChatOpenAI
+    with (
+        patch.dict(
+            os.environ,
+            {provider_env_key_names[LlmProvider.OPENAI]: "test-openai-key"},
+            clear=True,
+        ),
+        patch("langchain_openai.ChatOpenAI") as mock_chat,
+    ):
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+
+        config.build_chat_model()
+
+        # Verify ChatOpenAI was called with GitHub API key
+        mock_chat.assert_called_once()
+        call_args = mock_chat.call_args[1]
+        assert call_args["api_key"].get_secret_value() == "test-openai-key"
 
 
 def test_llm_config_anthropic_setup() -> None:
