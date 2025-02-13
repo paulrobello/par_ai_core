@@ -436,8 +436,8 @@ def test_llm_config_invalid_mode_provider_combinations() -> None:
         config._build_ollama_llm()
 
     # Test invalid mode for Ollama
-    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test", mode="invalid_mode")  # type: ignore
-    with pytest.raises(ValueError, match="Invalid LLM mode 'invalid_mode'"):
+    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test", mode=LlmMode.BASE)
+    with pytest.raises(ValueError, match=f"Invalid LLM mode '{LlmMode.BASE.value}'"):
         config._build_ollama_llm()
 
     # Test XAI with base mode
