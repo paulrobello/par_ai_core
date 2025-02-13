@@ -13,6 +13,7 @@ from par_ai_core.pricing_lookup import (
     accumulate_cost,
     get_api_call_cost,
     get_api_cost_model_name,
+    get_model_metadata,
     mk_usage_metadata,
     show_llm_cost,
 )
@@ -67,17 +68,17 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
 @pytest.mark.parametrize(
     "provider_name,model_name,expected_mode",
     [
-        ("openai", "gpt-4", "chat"),
-        ("anthropic", "claude-3-sonnet-20240229", "chat"),
-        ("google", "gemini-pro", "chat"),
-        ("openai", "text-embedding-3-small", "embedding"),
-        ("anthropic", "claude-3-embedding", "embedding"),
-        ("mistral", "mistral-embed", "embedding"),
-        ("openai", "dall-e-3", "image_generation"),
-        ("openai", "whisper-1", "audio_transcription"),
-        ("ollama", "llama2", "chat"),
-        ("ollama", "llama2-embedding", "embedding"),
-        ("unknown", "unknown-model", "unknown"),
+        ("AZURE_OPENAI", "gpt-4", "chat"),
+        ("ANTHROPIC_BEDROCK", "claude-3-sonnet-20240229", "chat"), 
+        ("GEMINI", "gemini-pro", "chat"),
+        ("AZURE_OPENAI", "text-embedding-3-small", "embedding"),
+        ("ANTHROPIC_BEDROCK", "claude-3-embedding", "embedding"),
+        ("MISTRAL_API", "mistral-embed", "embedding"),
+        ("AZURE_OPENAI", "dall-e-3", "image_generation"),
+        ("AZURE_OPENAI", "whisper-1", "audio_transcription"),
+        ("OLLAMA", "llama2", "chat"),
+        ("OLLAMA", "llama2-embedding", "embedding"),
+        ("UNKNOWN", "unknown-model", "unknown"),
     ],
 )
 def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str):
@@ -99,7 +100,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
     "provider_name,model_name,expected_fields",
     [
         (
-            "openai",
+            "AZURE_OPENAI",
             "gpt-4",
             {
                 "mode": "chat",
@@ -108,7 +109,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
             },
         ),
         (
-            "anthropic",
+            "ANTHROPIC_BEDROCK",
             "claude-3-sonnet-20240229",
             {
                 "mode": "chat",
@@ -117,7 +118,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
             },
         ),
         (
-            "google",
+            "GEMINI",
             "gemini-pro",
             {
                 "mode": "chat",
