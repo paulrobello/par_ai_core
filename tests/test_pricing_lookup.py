@@ -14,9 +14,9 @@ from par_ai_core.pricing_lookup import (
     get_api_call_cost,
     get_api_cost_model_name,
     get_model_metadata,
+    get_model_mode,
     mk_usage_metadata,
     show_llm_cost,
-    get_model_mode,
 )
 
 
