@@ -16,6 +16,7 @@ from par_ai_core.pricing_lookup import (
     get_model_metadata,
     mk_usage_metadata,
     show_llm_cost,
+    get_model_mode,
 )
 
 
@@ -81,7 +82,7 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
         (LlmProvider.OPENAI.value, "unknown-model", "unknown"),
     ],
 )
-def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str):
+def  (provider_name: str, model_name: str, expected_mode: str):
     """Test model mode detection.
     
     Tests various scenarios including:
