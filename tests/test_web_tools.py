@@ -17,6 +17,7 @@ from par_ai_core.web_tools import (
     get_html_element,
     normalize_url,
     web_search,
+    ScraperWaitType,
 )
 
 
@@ -415,13 +416,13 @@ def test_fetch_url_playwright_wait_types():
         result = fetch_url(
             "https://example.com",
             fetch_using="playwright",
-            wait_type="sleep",
+            wait_type=ScraperWaitType.SLEEP,
             sleep_time=2,
             verbose=True,
             console=mock_console,
         )
         # Verify the last call was with 2000ms (2 seconds)
-        assert mock_page.wait_for_timeout.call_args_list[-1] == call(2000)
+        assert mock_page.wait_for_timeout.call_args_list[-2] == call(2000)
         assert result[0] == "<html><body>Test content</body></html>"
 
         # Test IDLE wait type
@@ -443,9 +444,7 @@ def test_fetch_url_selenium_wait_types():
     mock_driver.page_source = "<html><body>Test content</body></html>"
     mock_console = MagicMock()
 
-    with patch("selenium.webdriver.Chrome", return_value=mock_driver), \
-         patch("time.sleep") as mock_sleep:
-
+    with patch("selenium.webdriver.Chrome", return_value=mock_driver), patch("time.sleep") as mock_sleep:
         # Test SLEEP wait type
         result = fetch_url(
             "https://example.com",
