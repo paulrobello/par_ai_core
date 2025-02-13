@@ -64,6 +64,86 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
     assert get_api_cost_model_name(provider_name=provider_name, model_name=input_model) == expected_model
 
 
+@pytest.mark.parametrize(
+    "provider_name,model_name,expected_mode",
+    [
+        ("openai", "gpt-4", "chat"),
+        ("anthropic", "claude-3-sonnet-20240229", "chat"),
+        ("google", "gemini-pro", "chat"),
+        ("openai", "text-embedding-3-small", "embedding"),
+        ("anthropic", "claude-3-embedding", "embedding"),
+        ("mistral", "mistral-embed", "embedding"),
+        ("openai", "dall-e-3", "image_generation"),
+        ("openai", "whisper-1", "audio_transcription"),
+        ("ollama", "llama2", "chat"),
+        ("ollama", "llama2-embedding", "embedding"),
+        ("unknown", "unknown-model", "unknown"),
+    ],
+)
+def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str):
+    """Test model mode detection.
+    
+    Tests various scenarios including:
+    - Chat models from different providers
+    - Embedding models
+    - Image generation models
+    - Audio transcription models
+    - Ollama models (both chat and embedding)
+    - Unknown models
+    """
+    provider = LlmProvider(provider_name.upper())
+    assert get_model_mode(provider, model_name) == expected_mode
+
+
+@pytest.mark.parametrize(
+    "provider_name,model_name,expected_fields",
+    [
+        (
+            "openai",
+            "gpt-4",
+            {
+                "mode": "chat",
+                "input_cost_per_token": 0.00003,
+                "output_cost_per_token": 0.00006,
+            },
+        ),
+        (
+            "anthropic",
+            "claude-3-sonnet-20240229",
+            {
+                "mode": "chat",
+                "input_cost_per_token": 0.000003,
+                "output_cost_per_token": 0.000015,
+            },
+        ),
+        (
+            "google",
+            "gemini-pro",
+            {
+                "mode": "chat",
+                "input_cost_per_token": 0.0000005,
+                "output_cost_per_token": 0.0000015,
+            },
+        ),
+    ],
+)
+def test_get_model_metadata(provider_name: str, model_name: str, expected_fields: dict):
+    """Test model metadata retrieval.
+    
+    Tests various scenarios including:
+    - OpenAI models
+    - Anthropic models
+    - Google models
+    - Verifies presence of key fields:
+        - mode
+        - input_cost_per_token
+        - output_cost_per_token
+    """
+    metadata = get_model_metadata(provider_name, model_name)
+    for field, expected_value in expected_fields.items():
+        assert metadata.get(field) == expected_value
+
+
 def test_get_api_call_cost():
     """Test API call cost calculation."""
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4")
