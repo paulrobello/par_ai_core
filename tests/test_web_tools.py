@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from par_ai_core.web_tools import normalize_url
 from bs4 import BeautifulSoup
 from rich.console import Console
 
@@ -17,6 +18,28 @@ from par_ai_core.web_tools import (
     fetch_url_selenium,
     fetch_url_playwright,
 )
+
+
+def test_normalize_url():
+    """Test URL normalization with various parameters."""
+    test_cases = [
+        # (input_url, strip_fragment, strip_query, strip_slash, expected)
+        ("https://example.com/path/#frag", True, False, False, "https://example.com/path/"),
+        ("https://example.com/path/?q=1", False, True, False, "https://example.com/path/"),
+        ("https://example.com/path/", False, False, True, "https://example.com/path"),
+        ("https://example.com/path//", False, False, True, "https://example.com/path//".rstrip("/")),
+        ("https://example.com/path?q=1#frag", True, True, True, "https://example.com/path"),
+        ("https://example.com/path/?q=1#frag", True, True, True, "https://example.com/path"),
+        ("https://example.com:8080/path?q=1", False, False, False, "https://example.com:8080/path?q=1"),
+        ("http://example.com/path/", False, False, False, "http://example.com/path/"),
+    ]
+
+    for url, strip_frag, strip_q, strip_slash, expected in test_cases:
+        assert normalize_url(url, strip_frag, strip_q, strip_slash) == expected
+
+    # Test default parameters (all stripping enabled)
+    assert normalize_url("https://example.com/path/?q=1#frag") == "https://example.com/path"
+    assert normalize_url("https://example.com//") == "https://example.com"
 
 
 def test_google_search_result_model():

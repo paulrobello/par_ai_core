@@ -234,6 +234,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.18:
+  - Updated web scraping utils
 - Version 0.1.17:
   - Use LiteLLM for pricing data
   - BREAKING CHANGE: Provider Google is now Gemini
