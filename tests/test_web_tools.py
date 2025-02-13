@@ -451,6 +451,8 @@ def test_fetch_url_playwright_wait_types():
         assert result[0] == "<html><body>Test content</body></html>"
 
         # Test TEXT wait type
+        mock_locator = MagicMock()
+        mock_page.locator.return_value = mock_locator
         with patch("playwright.sync_api.expect") as mock_expect:
             result = fetch_url(
                 "https://example.com",
@@ -462,7 +464,7 @@ def test_fetch_url_playwright_wait_types():
                 console=mock_console,
             )
             mock_page.locator.assert_called_with("body")
-            mock_expect.assert_called()
+            mock_expect.assert_called_with(mock_locator)
             assert result[0] == "<html><body>Test content</body></html>"
 
 
