@@ -82,6 +82,13 @@ def test_llm_config_from_json() -> None:
     assert config.model_name == "gpt-4"
     assert config.temperature == 0.7
 
+    # Test with string mode
+    json_data["mode"] = "Chat"  # String instead of enum
+    config = LlmConfig.from_json(json_data)
+    assert config.provider == LlmProvider.OPENAI
+    assert config.model_name == "gpt-4"
+    assert config.mode == LlmMode.CHAT
+
 
 def test_llm_config_clone() -> None:
     """Test LlmConfig clone method."""
