@@ -359,7 +359,10 @@ def test_llm_config_github_api_key() -> None:
     with (
         patch.dict(
             os.environ,
-            {"GITHUB_API_KEY": "test-github-key"},
+            {
+                "GITHUB_API_KEY": "test-github-key",
+                "OPENAI_API_KEY": "test-openai-key",  # Required as fallback
+            },
             clear=True,
         ),
         patch("langchain_openai.ChatOpenAI") as mock_chat,
