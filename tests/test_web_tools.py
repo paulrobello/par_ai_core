@@ -437,14 +437,43 @@ def test_fetch_url_playwright_wait_types():
         mock_page.wait_for_load_state.assert_called_with("networkidle", timeout=5000)
         assert result[0] == "<html><body>Test content</body></html>"
 
+        # Test SELECTOR wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="playwright",
+            wait_type=ScraperWaitType.SELECTOR,
+            wait_selector="#content",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_page.wait_for_selector.assert_called_with("#content", timeout=5000)
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # Test TEXT wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="playwright",
+            wait_type=ScraperWaitType.TEXT,
+            wait_selector="Expected Text",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_page.locator.assert_called_with("body")
+        assert result[0] == "<html><body>Test content</body></html>"
+
 
 def test_fetch_url_selenium_wait_types():
     """Test fetch_url_selenium with different wait types."""
     mock_driver = MagicMock()
     mock_driver.page_source = "<html><body>Test content</body></html>"
     mock_console = MagicMock()
+    mock_wait = MagicMock()
 
-    with patch("selenium.webdriver.Chrome", return_value=mock_driver), patch("time.sleep") as mock_sleep:
+    with patch("selenium.webdriver.Chrome", return_value=mock_driver), \
+         patch("time.sleep") as mock_sleep, \
+         patch("selenium.webdriver.support.wait.WebDriverWait", return_value=mock_wait):
         # Test SLEEP wait type
         result = fetch_url(
             "https://example.com",
@@ -468,6 +497,32 @@ def test_fetch_url_selenium_wait_types():
         )
         # Selenium uses a simple sleep for IDLE
         mock_sleep.assert_called_with(1)
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # Test SELECTOR wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type=ScraperWaitType.SELECTOR,
+            wait_selector="#content",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_wait.until.assert_called()
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # Test TEXT wait type
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type=ScraperWaitType.TEXT,
+            wait_selector="Expected Text",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_wait.until.assert_called()
         assert result[0] == "<html><body>Test content</body></html>"
 
 
