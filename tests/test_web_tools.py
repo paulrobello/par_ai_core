@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from bs4 import BeautifulSoup
