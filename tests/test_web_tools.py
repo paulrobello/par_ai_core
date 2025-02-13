@@ -16,6 +16,7 @@ from par_ai_core.web_tools import (
     fetch_url_playwright,
     fetch_url_selenium,
     get_html_element,
+    html_to_markdown,
     normalize_url,
     web_search,
 )
@@ -720,6 +721,115 @@ def test_fetch_url_and_convert_to_markdown_verbose():
         # Verify the result contains converted content
         assert "Test Header" in result[0]
         assert "Test paragraph" in result[0]
+
+
+def test_html_to_markdown_basic():
+    """Test basic HTML to markdown conversion."""
+    test_html = """
+    <html>
+        <body>
+            <h1>Test Header</h1>
+            <p>Test paragraph</p>
+            <a href="https://example.com">Test link</a>
+        </body>
+    </html>
+    """
+    result = html_to_markdown(test_html)
+    assert "# Test Header" in result
+    assert "Test paragraph" in result
+    assert "[Test link](https://example.com)" in result
+
+
+def test_html_to_markdown_metadata():
+    """Test HTML to markdown conversion with metadata."""
+    test_html = """
+    <html>
+        <head>
+            <title>Test Title</title>
+            <meta name="description" content="Test Description">
+            <meta name="keywords" content="test,keywords">
+        </head>
+        <body>
+            <h1>Content</h1>
+        </body>
+    </html>
+    """
+    result = html_to_markdown(
+        test_html,
+        url="https://example.com",
+        include_metadata=True,
+        meta=["description", "keywords"]
+    )
+    assert "# Metadata" in result
+    assert "source: https://example.com" in result
+    assert "title: Test Title" in result
+    assert "description: Test Description" in result
+    assert "keywords: test,keywords" in result
+
+
+def test_html_to_markdown_relative_urls():
+    """Test conversion of relative URLs in HTML to absolute URLs."""
+    test_html = """
+    <html>
+        <body>
+            <a href="/page">Relative Link</a>
+            <img src="../image.jpg" alt="Test Image">
+            <form action="submit.php">Form</form>
+        </body>
+    </html>
+    """
+    result = html_to_markdown(
+        test_html,
+        url="https://example.com/path/",
+        include_links=True,
+        include_images=True
+    )
+    assert "https://example.com/page" in result
+    assert "https://example.com/image.jpg" in result
+    assert "https://example.com/path/submit.php" in result
+
+
+def test_html_to_markdown_element_filtering():
+    """Test filtering of HTML elements during markdown conversion."""
+    test_html = """
+    <html>
+        <head>
+            <script>alert('test')</script>
+            <style>.test{color:red}</style>
+        </head>
+        <body>
+            <header>Header</header>
+            <main>Content</main>
+            <footer>Footer</footer>
+            <iframe src="frame.html"></iframe>
+        </body>
+    </html>
+    """
+    result = html_to_markdown(test_html)
+    assert "alert" not in result
+    assert ".test" not in result
+    assert "Header" not in result
+    assert "Content" in result
+    assert "Footer" not in result
+    assert "frame.html" not in result
+
+
+def test_html_to_markdown_code_blocks():
+    """Test conversion of code blocks in HTML to markdown."""
+    test_html = """
+    <html>
+        <body>
+            <pre><code>def test():
+    print("hello")</code></pre>
+            <pre>Plain preformatted text</pre>
+        </body>
+    </html>
+    """
+    result = html_to_markdown(test_html)
+    assert "```" in result
+    assert "def test():" in result
+    assert 'print("hello")' in result
+    assert "Plain preformatted text" in result
 
 
 def test_separator_elements_conversion():
