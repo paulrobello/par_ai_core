@@ -451,17 +451,19 @@ def test_fetch_url_playwright_wait_types():
         assert result[0] == "<html><body>Test content</body></html>"
 
         # Test TEXT wait type
-        result = fetch_url(
-            "https://example.com",
-            fetch_using="playwright",
-            wait_type=ScraperWaitType.TEXT,
-            wait_selector="Expected Text",
-            timeout=5,
-            verbose=True,
-            console=mock_console,
-        )
-        mock_page.locator.assert_called_with("body")
-        assert result[0] == "<html><body>Test content</body></html>"
+        with patch("playwright.sync_api.expect") as mock_expect:
+            result = fetch_url(
+                "https://example.com",
+                fetch_using="playwright",
+                wait_type=ScraperWaitType.TEXT,
+                wait_selector="Expected Text",
+                timeout=5,
+                verbose=True,
+                console=mock_console,
+            )
+            mock_page.locator.assert_called_with("body")
+            mock_expect.assert_called()
+            assert result[0] == "<html><body>Test content</body></html>"
 
 
 def test_fetch_url_selenium_wait_types():
