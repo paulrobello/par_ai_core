@@ -68,17 +68,17 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
 @pytest.mark.parametrize(
     "provider_name,model_name,expected_mode",
     [
-        ("AZURE_OPENAI", "gpt-4", "chat"),
-        ("ANTHROPIC_BEDROCK", "claude-3-sonnet-20240229", "chat"),
-        ("GEMINI", "gemini-pro", "chat"),
-        ("AZURE_OPENAI", "text-embedding-3-small", "embedding"),
-        ("ANTHROPIC_BEDROCK", "claude-3-embedding", "embedding"),
-        ("MISTRAL_API", "mistral-embed", "embedding"),
-        ("AZURE_OPENAI", "dall-e-3", "image_generation"),
-        ("AZURE_OPENAI", "whisper-1", "audio_transcription"),
-        ("OLLAMA", "llama2", "chat"),
-        ("OLLAMA", "llama2-embedding", "embedding"),
-        ("UNKNOWN", "unknown-model", "unknown"),
+        (LlmProvider.OPENAI.value, "gpt-4", "chat"),
+        (LlmProvider.BEDROCK.value, "claude-3-sonnet-20240229", "chat"),
+        (LlmProvider.GEMINI.value, "gemini-pro", "chat"),
+        (LlmProvider.OPENAI.value, "text-embedding-3-small", "embedding"),
+        (LlmProvider.BEDROCK.value, "claude-3-embedding", "embedding"),
+        (LlmProvider.MISTRAL.value, "mistral-embed", "embedding"),
+        (LlmProvider.OPENAI.value, "dall-e-3", "image_generation"),
+        (LlmProvider.OPENAI.value, "whisper-1", "audio_transcription"),
+        (LlmProvider.OLLAMA.value, "llama2", "chat"),
+        (LlmProvider.OLLAMA.value, "llama2-embedding", "embedding"),
+        (LlmProvider.OPENAI.value, "unknown-model", "unknown"),
     ],
 )
 def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str):
