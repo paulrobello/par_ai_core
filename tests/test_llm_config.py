@@ -268,6 +268,7 @@ def test_llm_config_get_runnable_config_by_llm_config() -> None:
         (LlmProvider.DEEPSEEK, LlmMode.EMBEDDINGS, "Deepseek provider does not support mode Embeddings"),
         (LlmProvider.LITELLM, LlmMode.EMBEDDINGS, "LiteLLM provider does not support mode Embeddings"),
         (LlmProvider.ANTHROPIC, LlmMode.EMBEDDINGS, "Anthropic provider does not support mode Embeddings"),
+        (LlmProvider.OLLAMA, LlmMode.EMBEDDINGS, "LLM provider is 'Ollama' but OPENAI requested."),
     ],
 )
 def test_llm_config_provider_errors(provider: LlmProvider, mode: LlmMode, expected_error: str) -> None:
