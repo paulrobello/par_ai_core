@@ -35,17 +35,33 @@ def test_mk_usage_metadata():
 
 
 @pytest.mark.parametrize(
-    "input_model,expected_model",
+    "provider_name,input_model,expected_model",
     [
-        ("gpt-4", "gpt-4"),
-        ("claude-3-sonnet-20240229", "claude-3-sonnet-20240229"),
-        ("gpt-4-turbo", "gpt-4-turbo"),
-        ("unknown-model", "unknown-model"),
+        ("", "gpt-4", "gpt-4"),
+        ("", "claude-3-sonnet-20240229", "claude-3-sonnet-20240229"),
+        ("", "gpt-4-turbo", "gpt-4-turbo"),
+        ("", "unknown-model", "unknown-model"),
+        ("openai", "gpt-4", "openai/gpt-4"),
+        ("anthropic", "claude-3", "anthropic/claude-3"),
+        ("google", "gemini-pro", "gemini/gemini-pro"),
+        ("", "inference-profile/anthropic.claude-v2", "bedrock/anthropic.claude-v2"),
+        ("", "litellm/claude-3", "claude-3"),
+        ("", "google/gemini-pro", "gemini/gemini-pro"),
+        ("deepseek", "chat", "deepseek/chat"),
     ],
 )
-def test_get_api_cost_model_name(input_model: str, expected_model: str):
-    """Test API cost model name resolution."""
-    assert get_api_cost_model_name(model_name=input_model) == expected_model
+def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_model: str):
+    """Test API cost model name resolution.
+    
+    Tests various scenarios including:
+    - Basic model names without provider
+    - Model names with provider prefix
+    - Special case handling for inference profiles
+    - Provider name prepending
+    - Google/Gemini name substitution
+    - LiteLLM prefix stripping
+    """
+    assert get_api_cost_model_name(provider_name=provider_name, model_name=input_model) == expected_model
 
 
 def test_get_api_call_cost():
