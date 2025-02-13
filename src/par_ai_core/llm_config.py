@@ -351,13 +351,6 @@ class LlmConfig:
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
-            if self.provider not in [
-                LlmProvider.OPENAI,
-                LlmProvider.GITHUB,
-                LlmProvider.LLAMACPP,
-            ]:
-                raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
-
             return OpenAIEmbeddings(
                 api_key=api_key,
                 model=self.model_name,
