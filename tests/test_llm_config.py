@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 from langchain_core.embeddings import Embeddings
@@ -250,9 +250,6 @@ def test_llm_config_get_runnable_config_by_llm_config() -> None:
 
     # Test with None input
     assert llm_run_manager.get_runnable_config_by_llm_config(None) is None
-
-
-from unittest.mock import ANY
 
 
 @pytest.mark.parametrize(
