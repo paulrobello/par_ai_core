@@ -54,7 +54,7 @@ def test_mk_usage_metadata():
 )
 def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_model: str):
     """Test API cost model name resolution.
-    
+
     Tests various scenarios including:
     - Basic model names without provider
     - Model names with provider prefix
@@ -82,7 +82,7 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
 )
 def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str):
     """Test model mode detection.
-    
+
     Tests various scenarios including:
     - Chat models from different providers
     - Embedding models
@@ -129,7 +129,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
 )
 def test_get_model_metadata(provider_name: str, model_name: str, expected_fields: dict):
     """Test model metadata retrieval.
-    
+
     Tests various scenarios including:
     - OpenAI models
     - Anthropic models
