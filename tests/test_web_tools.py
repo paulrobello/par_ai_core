@@ -471,9 +471,11 @@ def test_fetch_url_selenium_wait_types():
     mock_console = MagicMock()
     mock_wait = MagicMock()
 
-    with patch("selenium.webdriver.Chrome", return_value=mock_driver), \
-         patch("time.sleep") as mock_sleep, \
-         patch("selenium.webdriver.support.wait.WebDriverWait", return_value=mock_wait):
+    with (
+        patch("selenium.webdriver.Chrome", return_value=mock_driver),
+        patch("time.sleep") as mock_sleep,
+        patch("selenium.webdriver.support.wait.WebDriverWait", return_value=mock_wait),
+    ):
         # Test SLEEP wait type
         result = fetch_url(
             "https://example.com",
