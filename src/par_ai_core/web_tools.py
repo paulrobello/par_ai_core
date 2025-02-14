@@ -33,10 +33,10 @@ from __future__ import annotations
 import os
 import time
 from typing import Literal
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
-from playwright.sync_api import expect
+from playwright.sync_api import HttpCredentials, ProxySettings, expect
 from pydantic import BaseModel
 from rich.console import Console
 from rich.repr import rich_repr
@@ -83,6 +83,28 @@ def normalize_url(url: str, strip_fragment: bool = True, strip_query: bool = Tru
     if strip_slash:
         return url.rstrip("/")
     return url
+
+
+def inject_credentials(url: str, username: str, password: str) -> str:
+    """
+    Injects the given username and password into the URL, handling special characters.
+
+    Args:
+        url (str): The original URL.
+        username (str): The username to inject.
+        password (str): The password to inject.
+
+    Returns:
+        str: The URL with the injected credentials.
+    """
+    parsed_url = urlparse(url)
+    encoded_username = quote(username)
+    encoded_password = quote(password)
+    netloc = f"{encoded_username}:{encoded_password}@{parsed_url.hostname}"
+    if parsed_url.port:
+        netloc += f":{parsed_url.port}"
+    new_url = parsed_url._replace(netloc=netloc)
+    return urlunparse(new_url)
 
 
 @rich_repr
@@ -155,6 +177,8 @@ def fetch_url(
     fetch_using: Literal["playwright", "selenium"] = "playwright",
     sleep_time: int = 1,
     timeout: int = 10,
+    proxy_config: ProxySettings | None = None,
+    http_credentials: HttpCredentials | None = None,
     wait_type: ScraperWaitType = ScraperWaitType.IDLE,
     wait_selector: str | None = None,
     headless: bool = True,
@@ -170,6 +194,8 @@ def fetch_url(
         fetch_using (Literal["playwright", "selenium"]): The library to use for fetching the webpage.
         sleep_time (int): The number of seconds to sleep between requests.
         timeout (int): The number of seconds to wait for a response.
+        proxy_config (ProxySettings | None): Proxy configuration. Defaults to None.
+        http_credentials (HttpCredentials | None): HTTP credentials for authentication. Defaults to None.
         wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.IDLE.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless (bool): Whether to run the browser in headless mode.
@@ -190,6 +216,8 @@ def fetch_url(
                 urls,
                 sleep_time=sleep_time,
                 timeout=timeout,
+                proxy_config=proxy_config,
+                http_credentials=http_credentials,
                 wait_type=wait_type,
                 wait_selector=wait_selector,
                 headless=headless,
@@ -201,6 +229,8 @@ def fetch_url(
             urls,
             sleep_time=sleep_time,
             timeout=timeout,
+            proxy_config=proxy_config,
+            http_credentials=http_credentials,
             wait_type=wait_type,
             wait_selector=wait_selector,
             headless=headless,
@@ -221,7 +251,9 @@ def fetch_url_playwright(
     *,
     sleep_time: int = 1,
     timeout: int = 10,
-    wait_type: ScraperWaitType = ScraperWaitType.IDLE,
+    proxy_config: ProxySettings | None = None,
+    http_credentials: HttpCredentials | None = None,
+    wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
     wait_selector: str | None = None,
     headless: bool = True,
     ignore_ssl: bool = True,
@@ -235,7 +267,9 @@ def fetch_url_playwright(
         urls (Union[str, list[str]]): The URL(s) to fetch.
         sleep_time (int, optional): The number of seconds to sleep between requests. Defaults to 1.
         timeout (int, optional): The timeout in seconds for the request. Defaults to 10.
-        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.IDLE.
+        proxy_config (ProxySettings, optional): Proxy configuration. Defaults to None.
+        http_credentials (HttpCredentials, optional): HTTP credentials for authentication. Defaults to None.
+        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless (bool, optional): Whether to run the browser in headless mode. Defaults to True.
         ignore_ssl (bool, optional): Whether to ignore SSL errors. Defaults to True.
@@ -257,7 +291,7 @@ def fetch_url_playwright(
 
     with sync_playwright() as p:
         try:
-            browser = p.chromium.launch(headless=headless)
+            browser = p.chromium.launch(proxy=proxy_config, headless=headless)
         except Exception as e:
             console.print(
                 "[bold red]Error launching playwright browser:[/bold red] Make sure you install playwright: `uv tool install playwright` then run `playwright install chromium`."
@@ -265,7 +299,10 @@ def fetch_url_playwright(
             raise e
             # return ["" * len(urls)]
         context = browser.new_context(
-            viewport={"width": 1280, "height": 1024}, user_agent=get_random_user_agent(), ignore_https_errors=ignore_ssl
+            viewport={"width": 1280, "height": 1024},
+            user_agent=get_random_user_agent(),
+            ignore_https_errors=ignore_ssl,
+            http_credentials=http_credentials,
         )
 
         page = context.new_page()
@@ -336,7 +373,9 @@ def fetch_url_selenium(
     *,
     sleep_time: int = 1,
     timeout: int = 10,
-    wait_type: ScraperWaitType = ScraperWaitType.IDLE,
+    proxy_config: ProxySettings | None = None,
+    http_credentials: HttpCredentials | None = None,
+    wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
     wait_selector: str | None = None,
     headless: bool = True,
     ignore_ssl: bool = True,
@@ -349,7 +388,9 @@ def fetch_url_selenium(
         urls: The URL(s) to fetch
         sleep_time: The number of seconds to sleep between requests
         timeout: The number of seconds to wait for a response
-        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.IDLE.
+        proxy_config (ProxySettings, optional): Proxy configuration. Defaults to None.
+        http_credentials (HttpCredentials, optional): HTTP credentials for authentication. Defaults to None.
+        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless: Whether to run the browser in headless mode
         ignore_ssl: Whether to ignore SSL errors
@@ -390,6 +431,8 @@ def fetch_url_selenium(
     if headless:
         options.add_argument("--window-position=-2400,-2400")
         options.add_argument("--headless=new")
+    if proxy_config and "server" in proxy_config:
+        options.add_argument(f"--proxy-server={proxy_config['server']}")
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     driver.set_page_load_timeout(timeout)
@@ -398,9 +441,12 @@ def fetch_url_selenium(
     for url in urls:
         if verbose:
             console.print(f"[bold blue]Selenium fetching content from {url}...[/bold blue]")
+
+        if http_credentials and "username" in http_credentials and "password" in http_credentials:
+            url = inject_credentials(url, http_credentials["username"], http_credentials["password"])
+
         try:
             driver.get(url)
-            # Wait for page to load
             if wait_type == ScraperWaitType.PAUSE:
                 console.print("[yellow]Press Enter to continue...[/yellow]")
                 input()
