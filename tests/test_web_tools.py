@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, call, patch
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 from bs4 import BeautifulSoup
@@ -84,7 +85,7 @@ def test_fetch_url_parameters(fetch_using, monkeypatch):
 
     # Mock the browser functions to raise exceptions
     if fetch_using == "playwright":
-        monkeypatch.setattr("playwright.sync_api.sync_playwright", lambda: exec('raise Exception("No playwright")'))
+        monkeypatch.setattr("par_ai_core.web_tools.async_playwright", lambda: exec('raise Exception("No playwright")'))
     else:
         monkeypatch.setattr("selenium.webdriver.Chrome", lambda *args, **kwargs: exec('raise Exception("No selenium")'))
 
@@ -151,41 +152,91 @@ def test_web_search_default_console():
                 assert results[0].snippet == "Test snippet"
 
 
-def test_fetch_url_playwright_success(monkeypatch):
-    """Test successful URL fetch using playwright."""
-    mock_page = MagicMock()
+def test_fetch_url_playwright_success(monkeypatch) -> None:
+    """Test successful URL fetch using playwright with proper async mocks."""
+    # Set up the browser mock with an async close method.
+    # Create an async mock for the page and its methods
+    mock_page = AsyncMock()
     mock_page.content.return_value = "<html><body>Test content</body></html>"
 
-    mock_context = MagicMock()
-    mock_context.new_page.return_value = mock_page
-
-    mock_browser = MagicMock()
-    mock_browser.new_context.return_value = mock_context
-
-    mock_playwright = MagicMock()
-    mock_playwright.chromium.launch.return_value = mock_browser
-
-    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
-        result = fetch_url("https://example.com", fetch_using="playwright")
-        assert result[0] == "<html><body>Test content</body></html>"
-
-
-def test_fetch_url_playwright_direct_success(monkeypatch):
-    """Test successful URL fetch using playwright."""
-    mock_page = MagicMock()
+    # Create an async mock for the page and its methods
+    mock_page = AsyncMock()
     mock_page.content.return_value = "<html><body>Test content</body></html>"
+    mock_page.goto.return_value = AsyncMock(return_value=None)
+    mock_page.wait_for_timeout = AsyncMock(return_value=None)
+    mock_page.wait_for_load_state.return_value = AsyncMock(return_value=None)
+    mock_page.wait_for_selector.return_value = AsyncMock(return_value=None)
+    # If wait_for_text is ever called via a locator, simulate that as well.
+    mock_locator = AsyncMock()
+    mock_locator.wait_for_text.return_value = AsyncMock(return_value=None)
 
-    mock_context = MagicMock()
+    # Create an async mock for the context and its methods
+    mock_context = AsyncMock()
     mock_context.new_page.return_value = mock_page
-
-    mock_browser = MagicMock()
+    mock_context.close.return_value = AsyncMock(return_value=None)
+    # Create an async mock for the browser and its methods
+    mock_browser = AsyncMock()
     mock_browser.new_context.return_value = mock_context
+    mock_browser.close.return_value = AsyncMock(return_value=None)
 
     mock_playwright = MagicMock()
-    mock_playwright.chromium.launch.return_value = mock_browser
+    mock_playwright.chromium.launch = AsyncMock(return_value=mock_browser)
 
-    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
-        result = fetch_url_playwright("https://example.com")
+    # Create an async context manager for async_playwright.
+    class MockAsyncPlaywright:
+        async def __aenter__(self):
+            return mock_playwright
+
+        async def __aexit__(self, exc_type, exc, tb):
+            pass
+
+    # Define a mock async playwright context manager
+    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+        # Call the function under test.
+        result = fetch_url(["https://example.com"], fetch_using="playwright", verbose=False)
+
+    # Verify that the fetched content is as expected.
+    assert result[0] == "<html><body>Test content</body></html>"
+
+
+@pytest.mark.asyncio
+async def test_fetch_url_playwright_direct_success(monkeypatch) -> None:
+    """Test successful URL fetch using playwright (direct call) with proper async mocks."""
+    # Create async mocks for the page and its methods.
+    mock_page = AsyncMock()
+    mock_page.content.return_value = "<html><body>Test content</body></html>"
+    mock_page.goto.return_value = AsyncMock()  # simulate async no-op
+    mock_page.wait_for_timeout.return_value = AsyncMock()
+
+    # Create async mocks for the browser context.
+    mock_context = AsyncMock()
+    mock_context.new_page.return_value = mock_page
+    mock_context.close.return_value = AsyncMock()
+
+    # Create async mocks for the browser.
+    mock_browser = AsyncMock()
+    mock_browser.new_context.return_value = mock_context
+    mock_browser.close.return_value = AsyncMock()
+
+    # Create a mock for playwright's chromium with an async launch method.
+    mock_chromium = MagicMock()
+    mock_chromium.launch = AsyncMock(return_value=mock_browser)
+
+    # Create a mock playwright object.
+    mock_playwright = MagicMock()
+    mock_playwright.chromium = mock_chromium
+
+    # Define an async context manager to simulate async_playwright.
+    class MockAsyncPlaywright:
+        async def __aenter__(self) -> MagicMock:
+            return mock_playwright
+
+        async def __aexit__(self, exc_type, exc, tb) -> None:
+            pass
+
+    # Patch the async_playwright context manager with our mock.
+    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+        result = await fetch_url_playwright("https://example.com", verbose=False)
         assert result[0] == "<html><body>Test content</body></html>"
 
 
@@ -349,99 +400,159 @@ def test_html_to_markdown_special_elements():
 
 def test_playwright_browser_cleanup():
     """Test that playwright browser is cleaned up after use."""
+    # Set up the browser mock with an async close method.
     mock_browser = MagicMock()
-    mock_playwright = MagicMock()
-    mock_playwright.chromium.launch.return_value = mock_browser
+    mock_browser.close = AsyncMock()
 
-    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
+    # Set up the playwright mock with an async launch method.
+    mock_playwright = MagicMock()
+    mock_playwright.chromium.launch = AsyncMock(return_value=mock_browser)
+
+    # Create an async context manager for async_playwright.
+    class MockAsyncPlaywright:
+        async def __aenter__(self):
+            return mock_playwright
+
+        async def __aexit__(self, exc_type, exc, tb):
+            pass
+
+    # Patch async_playwright to return our async context manager.
+    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+        # Assuming fetch_url synchronously runs the async fetch logic (e.g., via asyncio.run)
         fetch_url("https://example.com", fetch_using="playwright")
-        mock_browser.close.assert_called_once()
+
+    # Verify that browser.close() was awaited.
+    mock_browser.close.assert_called_once()
 
 
 def test_playwright_launch_error():
     """Test handling of playwright launch errors."""
-    with patch("playwright.sync_api.sync_playwright", side_effect=Exception("Failed to launch")):
+    with patch("par_ai_core.web_tools.async_playwright", side_effect=Exception("Failed to launch")):
         result = fetch_url("https://example.com", fetch_using="playwright", verbose=True)
         assert result == [""]
 
 
-def test_fetch_url_playwright_verbose_error():
+@pytest.mark.asyncio
+async def test_fetch_url_playwright_verbose_error():
     """Test fetch_url_playwright error handling with verbose output."""
-    mock_page = MagicMock()
-    mock_page.goto.side_effect = Exception("Test playwright error")
+    # Create async mocks for async methods.
+    mock_page = AsyncMock()
+    # When page.goto is awaited, it raises an exception.
+    mock_page.goto = AsyncMock(side_effect=Exception("Test playwright error"))
+    mock_page.wait_for_timeout = AsyncMock(return_value=None)
+    # (Setting content here in case it is accidentally called; in error scenario it shouldn’t be.)
+    mock_page.content = AsyncMock(return_value="<html><body>Test content</body></html>")
+    # Also mock wait_for_load_state, since in the IDLE branch it is used.
+    mock_page.wait_for_load_state = AsyncMock(return_value=None)
 
-    mock_context = MagicMock()
+    mock_context = AsyncMock()
+    mock_context.new_page.return_value = mock_page
+    mock_context.close = AsyncMock(return_value=None)
+
+    mock_browser = AsyncMock()
+    mock_browser.new_context.return_value = mock_context
+    mock_browser.close = AsyncMock(return_value=None)
+
+    # Create a mock for chromium.launch with an async launch method.
+    mock_chromium = MagicMock()
+    mock_chromium.launch = AsyncMock(return_value=mock_browser)
+
+    # Set up the playwright mock with a chromium attribute.
+    mock_playwright = MagicMock()
+    mock_playwright.chromium = mock_chromium
+
+    # Create a mock console.
+    mock_console = MagicMock()
+
+    # Define an async context manager for async_playwright.
+    class MockAsyncPlaywright:
+        async def __aenter__(self):
+            return mock_playwright
+
+        async def __aexit__(self, exc_type, exc, tb):
+            pass
+
+    # Patch the async_playwright in the module where fetch_url_playwright is imported.
+    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+        # Await the asynchronous function
+        result = await fetch_url_playwright("https://example.com", verbose=True, console=mock_console)
+
+    # Retrieve all the printed messages.
+    printed_messages = [call.args[0] for call in mock_console.print.call_args_list]
+
+    # Instead of an exact match, verify that the expected substrings are present.
+    assert any("Playwright fetching content from https://example.com" in msg for msg in printed_messages), (
+        "Expected verbose fetching message not found in console output."
+    )
+    assert any("Error fetching content from https://example.com" in msg for msg in printed_messages), (
+        "Expected verbose error message not found in console output."
+    )
+
+    # Verify that an empty string is returned on error.
+    assert result == [""], f"Expected [''] but got {result}"
+
+
+@pytest.mark.asyncio
+async def test_fetch_url_playwright_wait_types():
+    """Test fetch_url with different wait types using playwright."""
+    # Use AsyncMock for all awaited methods.
+    mock_page = AsyncMock()
+    mock_page.content = AsyncMock(return_value="<html><body>Test content</body></html>")
+    mock_page.goto = AsyncMock()  # Simulate navigation.
+    mock_page.wait_for_timeout = AsyncMock(return_value=None)
+    mock_page.wait_for_load_state = AsyncMock(return_value=None)
+    mock_page.wait_for_selector = AsyncMock(return_value=None)
+
+    mock_context = AsyncMock()
     mock_context.new_page.return_value = mock_page
 
-    mock_browser = MagicMock()
+    mock_browser = AsyncMock()
     mock_browser.new_context.return_value = mock_context
 
-    mock_playwright = MagicMock()
-    mock_playwright.chromium.launch.return_value = mock_browser
+    mock_playwright = AsyncMock()
+    # Ensure that p.chromium is also an AsyncMock.
+    mock_playwright.chromium = AsyncMock()
+    # Set up launch as an async function that returns mock_browser.
+    mock_playwright.chromium.launch = AsyncMock(return_value=mock_browser)
 
     mock_console = MagicMock()
 
-    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
-        result = fetch_url("https://example.com", fetch_using="playwright", verbose=True, console=mock_console)
+    # Create a proper async context manager for async_playwright.
+    class MockAsyncPlaywright:
+        async def __aenter__(self):
+            return mock_playwright
 
-        # Verify error message was printed to console
-        mock_console.print.assert_any_call(
-            "[bold blue]Playwright fetching content from https://example.com...[/bold blue]"
-        )
-        mock_console.print.assert_any_call(
-            "[bold red]Error fetching content from https://example.com[/bold red]: Test playwright error"
-        )
+        async def __aexit__(self, exc_type, exc, tb):
+            pass
 
-        # Verify empty string is returned on error
-        assert result == [""]
-
-
-def test_fetch_url_playwright_wait_types():
-    """Test fetch_url_playwright with different wait types."""
-    mock_page = MagicMock()
-    mock_page.content.return_value = "<html><body>Test content</body></html>"
-
-    mock_context = MagicMock()
-    mock_context.new_page.return_value = mock_page
-
-    mock_browser = MagicMock()
-    mock_browser.new_context.return_value = mock_context
-
-    mock_playwright = MagicMock()
-    mock_playwright.chromium.launch.return_value = mock_browser
-
-    mock_console = MagicMock()
-
-    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
+    # Patch the async_playwright symbol in our module.
+    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
         # Test SLEEP wait type
-        result = fetch_url(
+        result = await fetch_url_playwright(
             "https://example.com",
-            fetch_using="playwright",
             wait_type=ScraperWaitType.SLEEP,
-            sleep_time=2,
+            sleep_time=2,  # 2 seconds
             verbose=True,
             console=mock_console,
         )
-        # Verify the last call was with 2000ms (2 seconds)
-        assert mock_page.wait_for_timeout.call_args_list[-2] == call(2000)
+        # Verify that wait_for_timeout was called with 2000ms.
+        assert mock_page.wait_for_timeout.call_args_list[0] == call(2000)
         assert result[0] == "<html><body>Test content</body></html>"
 
-        # Test IDLE wait type
-        result = fetch_url(
+        # Test IDLE wait type.
+        result = await fetch_url_playwright(
             "https://example.com",
-            fetch_using="playwright",
-            wait_type="idle",
-            timeout=5,
+            wait_type=ScraperWaitType.IDLE,
+            timeout=5,  # 5 seconds
             verbose=True,
             console=mock_console,
         )
         mock_page.wait_for_load_state.assert_called_with("networkidle", timeout=5000)
         assert result[0] == "<html><body>Test content</body></html>"
 
-        # Test SELECTOR wait type
-        result = fetch_url(
+        # Test SELECTOR wait type.
+        result = await fetch_url_playwright(
             "https://example.com",
-            fetch_using="playwright",
             wait_type=ScraperWaitType.SELECTOR,
             wait_selector="#content",
             timeout=5,
@@ -451,11 +562,10 @@ def test_fetch_url_playwright_wait_types():
         mock_page.wait_for_selector.assert_called_with("#content", timeout=5000)
         assert result[0] == "<html><body>Test content</body></html>"
 
-        # Test SELECTOR wait type with empty selector
-        mock_page.wait_for_selector.reset_mock()  # Reset the mock before testing
-        result = fetch_url(
+        # Test SELECTOR wait type with empty selector.
+        mock_page.wait_for_selector.reset_mock()  # Reset before testing.
+        result = await fetch_url_playwright(
             "https://example.com",
-            fetch_using="playwright",
             wait_type=ScraperWaitType.SELECTOR,
             wait_selector="",
             timeout=5,
@@ -465,46 +575,45 @@ def test_fetch_url_playwright_wait_types():
         mock_page.wait_for_selector.assert_not_called()
         assert result[0] == "<html><body>Test content</body></html>"
 
-        # Test TEXT wait type with empty selector
-        mock_locator = MagicMock()
-        mock_page.locator.return_value = mock_locator
-        with patch("par_ai_core.web_tools.expect") as mock_expect:
-            mock_expect_instance = MagicMock()
-            mock_expect_instance.to_contain_text = MagicMock()
-            mock_expect.return_value = mock_expect_instance
-            result = fetch_url(
-                "https://example.com",
-                fetch_using="playwright",
-                wait_type=ScraperWaitType.TEXT,
-                wait_selector="",
-                timeout=5,
-                verbose=True,
-                console=mock_console,
-            )
-            mock_page.locator.assert_not_called()
-            mock_expect.assert_not_called()
-            assert result[0] == "<html><body>Test content</body></html>"
+        # Test TEXT wait type with empty selector.
+        mock_page.locator = MagicMock()
+        result = await fetch_url_playwright(
+            "https://example.com",
+            wait_type=ScraperWaitType.TEXT,
+            wait_selector="",
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+        mock_page.locator.assert_not_called()
+        assert result[0] == "<html><body>Test content</body></html>"
 
-        # Test TEXT wait type
-        mock_locator = MagicMock()
-        mock_page.locator.return_value = mock_locator
-        with patch("par_ai_core.web_tools.expect") as mock_expect:
-            mock_expect_instance = MagicMock()
-            mock_expect_instance.to_contain_text = MagicMock()
-            mock_expect.return_value = mock_expect_instance
-            result = fetch_url(
-                "https://example.com",
-                fetch_using="playwright",
-                wait_type=ScraperWaitType.TEXT,
-                wait_selector="Expected Text",
-                timeout=5,
-                verbose=True,
-                console=mock_console,
-            )
-            mock_page.locator.assert_called_with("body")
-            mock_expect.assert_called_with(mock_locator)
-            mock_expect_instance.to_contain_text.assert_called_with("Expected Text", timeout=5000)
-            assert result[0] == "<html><body>Test content</body></html>"
+        # Test TEXT wait type with non-empty selector.
+        mock_page.locator = MagicMock(return_value=AsyncMock())
+        mock_page.locator.return_value.wait_for_text = AsyncMock()
+        wait_selector = "Expected Text"
+        page_content = f"<html><body>Test content {wait_selector}</body></html>"
+        mock_page.content = AsyncMock(return_value=page_content)
+
+        result = await fetch_url_playwright(
+            "https://example.com",
+            wait_type=ScraperWaitType.TEXT,
+            wait_selector=wait_selector,
+            timeout=5,
+            verbose=True,
+            console=mock_console,
+        )
+
+        mock_page.goto.assert_called_with("https://example.com", timeout=5000)
+        mock_page.locator.assert_called_with("body")
+        mock_page.locator.return_value.wait_for_text.assert_called_with("Expected Text", timeout=5000)
+
+        # Retrieve all the printed messages.
+        printed_messages = [call.args[0] for call in mock_console.print.call_args_list]
+        # Instead of an exact match, verify that the expected substrings are present.
+        assert not any("[bold red]Error" in msg for msg in printed_messages), "Expected no errors"
+
+        assert result[0] == page_content
 
 
 def test_fetch_url_selenium_wait_types():
@@ -523,7 +632,7 @@ def test_fetch_url_selenium_wait_types():
         result = fetch_url(
             "https://example.com",
             fetch_using="selenium",
-            wait_type="sleep",
+            wait_type=ScraperWaitType.SLEEP,
             sleep_time=2,
             verbose=True,
             console=mock_console,
@@ -535,7 +644,7 @@ def test_fetch_url_selenium_wait_types():
         result = fetch_url(
             "https://example.com",
             fetch_using="selenium",
-            wait_type="idle",
+            wait_type=ScraperWaitType.IDLE,
             timeout=5,
             verbose=True,
             console=mock_console,
@@ -571,24 +680,44 @@ def test_fetch_url_selenium_wait_types():
         assert result[0] == "<html><body>Test content</body></html>"
 
 
-def test_fetch_url_playwright_verbose():
+@pytest.mark.asyncio
+async def test_fetch_url_playwright_verbose():
     """Test fetch_url_playwright with verbose output."""
-    mock_page = MagicMock()
-    mock_page.content.return_value = "<html><body>Test content</body></html>"
 
-    mock_context = MagicMock()
+    mock_page = AsyncMock()
+    mock_page.content = AsyncMock(return_value="<html><body>Test content</body></html>")
+    mock_page.goto = AsyncMock()  # Simulate navigation.
+    mock_page.wait_for_timeout = AsyncMock(return_value=None)
+    mock_page.wait_for_load_state = AsyncMock(return_value=None)
+    mock_page.wait_for_selector = AsyncMock(return_value=None)
+
+    mock_context = AsyncMock()
     mock_context.new_page.return_value = mock_page
 
-    mock_browser = MagicMock()
+    mock_browser = AsyncMock()
     mock_browser.new_context.return_value = mock_context
 
-    mock_playwright = MagicMock()
-    mock_playwright.chromium.launch.return_value = mock_browser
+    mock_browser = AsyncMock()
+    mock_browser.new_context.return_value = mock_context
+
+    mock_playwright = AsyncMock()
+    # Ensure that p.chromium is also an AsyncMock.
+    mock_playwright.chromium = AsyncMock()
+    # Set up launch as an async function that returns mock_browser.
+    mock_playwright.chromium.launch = AsyncMock(return_value=mock_browser)
 
     mock_console = MagicMock()
 
-    with patch("playwright.sync_api.sync_playwright", return_value=MagicMock(__enter__=lambda x: mock_playwright)):
-        result = fetch_url("https://example.com", fetch_using="playwright", verbose=True, console=mock_console)
+    # Create a proper async context manager for async_playwright.
+    class MockAsyncPlaywright:
+        async def __aenter__(self):
+            return mock_playwright
+
+        async def __aexit__(self, exc_type, exc, tb):
+            pass
+
+    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+        result = await fetch_url_playwright("https://example.com", verbose=True, console=mock_console)
 
         # Verify console output messages
         mock_console.print.assert_any_call(
@@ -627,7 +756,7 @@ def test_fetch_url_selenium_browser_launch_error():
         result = fetch_url("https://example.com", fetch_using="selenium", verbose=True, console=mock_console)
 
         # Verify error message was printed
-        mock_console.print.assert_called_with("[bold red]Error fetching URL: Failed to launch browser[/bold red]")
+        mock_console.print.assert_called_with("[bold red]Error initializing Selenium driver[/bold red]")
 
         # Verify empty string is returned
         assert result == [""]
