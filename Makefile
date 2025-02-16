@@ -109,7 +109,7 @@ dist: packagecheck		# Upload to pypi
 
 .PHONY: test
 test:				# Run tests with coverage report
-	$(run) pytest --cov=src/$(lib) --cov-report=term-missing --cov-report=html tests/
+	$(run) pytest --cov=src/$(lib) --cov-report=term-missing --cov-report=html tests/ # --full-trace -W error::RuntimeWarning
 
 .PHONY: test-trace
 test-trace:				# Run tests enable full trace
