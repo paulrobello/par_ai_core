@@ -30,13 +30,16 @@ conjunction with other AI and web scraping related tasks.
 
 from __future__ import annotations
 
+import asyncio
 import os
+import threading
 import time
+from queue import Queue
 from typing import Literal
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
-from playwright.sync_api import HttpCredentials, ProxySettings, expect
+from playwright.async_api import HttpCredentials, ProxySettings, async_playwright
 from pydantic import BaseModel
 from rich.console import Console
 from rich.repr import rich_repr
@@ -175,6 +178,7 @@ def fetch_url(
     urls: str | list[str],
     *,
     fetch_using: Literal["playwright", "selenium"] = "playwright",
+    max_parallel: int = 1,
     sleep_time: int = 1,
     timeout: int = 10,
     proxy_config: ProxySettings | None = None,
@@ -192,6 +196,7 @@ def fetch_url(
     Args:
         urls (str | list[str]): The URL(s) to fetch.
         fetch_using (Literal["playwright", "selenium"]): The library to use for fetching the webpage.
+        max_parallel (int): The maximum number of parallel requests.
         sleep_time (int): The number of seconds to sleep between requests.
         timeout (int): The number of seconds to wait for a response.
         proxy_config (ProxySettings | None): Proxy configuration. Defaults to None.
@@ -212,21 +217,48 @@ def fetch_url(
         raise ValueError("All URLs must be absolute URLs with a scheme (e.g. http:// or https://)")
     try:
         if fetch_using == "playwright":
-            return fetch_url_playwright(
-                urls,
-                sleep_time=sleep_time,
-                timeout=timeout,
-                proxy_config=proxy_config,
-                http_credentials=http_credentials,
-                wait_type=wait_type,
-                wait_selector=wait_selector,
-                headless=headless,
-                verbose=verbose,
-                ignore_ssl=ignore_ssl,
-                console=console,
-            )
+            try:
+                loop = asyncio.get_running_loop()
+            except Exception as _:
+                loop = None
+            if loop:
+                return loop.run_until_complete(
+                    fetch_url_playwright(
+                        urls,
+                        max_parallel=max_parallel,
+                        sleep_time=sleep_time,
+                        timeout=timeout,
+                        proxy_config=proxy_config,
+                        http_credentials=http_credentials,
+                        wait_type=wait_type,
+                        wait_selector=wait_selector,
+                        headless=headless,
+                        verbose=verbose,
+                        ignore_ssl=ignore_ssl,
+                        console=console,
+                    )
+                )
+            else:
+                return asyncio.run(
+                    fetch_url_playwright(
+                        urls,
+                        max_parallel=max_parallel,
+                        sleep_time=sleep_time,
+                        timeout=timeout,
+                        proxy_config=proxy_config,
+                        http_credentials=http_credentials,
+                        wait_type=wait_type,
+                        wait_selector=wait_selector,
+                        headless=headless,
+                        verbose=verbose,
+                        ignore_ssl=ignore_ssl,
+                        console=console,
+                    )
+                )
+
         return fetch_url_selenium(
             urls,
+            max_parallel=max_parallel,
             sleep_time=sleep_time,
             timeout=timeout,
             proxy_config=proxy_config,
@@ -246,9 +278,10 @@ def fetch_url(
         return [""] * (len(urls) if isinstance(urls, list) else 1)
 
 
-def fetch_url_playwright(
+async def fetch_url_playwright(
     urls: str | list[str],
     *,
+    max_parallel: int = 1,
     sleep_time: int = 1,
     timeout: int = 10,
     proxy_config: ProxySettings | None = None,
@@ -261,116 +294,107 @@ def fetch_url_playwright(
     console: Console | None = None,
 ) -> list[str]:
     """
-    Fetch HTML content from a URL using Playwright.
-
+    Fetch the contents of a webpage using Playwright.
     Args:
-        urls (Union[str, list[str]]): The URL(s) to fetch.
-        sleep_time (int, optional): The number of seconds to sleep between requests. Defaults to 1.
-        timeout (int, optional): The timeout in seconds for the request. Defaults to 10.
-        proxy_config (ProxySettings, optional): Proxy configuration. Defaults to None.
-        http_credentials (HttpCredentials, optional): HTTP credentials for authentication. Defaults to None.
+        urls (str | list[str]): The URL(s) to fetch.
+        max_parallel (int): The maximum number of parallel requests.
+        sleep_time (int): The number of seconds to sleep between requests.
+        timeout (int): The number of seconds to wait for a response.
+        proxy_config (ProxySettings | None): Proxy configuration. Defaults to None.
+        http_credentials (HttpCredentials | None): HTTP credentials for authentication. Defaults to None.
         wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
-        headless (bool, optional): Whether to run the browser in headless mode. Defaults to True.
-        ignore_ssl (bool, optional): Whether to ignore SSL errors. Defaults to True.
-        verbose (bool, optional): Whether to print verbose output. Defaults to False.
-        console (Console, optional): The console to use for printing verbose output.
+        headless (bool): Whether to run the browser in headless mode.
+        ignore_ssl (bool): Whether to ignore SSL errors.
+        verbose (bool): Whether to print verbose output.
+        console (Console | None): The console to use for output. Defaults to console_err.
 
     Returns:
-        list[str]: The fetched HTML content as a list of strings.
+        list[str]: A list of HTML contents of the fetched webpages.
     """
-    from playwright.sync_api import sync_playwright
-
-    if not console:
-        console = console_err
+    # from playwright.async_api import async_playwright
 
     if isinstance(urls, str):
         urls = [urls]
 
-    results: list[str] = []
+    if not console:
+        console = console_err
 
-    with sync_playwright() as p:
-        try:
-            browser = p.chromium.launch(proxy=proxy_config, headless=headless)
-        except Exception as e:
-            console.print(
-                "[bold red]Error launching playwright browser:[/bold red] Make sure you install playwright: `uv tool install playwright` then run `playwright install chromium`."
-            )
-            raise e
-            # return ["" * len(urls)]
-        context = browser.new_context(
+    async def fetch_page(url: str, browser) -> str:
+        context = await browser.new_context(
             viewport={"width": 1280, "height": 1024},
             user_agent=get_random_user_agent(),
             ignore_https_errors=ignore_ssl,
             http_credentials=http_credentials,
         )
-
-        page = context.new_page()
-        for url in urls:
+        page = await context.new_page()
+        try:
             if verbose:
                 console.print(f"[bold blue]Playwright fetching content from {url}...[/bold blue]")
-            try:
-                page.goto(url, timeout=timeout * 1000)
+            await page.goto(url, timeout=timeout * 1000)
 
-                if wait_type == ScraperWaitType.PAUSE:
-                    console.print("[yellow]Press Enter to continue...[/yellow]")
-                    input()
-                elif wait_type == ScraperWaitType.SLEEP:
-                    if verbose:
-                        console.print(f"[yellow]Waiting {sleep_time} seconds...[/yellow]")
-                    page.wait_for_timeout(sleep_time * 1000)  # Use the specified sleep time
-                elif wait_type == ScraperWaitType.IDLE:
-                    if verbose:
-                        console.print("[yellow]Waiting for networkidle...[/yellow]")
-                    page.wait_for_load_state("networkidle", timeout=timeout * 1000)  # domcontentloaded
-                elif wait_type == ScraperWaitType.SELECTOR:
-                    if wait_selector:
-                        if verbose:
-                            console.print(f"[yellow]Waiting for selector {wait_selector}...[/yellow]")
-                        page.wait_for_selector(wait_selector, timeout=timeout * 1000)
-                    else:
-                        if verbose:
-                            console.print(
-                                "[bold yellow]Warning:[/bold yellow] Please specify a selector when using wait_type=selector."
-                            )
-                elif wait_type == ScraperWaitType.TEXT:
-                    if wait_selector:
-                        if verbose:
-                            console.print(f"[yellow]Waiting for selector {wait_selector}...[/yellow]")
-                        expect(page.locator("body")).to_contain_text(wait_selector, timeout=timeout * 1000)
-                    else:
-                        if verbose:
-                            console.print(
-                                "[bold yellow]Warning:[/bold yellow] Please specify a selector when using wait_type=text."
-                            )
-
-                # Add more realistic actions like scrolling
-                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                page.wait_for_timeout(1000)  # Simulate time taken to scroll and read
-                html = page.content()
-                results.append(html)
-                # if verbose:
-                #     console.print(
-                #         Panel(
-                #             html[0:500] + "...",
-                #             title="[bold green]Snippet[/bold green]",
-                #         )
-                #     )
-            except Exception as e:
+            if wait_type == ScraperWaitType.PAUSE:
+                console.print("[yellow]Press Enter to continue...[/yellow]")
+                input()
+            elif wait_type == ScraperWaitType.SLEEP:
                 if verbose:
-                    console.print(f"[bold red]Error fetching content from {url}[/bold red]: {str(e)}")
-                results.append("")
-        try:
-            browser.close()
-        except Exception as _:
-            pass
+                    console.print(f"[yellow]Waiting {sleep_time} seconds...[/yellow]")
+                await page.wait_for_timeout(sleep_time * 1000)
+            elif wait_type == ScraperWaitType.IDLE:
+                if verbose:
+                    console.print("[yellow]Waiting for networkidle...[/yellow]")
+                await page.wait_for_load_state("networkidle", timeout=timeout * 1000)
+            elif wait_type == ScraperWaitType.SELECTOR:
+                if wait_selector:
+                    if verbose:
+                        console.print(f"[yellow]Waiting for selector {wait_selector}...[/yellow]")
+                    await page.wait_for_selector(wait_selector, timeout=timeout * 1000)
+                else:
+                    if verbose:
+                        console.print(
+                            "[bold yellow]Warning:[/bold yellow] Please specify a selector when using wait_type=selector."
+                        )
+            elif wait_type == ScraperWaitType.TEXT:
+                if wait_selector:
+                    if verbose:
+                        console.print(f"[yellow]Waiting for selector {wait_selector}...[/yellow]")
+                    await page.locator("body").wait_for_text(wait_selector, timeout=timeout * 1000)
+                else:
+                    if verbose:
+                        console.print(
+                            "[bold yellow]Warning:[/bold yellow] Please specify a selector when using wait_type=text."
+                        )
 
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            await page.wait_for_timeout(1000)
+            html = await page.content()
+            return html
+        except Exception as e:
+            if verbose:
+                console.print(f"[bold red]Error fetching content from {url}[/bold red]: {str(e)}")
+            return ""
+        finally:
+            await context.close()
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(proxy=proxy_config, headless=headless)
+        try:
+            semaphore = asyncio.Semaphore(max_parallel)
+
+            async def fetch_with_semaphore(url):
+                async with semaphore:
+                    return await fetch_page(url, browser)
+
+            results = await asyncio.gather(*[fetch_with_semaphore(url) for url in urls])
+        finally:
+            await browser.close()
     return results
 
 
 def fetch_url_selenium(
     urls: str | list[str],
     *,
+    max_parallel: int = 1,
     sleep_time: int = 1,
     timeout: int = 10,
     proxy_config: ProxySettings | None = None,
@@ -382,10 +406,11 @@ def fetch_url_selenium(
     verbose: bool = False,
     console: Console | None = None,
 ) -> list[str]:
-    """Fetch the contents of a webpage using Selenium.
+    """Fetch the contents of a webpage using Selenium with parallel requests using the same driver.
 
     Args:
         urls: The URL(s) to fetch
+        max_parallel: The maximum number of parallel requests
         sleep_time: The number of seconds to sleep between requests
         timeout: The number of seconds to wait for a response
         proxy_config (ProxySettings, optional): Proxy configuration. Defaults to None.
@@ -433,53 +458,87 @@ def fetch_url_selenium(
         options.add_argument("--headless=new")
     if proxy_config and "server" in proxy_config:
         options.add_argument(f"--proxy-server={proxy_config['server']}")
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    driver.set_page_load_timeout(timeout)
 
-    results: list[str] = []
-    for url in urls:
-        if verbose:
-            console.print(f"[bold blue]Selenium fetching content from {url}...[/bold blue]")
+    results: list[str] = [""] * len(urls)
+    queue = Queue()
 
-        if http_credentials and "username" in http_credentials and "password" in http_credentials:
-            url = inject_credentials(url, http_credentials["username"], http_credentials["password"])
-
+    def worker():
+        driver = None
         try:
-            driver.get(url)
-            if wait_type == ScraperWaitType.PAUSE:
-                console.print("[yellow]Press Enter to continue...[/yellow]")
-                input()
-            elif wait_type == ScraperWaitType.SLEEP and sleep_time > 0:
-                time.sleep(sleep_time)
-            elif wait_type == ScraperWaitType.IDLE:
-                time.sleep(1)
-            elif wait_type == ScraperWaitType.SELECTOR:
-                if wait_selector:
-                    wait = WebDriverWait(driver, 10)
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, wait_selector)))
-            elif wait_type == ScraperWaitType.TEXT:
-                if wait_selector:
-                    wait = WebDriverWait(driver, 10)
-                    wait.until(EC.text_to_be_present_in_element((By.TAG_NAME, "body"), wait_selector))
-            time.sleep(1)  # Wait a bit for any dynamic content to load
-            if verbose:
-                console.print("[bold green]Page loaded. Scrolling and waiting for dynamic content...[/bold green]")
-                console.print(f"[bold yellow]Sleeping for {sleep_time} seconds...[/bold yellow]")
-            # Scroll to the bottom of the page
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            driver.set_page_load_timeout(timeout)
 
-            time.sleep(sleep_time)  # Sleep for the specified time
+            while not queue.empty():
+                index, url = queue.get()
+                try:
+                    if verbose:
+                        console.print(f"[bold blue]Selenium fetching content from {url}...[/bold blue]")
 
-            results.append(driver.page_source)
-        except Exception as e:
+                    if http_credentials and "username" in http_credentials and "password" in http_credentials:
+                        url = inject_credentials(url, http_credentials["username"], http_credentials["password"])
+
+                    driver.get(url)
+                    if wait_type == ScraperWaitType.PAUSE:
+                        console.print("[yellow]Press Enter to continue...[/yellow]")
+                        input()
+                    elif wait_type == ScraperWaitType.SLEEP and sleep_time > 0:
+                        pass
+                        # time.sleep(sleep_time)
+                    elif wait_type == ScraperWaitType.IDLE:
+                        time.sleep(1)
+                    elif wait_type == ScraperWaitType.SELECTOR:
+                        if wait_selector:
+                            wait = WebDriverWait(driver, 10)
+                            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, wait_selector)))
+                    elif wait_type == ScraperWaitType.TEXT:
+                        if wait_selector:
+                            wait = WebDriverWait(driver, 10)
+                            wait.until(EC.text_to_be_present_in_element((By.TAG_NAME, "body"), wait_selector))
+                    time.sleep(1)  # Wait a bit for any dynamic content to load
+                    if verbose:
+                        console.print(
+                            "[bold green]Page loaded. Scrolling and waiting for dynamic content...[/bold green]"
+                        )
+                        console.print(f"[bold yellow]Sleeping for {sleep_time} seconds...[/bold yellow]")
+                    # Scroll to the bottom of the page
+                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+                    time.sleep(sleep_time)  # Sleep for the specified time
+
+                    results[index] = driver.page_source
+                except Exception as e:
+                    if verbose:
+                        console.print(f"[bold red]Error fetching content from {url}: {str(e)}[/bold red]")
+                    results[index] = ""
+                finally:
+                    queue.task_done()
+        except Exception as _:
             if verbose:
-                console.print(f"[bold red]Error fetching content from {url}: {str(e)}[/bold red]")
-            results.append("")
-    try:
-        driver.quit()
-    except Exception as _:
-        pass
+                console.print("[bold red]Error initializing Selenium driver[/bold red]")
+            while not queue.empty():
+                queue.get()
+                queue.task_done()
+        finally:
+            if driver:
+                try:
+                    driver.quit()
+                except Exception as _:
+                    pass
+
+    for i, url in enumerate(urls):
+        queue.put((i, url))
+
+    threads = []
+    for _ in range(max_parallel):
+        thread = threading.Thread(target=worker)
+        thread.start()
+        threads.append(thread)
+
+    queue.join()
+
+    for thread in threads:
+        thread.join()
 
     return results
 
