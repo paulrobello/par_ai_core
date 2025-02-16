@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
 ## Whats New
 - Version 0.1.19:
-  - Added proxy config and http auth support for fetch_url related utils
+  - Added proxy config, http auth and parallel fetch support for fetch_url related utils
 - Version 0.1.18:
   - Updated web scraping utils
 - Version 0.1.17:
