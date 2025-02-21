@@ -3,7 +3,11 @@
 [![PyPI](https://img.shields.io/pypi/v/par_ai_core)](https://pypi.org/project/par_ai_core/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/par_ai_core.svg)](https://pypi.org/project/par_ai_core/)  
 ![Runs on Linux | MacOS | Windows](https://img.shields.io/badge/runs%20on-Linux%20%7C%20MacOS%20%7C%20Windows-blue)
-![Arch x86-63 | ARM | AppleSilicon](https://img.shields.io/badge/arch-x86--64%20%7C%20ARM%20%7C%20AppleSilicon-blue)  
+![Arch x86-63 | ARM | AppleSilicon](https://img.shields.io/badge/arch-x86--64%20%7C%20ARM%20%7C%20AppleSilicon-blue)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/par_ai_core)
+
+
+
 ![PyPI - License](https://img.shields.io/pypi/l/par_ai_core)
 [![codecov](https://codecov.io/gh/paulrobello/par_ai_core/branch/main/graph/badge.svg)](https://codecov.io/gh/paulrobello/par_ai_core)
 
