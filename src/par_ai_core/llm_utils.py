@@ -110,7 +110,8 @@ def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
     reasoning_effort = os.environ.get(f"{prefix}_REASONING_EFFORT")
     if reasoning_effort not in [None, "low", "medium", "high"]:
         raise ValueError(f"{prefix}_REASONING_EFFORT must be one of 'low', 'medium', or 'high'")
-    reasoning_effort = ReasoningEffort(reasoning_effort)
+    if reasoning_effort is not None:
+        reasoning_effort = ReasoningEffort(reasoning_effort)
 
     reasoning_budget = os.environ.get(f"{prefix}_REASONING_BUDGET")
     if reasoning_budget is not None:
