@@ -144,6 +144,18 @@ components such as llm_config, llm_providers, and langchain integrations.</p>
     if seed is not None:
         seed = int(seed)
 
+    reasoning_effort = os.environ.get(f&#34;{prefix}_REASONING_EFFORT&#34;)
+    if reasoning_effort not in [None, &#34;low&#34;, &#34;medium&#34;, &#34;high&#34;]:
+        raise ValueError(f&#34;{prefix}_REASONING_EFFORT must be one of &#39;low&#39;, &#39;medium&#39;, or &#39;high&#39;&#34;)
+    if reasoning_effort is not None:
+        reasoning_effort = ReasoningEffort(reasoning_effort)
+
+    reasoning_budget = os.environ.get(f&#34;{prefix}_REASONING_BUDGET&#34;)
+    if reasoning_budget is not None:
+        reasoning_budget = int(reasoning_budget)
+        if not reasoning_budget:
+            reasoning_budget = None
+
     return LlmConfig(
         provider=ai_provider,
         model_name=model_name,
@@ -164,6 +176,8 @@ components such as llm_config, llm_providers, and langchain integrations.</p>
         top_k=top_k,
         top_p=top_p,
         seed=seed,
+        reasoning_effort=reasoning_effort,
+        reasoning_budget=reasoning_budget,
     )</code></pre>
 </details>
 <div class="desc"><p>Create instance of LlmConfig from environment variables.
