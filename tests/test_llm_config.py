@@ -419,13 +419,13 @@ def test_llm_config_anthropic_setup() -> None:
             model="claude-3",
             temperature=0.8,
             streaming=True,
-            default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+            # default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             timeout=None,
             top_k=None,
             top_p=None,
-            max_tokens_to_sample=1024,
+            max_tokens_to_sample=2048,
             disable_streaming=False,
-            max_tokens=None,
+            thinking=None,
         )
 
 
