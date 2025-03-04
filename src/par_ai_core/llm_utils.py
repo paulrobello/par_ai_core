@@ -25,7 +25,7 @@ import os
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from par_ai_core.llm_config import LlmConfig, llm_run_manager
+from par_ai_core.llm_config import LlmConfig, ReasoningEffort, llm_run_manager
 from par_ai_core.llm_providers import LlmProvider, provider_base_urls, provider_default_models, provider_env_key_names
 
 
@@ -107,6 +107,17 @@ def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
     if seed is not None:
         seed = int(seed)
 
+    reasoning_effort = os.environ.get(f"{prefix}_REASONING_EFFORT")
+    if reasoning_effort not in [None, "low", "medium", "high"]:
+        raise ValueError(f"{prefix}_REASONING_EFFORT must be one of 'low', 'medium', or 'high'")
+    reasoning_effort = ReasoningEffort(reasoning_effort)
+
+    reasoning_budget = os.environ.get(f"{prefix}_REASONING_BUDGET")
+    if reasoning_budget is not None:
+        reasoning_budget = int(reasoning_budget)
+        if not reasoning_budget:
+            reasoning_budget = None
+
     return LlmConfig(
         provider=ai_provider,
         model_name=model_name,
@@ -127,6 +138,8 @@ def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
         top_k=top_k,
         top_p=top_p,
         seed=seed,
+        reasoning_effort=reasoning_effort,
+        reasoning_budget=reasoning_budget,
     )
 
 

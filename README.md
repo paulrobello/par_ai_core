@@ -238,6 +238,9 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.21:
+  - Added config options for OpenAI reasoning effort, and Anthropic reasoning token budget
+  - Fix o3 error when temperature is set
 - Version 0.1.20:
   - Added parallel fetch support for fetch_url related utils
 - Version 0.1.19:

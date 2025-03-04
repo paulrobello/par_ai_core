@@ -22,7 +22,6 @@ import threading
 import uuid
 import warnings
 from dataclasses import dataclass, fields
-from enum import Enum
 from typing import Any, Literal
 
 from langchain._api import LangChainDeprecationWarning
@@ -30,6 +29,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel, BaseLanguageModel
 from langchain_core.runnables import RunnableConfig
 from pydantic import SecretStr
+from strenum import StrEnum
 
 # from langchain_experimental import
 from par_ai_core.llm_providers import (
@@ -44,7 +44,7 @@ from par_ai_core.llm_providers import (
 warnings.simplefilter("ignore", category=LangChainDeprecationWarning)
 
 
-class LlmMode(str, Enum):
+class LlmMode(StrEnum):
     """Enumeration of LLM operating modes.
 
     Defines the different ways an LLM can be used:
@@ -59,6 +59,14 @@ class LlmMode(str, Enum):
 
 
 llm_modes: list[LlmMode] = list(LlmMode)
+
+
+class ReasoningEffort(StrEnum):
+    """Reasoning effort for o1 and o3 models"""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
 
 
 @dataclass
@@ -160,6 +168,10 @@ class LlmConfig:
     """Ollama output format. Valid options are empty string (default) and 'json'"""
     extra_body: dict[str, Any] | None = None
     """Extra body parameters to send with the API request. Only used by OpenAI compatible providers"""
+    reasoning_effort: ReasoningEffort | None = None
+    """OpenAI thinking model reasoning effort"""
+    reasoning_budget: int | None = None
+    """Reasoning token budget for anthropic"""
 
     def to_json(self) -> dict:
         """Converts the configuration to a JSON-serializable dictionary.
@@ -193,6 +205,8 @@ class LlmConfig:
             "env_prefix": self.env_prefix,
             "format": self.format,
             "extra_body": self.extra_body,
+            "reasoning_effort": self.reasoning_effort,
+            "reasoning_budget": self.reasoning_budget,
         }
 
     @classmethod
@@ -248,6 +262,8 @@ class LlmConfig:
             env_prefix=self.env_prefix,
             format=self.format,
             extra_body=self.extra_body,
+            reasoning_effort=self.reasoning_effort,
+            reasoning_budget=self.reasoning_budget,
         )
 
     def gen_runnable_config(self) -> RunnableConfig:
@@ -349,6 +365,7 @@ class LlmConfig:
                 seed=self.seed,
                 max_tokens=self.num_ctx,  # type: ignore
                 disable_streaming=not self.streaming,
+                reasoning_effort=self.reasoning_effort,
             )
         if self.mode == LlmMode.EMBEDDINGS:
             return OpenAIEmbeddings(
@@ -460,6 +477,7 @@ class LlmConfig:
                 seed=self.seed,
                 max_tokens=self.num_ctx,  # type: ignore
                 disable_streaming=not self.streaming,
+                reasoning_effort=self.reasoning_effort,
             )
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
@@ -497,18 +515,20 @@ class LlmConfig:
         from langchain_anthropic import ChatAnthropic
 
         if self.mode == LlmMode.CHAT:
+            if self.reasoning_budget and not self.num_ctx:
+                self.num_ctx = self.reasoning_budget * 2
             return ChatAnthropic(
                 model=self.model_name,  # type: ignore
-                temperature=self.temperature,
+                temperature=self.temperature if not self.reasoning_budget else 1,
                 streaming=self.streaming,
                 # base_url=self.base_url,
-                default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+                # default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
                 timeout=self.timeout,
                 top_k=self.top_k,
                 top_p=self.top_p,
-                max_tokens_to_sample=self.num_predict or 1024,
+                max_tokens_to_sample=self.num_ctx or 2048,
                 disable_streaming=not self.streaming,
-                max_tokens=self.num_ctx or None,  # type: ignore
+                thinking={"type": "enabled", "budget_tokens": self.reasoning_budget} if self.reasoning_budget else None,
             )  # type: ignore
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
@@ -666,7 +686,7 @@ class LlmConfig:
 
     def build_llm_model(self) -> BaseLanguageModel:
         """Build the LLM model."""
-        if self.model_name.startswith("o1"):
+        if self.model_name.startswith("o1") or self.model_name.startswith("o3"):
             self.temperature = 1
         llm = self._build_llm()
         if not isinstance(llm, BaseLanguageModel):
@@ -678,7 +698,7 @@ class LlmConfig:
 
     def build_chat_model(self) -> BaseChatModel:
         """Build the chat model."""
-        if self.model_name.startswith("o1"):
+        if self.model_name.startswith("o1") or self.model_name.startswith("o3"):
             self.temperature = 1
             self.streaming = False
 
@@ -735,6 +755,10 @@ class LlmConfig:
             os.environ[f"{self.env_prefix}_SEED"] = str(self.seed)
         if self.timeout is not None:
             os.environ[f"{self.env_prefix}_TIMEOUT"] = str(self.timeout)
+        if self.reasoning_effort is not None:
+            os.environ[f"{self.env_prefix}_REASONING_EFFORT"] = str(self.reasoning_effort)
+        if self.reasoning_budget is not None:
+            os.environ[f"{self.env_prefix}_REASONING_BUDGET"] = str(self.reasoning_budget)
 
         return self
 
