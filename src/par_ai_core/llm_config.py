@@ -515,8 +515,11 @@ class LlmConfig:
         from langchain_anthropic import ChatAnthropic
 
         if self.mode == LlmMode.CHAT:
-            if self.reasoning_budget and not self.num_ctx:
-                self.num_ctx = self.reasoning_budget * 2
+            if self.reasoning_budget:
+                if self.reasoning_budget < 1024:
+                    raise ValueError("Reasoning budget must be at least 1024 tokens")
+                if not self.num_ctx:
+                    self.num_ctx = self.reasoning_budget * 2
             return ChatAnthropic(
                 model=self.model_name,  # type: ignore
                 temperature=self.temperature if not self.reasoning_budget else 1,
