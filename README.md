@@ -238,6 +238,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.22:
+  - Fix some asyncio issues with web fetch utils.
 - Version 0.1.21:
   - Added config options for OpenAI reasoning effort, and Anthropic reasoning token budget
   - Fix o3 error when temperature is set

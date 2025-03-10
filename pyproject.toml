@@ -76,6 +76,7 @@ dependencies = [
     "langchain-deepseek>=0.1.2",
     "litellm>=1.61.3",
     "google-generativeai>=0.8.4",
+    "nest-asyncio>=1.6.0",
 ]
 packages = [
     "src/par_ai_core",
