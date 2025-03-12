@@ -691,6 +691,8 @@ class LlmConfig:
         """Build the LLM model."""
         if self.model_name.startswith("o1") or self.model_name.startswith("o3"):
             self.temperature = 1
+        else:
+            self.reasoning_effort = None
         llm = self._build_llm()
         if not isinstance(llm, BaseLanguageModel):
             raise ValueError(f"Invalid LLM type returned for base mode from provider '{self.provider.value}'")
@@ -704,6 +706,8 @@ class LlmConfig:
         if self.model_name.startswith("o1") or self.model_name.startswith("o3"):
             self.temperature = 1
             self.streaming = False
+        else:
+            self.reasoning_effort = None
 
         llm = self._build_llm()
         if not isinstance(llm, BaseChatModel):
@@ -715,6 +719,7 @@ class LlmConfig:
 
     def build_embeddings(self) -> Embeddings:
         """Build the embeddings."""
+        self.reasoning_effort = None
         llm = self._build_llm()
         if not isinstance(llm, Embeddings):
             raise ValueError(f"LLM mode '{self.mode.value}' does not support embeddings.")
