@@ -56,7 +56,7 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_community.utilities.brave_search import BraveSearchWrapper
 from langchain_core.language_models import BaseChatModel
 from tavily import TavilyClient
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._api import YouTubeTranscriptApi
 
 from par_ai_core.llm_utils import summarize_content
 from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
