@@ -67,7 +67,7 @@ conjunction with other AI and web scraping related tasks.</p>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="par_ai_core.web_tools.fetch_url"><code class="name flex">
-<span>def <span class="ident">fetch_url</span></span>(<span>urls: str | list[str],<br>*,<br>fetch_using: "Literal['playwright', 'selenium']" = 'playwright',<br>max_parallel: int = 1,<br>sleep_time: int = 1,<br>timeout: int = 10,<br>proxy_config: ProxySettings | None = None,<br>http_credentials: HttpCredentials | None = None,<br>wait_type: <a title="par_ai_core.web_tools.ScraperWaitType" href="#par_ai_core.web_tools.ScraperWaitType">ScraperWaitType</a> = idle,<br>wait_selector: str | None = None,<br>headless: bool = True,<br>verbose: bool = False,<br>ignore_ssl: bool = True,<br>console: Console | None = None) ‑> list[str]</span>
+<span>def <span class="ident">fetch_url</span></span>(<span>urls: str | list[str],<br>*,<br>fetch_using: "Literal['playwright', 'selenium']" = 'playwright',<br>max_parallel: int = 1,<br>sleep_time: int = 1,<br>timeout: int = 10,<br>proxy_config: ProxySettings | None = None,<br>http_credentials: HttpCredentials | None = None,<br>wait_type: <a title="par_ai_core.web_tools.ScraperWaitType" href="#par_ai_core.web_tools.ScraperWaitType">ScraperWaitType</a> = sleep,<br>wait_selector: str | None = None,<br>headless: bool = True,<br>verbose: bool = False,<br>ignore_ssl: bool = True,<br>console: Console | None = None) ‑> list[str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -83,7 +83,7 @@ conjunction with other AI and web scraping related tasks.</p>
     timeout: int = 10,
     proxy_config: ProxySettings | None = None,
     http_credentials: HttpCredentials | None = None,
-    wait_type: ScraperWaitType = ScraperWaitType.IDLE,
+    wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
     wait_selector: str | None = None,
     headless: bool = True,
     verbose: bool = False,

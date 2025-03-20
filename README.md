@@ -238,6 +238,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.24:
+  - Changed default fetch wait from idle to sleep
 - Version 0.1.23:
   - Fix issue caused by providing reasoning effort to models that dont support it.
 - Version 0.1.22:

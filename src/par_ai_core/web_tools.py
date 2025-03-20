@@ -183,7 +183,7 @@ def fetch_url(
     timeout: int = 10,
     proxy_config: ProxySettings | None = None,
     http_credentials: HttpCredentials | None = None,
-    wait_type: ScraperWaitType = ScraperWaitType.IDLE,
+    wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
     wait_selector: str | None = None,
     headless: bool = True,
     verbose: bool = False,

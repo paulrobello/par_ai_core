@@ -691,6 +691,8 @@ class LlmConfig:
         &#34;&#34;&#34;Build the LLM model.&#34;&#34;&#34;
         if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
             self.temperature = 1
+        else:
+            self.reasoning_effort = None
         llm = self._build_llm()
         if not isinstance(llm, BaseLanguageModel):
             raise ValueError(f&#34;Invalid LLM type returned for base mode from provider &#39;{self.provider.value}&#39;&#34;)
@@ -704,6 +706,8 @@ class LlmConfig:
         if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
             self.temperature = 1
             self.streaming = False
+        else:
+            self.reasoning_effort = None
 
         llm = self._build_llm()
         if not isinstance(llm, BaseChatModel):
@@ -715,6 +719,7 @@ class LlmConfig:
 
     def build_embeddings(self) -&gt; Embeddings:
         &#34;&#34;&#34;Build the embeddings.&#34;&#34;&#34;
+        self.reasoning_effort = None
         llm = self._build_llm()
         if not isinstance(llm, Embeddings):
             raise ValueError(f&#34;LLM mode &#39;{self.mode.value}&#39; does not support embeddings.&#34;)
@@ -979,6 +984,8 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
     if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
         self.temperature = 1
         self.streaming = False
+    else:
+        self.reasoning_effort = None
 
     llm = self._build_llm()
     if not isinstance(llm, BaseChatModel):
@@ -1000,6 +1007,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
 </summary>
 <pre><code class="python">def build_embeddings(self) -&gt; Embeddings:
     &#34;&#34;&#34;Build the embeddings.&#34;&#34;&#34;
+    self.reasoning_effort = None
     llm = self._build_llm()
     if not isinstance(llm, Embeddings):
         raise ValueError(f&#34;LLM mode &#39;{self.mode.value}&#39; does not support embeddings.&#34;)
@@ -1019,6 +1027,8 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
     &#34;&#34;&#34;Build the LLM model.&#34;&#34;&#34;
     if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
         self.temperature = 1
+    else:
+        self.reasoning_effort = None
     llm = self._build_llm()
     if not isinstance(llm, BaseLanguageModel):
         raise ValueError(f&#34;Invalid LLM type returned for base mode from provider &#39;{self.provider.value}&#39;&#34;)
