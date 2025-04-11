@@ -55,8 +55,9 @@ from googleapiclient.discovery import build
 from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_community.utilities.brave_search import BraveSearchWrapper
 from langchain_core.language_models import BaseChatModel
+from pydantic import SecretStr
 from tavily import TavilyClient
-from youtube_transcript_api._api import YouTubeTranscriptApi
+from youtube_transcript_api._api import YouTubeTranscriptApi  # type: ignore
 
 from par_ai_core.llm_utils import summarize_content
 from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
@@ -178,7 +179,7 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
     else:
         date_range = "false"
     wrapper = BraveSearchWrapper(
-        api_key=os.environ["BRAVE_API_KEY"],
+        api_key=SecretStr(os.environ["BRAVE_API_KEY"]),
         search_kwargs={"count": max_results, "summary": True, "freshness": date_range},
     )
     res = json.loads(wrapper.run(query))

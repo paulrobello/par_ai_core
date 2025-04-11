@@ -450,7 +450,7 @@ def get_api_call_cost(
             model_name = f"deepseek/{model_name}"
         model_info = get_model_info(model=model_name)
     except Exception as _:
-        console_err.print(f"No pricing data found for model {llm_config.provider.lower()}/{model_name}")
+        # console_err.print(f"No pricing data found for model {llm_config.provider.lower()}/{model_name}")
         return 0
     # console_err.print(usage_metadata)
     # console_err.print(model_info)

@@ -24,7 +24,7 @@ import warnings
 from dataclasses import dataclass, fields
 from typing import Any, Literal
 
-from langchain._api import LangChainDeprecationWarning
+from langchain._api import LangChainDeprecationWarning  # type: ignore
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel, BaseLanguageModel
 from langchain_core.runnables import RunnableConfig

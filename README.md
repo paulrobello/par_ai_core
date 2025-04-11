@@ -238,6 +238,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.1.25:
+  - Supress pricing not found warning
 - Version 0.1.24:
   - Changed default fetch wait from idle to sleep
 - Version 0.1.23:

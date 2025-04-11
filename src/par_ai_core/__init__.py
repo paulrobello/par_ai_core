@@ -10,7 +10,7 @@ import os
 import warnings
 
 import nest_asyncio
-from langchain_core._api import LangChainBetaWarning
+from langchain_core._api import LangChainBetaWarning  # type: ignore
 
 nest_asyncio.apply()
 
@@ -23,7 +23,7 @@ __author__ = "Paul Robello"
 __credits__ = ["Paul Robello"]
 __maintainer__ = "Paul Robello"
 __email__ = "probello@gmail.com"
-__version__ = "0.1.24"
+__version__ = "0.1.21"
 __application_title__ = "Par AI Core"
 __application_binary__ = "par_ai_core"
 __licence__ = "MIT"
