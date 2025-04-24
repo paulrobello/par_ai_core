@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Tests for the provider callback info module."""
 
 from uuid import UUID

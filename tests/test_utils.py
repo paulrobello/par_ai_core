@@ -2,18 +2,6 @@
 
 from __future__ import annotations
 
-
-class MockConsole:
-    """Mock console for testing display output."""
-
-    def __init__(self):
-        self.last_output = ""
-
-    def print(self, content: str) -> None:
-        """Store the last printed output."""
-        self.last_output = str(content)
-
-
 import csv
 import io
 import os
@@ -76,6 +64,17 @@ from par_ai_core.utils import (
     to_camel_case,
     to_class_case,
 )
+
+
+class MockConsole:
+    """Mock console for testing display output."""
+
+    def __init__(self):
+        self.last_output = ""
+
+    def print(self, content: str) -> None:
+        """Store the last printed output."""
+        self.last_output = str(content)
 
 
 def test_has_stdin_content(monkeypatch):
