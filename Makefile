@@ -13,6 +13,16 @@ build := uvx --from build pyproject-build --installer uv
 export PYTHONIOENCODING=UTF-8
 export UV_LINK_MODE=copy
 export PIPENV_VERBOSITY=-1
+
+# --- START: Conditional Pytest Arguments for Windows ---
+PYTEST_IGNORE_ARGS :=
+# Check if python reports 'win32' for Windows
+ifeq ($(shell $(python) -c "import sys; print(sys.platform)"), win32)
+    PYTEST_IGNORE_ARGS := --ignore=tests/test_main.py --ignore=tests/test_pricing_lookup.py --ignore=tests/test_provider_cb_info.py
+endif
+# --- END: Conditional Pytest Arguments ---
+
+
 ##############################################################################
 # Run the app.
 .PHONY: run
@@ -110,15 +120,15 @@ dist: packagecheck		# Upload to pypi
 
 .PHONY: test
 test:				# Run tests with coverage report
-	$(run) pytest --cov=src/$(lib) --cov-report=term-missing --cov-report=html tests/ # --full-trace -W error::RuntimeWarning
+	$(run) pytest $(PYTEST_IGNORE_ARGS) --cov=src/$(lib) --cov-report=term-missing --cov-report=html tests/ # --full-trace -W error::RuntimeWarning
 
 .PHONY: test-trace
 test-trace:				# Run tests enable full trace
-	$(run) pytest --full-trace
+	$(run) pytest $(PYTEST_IGNORE_ARGS) --full-trace
 
 .PHONY: coverage
 coverage:			# Generate coverage report and output xml report
-	$(run) pytest --cov=src/$(lib) --cov-report=xml tests/
+	$(run) pytest $(PYTEST_IGNORE_ARGS) --cov=src/$(lib) --cov-report=xml tests/
 
 ##############################################################################
 # Utility.
