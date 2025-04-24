@@ -17,9 +17,9 @@ export PIPENV_VERBOSITY=-1
 # --- START: Conditional Pytest Arguments for Windows ---
 PYTEST_IGNORE_ARGS :=
 # Check if python reports 'win32' for Windows
-ifeq ($(shell $(python) -c "import sys; print(sys.platform)"), win32)
-    PYTEST_IGNORE_ARGS := --ignore=tests/test_main.py --ignore=tests/test_pricing_lookup.py --ignore=tests/test_provider_cb_info.py
-endif
+#ifeq ($(shell $(python) -c "import sys; print(sys.platform)"), win32)
+#    PYTEST_IGNORE_ARGS := --ignore=tests/test_main.py --ignore=tests/test_pricing_lookup.py --ignore=tests/test_provider_cb_info.py
+#endif
 # --- END: Conditional Pytest Arguments ---
 
 
