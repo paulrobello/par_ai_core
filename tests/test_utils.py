@@ -42,6 +42,7 @@ from par_ai_core.utils import (
     code_rust_file_globs,
     detect_syntax,
     dict_keys_to_lower,
+    extract_url_auth,
     gather_files_for_context,
     get_file_list_for_context,
     get_files,
@@ -654,6 +655,39 @@ def test_is_url():
 
     # Test URL that raises ValueError
     assert not is_url("http:// invalid /path")  # Invalid host format
+
+
+def test_extract_url_auth():
+    """Test extract_url_auth function."""
+    # Test URL with no auth
+    url = "https://example.com/path"
+    clean_url, auth = extract_url_auth(url)
+    assert clean_url == url
+    assert auth is None
+
+    # Test URL with username and password
+    url = "https://user:pass@example.com/path"
+    clean_url, auth = extract_url_auth(url)
+    assert clean_url == "https://example.com/path"
+    assert auth == ("user", "pass")
+
+    # Test URL with port
+    url = "https://user:pass@example.com:8080/path"
+    clean_url, auth = extract_url_auth(url)
+    assert clean_url == "https://example.com:8080/path"
+    assert auth == ("user", "pass")
+
+    # Test URL with query and fragment
+    url = "https://user:pass@example.com:8080/path?query=param#fragment"
+    clean_url, auth = extract_url_auth(url)
+    assert clean_url == "https://example.com:8080/path?query=param#fragment"
+    assert auth == ("user", "pass")
+
+    # Test URL with username only (should not extract auth)
+    url = "https://user@example.com/path"
+    clean_url, auth = extract_url_auth(url)
+    assert clean_url == "https://example.com/path"
+    assert auth is None
 
 
 def test_get_url_file_suffix():
