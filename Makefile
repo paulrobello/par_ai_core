@@ -10,6 +10,7 @@ twine  := $(run) twine
 #build  := $(python) -m build
 build := uvx --from build pyproject-build --installer uv
 
+export PYTHONIOENCODING=UTF-8
 export UV_LINK_MODE=copy
 export PIPENV_VERBOSITY=-1
 ##############################################################################
