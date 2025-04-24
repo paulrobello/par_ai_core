@@ -46,7 +46,7 @@ from io import StringIO
 from os.path import isfile, join
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 from markdownify import MarkdownConverter
@@ -875,3 +875,30 @@ def gather_files_for_context(file_patterns: list[str | Path], max_context_length
 
     doc.write("</files>\n")
     return doc.getvalue()
+
+
+def extract_url_auth(url: str) -> tuple[str, tuple[str, str] | None]:
+    """
+    Separate auth info from url if present and return clean url and auth info as tuple.
+
+    url str: url to parse
+
+    Returns:
+        tuple[str, tuple[str, str] | None]: clean url and auth info as tuple
+    """
+    parsed_url = urlsplit(url)
+    username = parsed_url.username
+    password = parsed_url.password
+    new_netloc = parsed_url.hostname
+    if parsed_url.port is not None:
+        if new_netloc:
+            new_netloc = f"{new_netloc}:{parsed_url.port}"
+        else:
+            new_netloc = f":{parsed_url.port}"
+    components = (parsed_url.scheme, new_netloc or "", parsed_url.path, parsed_url.query, parsed_url.fragment)
+    clean_host_url = str(urlunsplit(components))
+    if username and password:
+        auth = (username, password)
+    else:
+        auth = None
+    return clean_host_url, auth

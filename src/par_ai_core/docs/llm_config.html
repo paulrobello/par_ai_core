@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.5">
+<meta name="generator" content="pdoc3 0.11.6">
 <title>par_ai_core.llm_config API documentation</title>
 <meta name="description" content="Configuration and management of Language Learning Models (LLMs) …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
@@ -280,12 +280,20 @@ class LlmConfig:
 
         from langchain_ollama import ChatOllama, OllamaEmbeddings, OllamaLLM
 
+        url = self.base_url or OLLAMA_HOST or provider_base_urls[self.provider]
+        if not url:
+            raise ValueError(&#34;Could not determine OLLAMA URL&#34;)
+        clean_url, auth = extract_url_auth(url)
+        client_kwargs: dict[str, Any] = {&#34;timeout&#34;: self.timeout}
+        if auth:
+            client_kwargs[&#34;auth&#34;] = auth
+
         if self.mode == LlmMode.BASE:
             return OllamaLLM(
                 model=self.model_name,
                 temperature=self.temperature,
-                base_url=self.base_url,
-                client_kwargs={&#34;timeout&#34;: self.timeout},
+                base_url=clean_url,
+                client_kwargs=client_kwargs,
                 num_ctx=self.num_ctx or None,
                 num_predict=self.num_predict,
                 repeat_last_n=self.repeat_last_n,
@@ -302,8 +310,8 @@ class LlmConfig:
             return ChatOllama(
                 model=self.model_name,
                 temperature=self.temperature,
-                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
-                client_kwargs={&#34;timeout&#34;: self.timeout},
+                base_url=clean_url,
+                client_kwargs=client_kwargs,
                 num_ctx=self.num_ctx or None,
                 num_predict=self.num_predict,
                 repeat_last_n=self.repeat_last_n,
@@ -320,7 +328,8 @@ class LlmConfig:
             )
         if self.mode == LlmMode.EMBEDDINGS:
             return OllamaEmbeddings(
-                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                base_url=clean_url,
+                client_kwargs=client_kwargs,
                 model=self.model_name,
             )
 
@@ -818,7 +827,31 @@ different types of language models across various providers.</p>
 <dt><strong><code>env_prefix</code></strong></dt>
 <dd>Environment variable prefix</dd>
 </dl></div>
-<h3>Class variables</h3>
+<h3>Static methods</h3>
+<dl>
+<dt id="par_ai_core.llm_config.LlmConfig.from_json"><code class="name flex">
+<span>def <span class="ident">from_json</span></span>(<span>data: dict) ‑> <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates an LlmConfig instance from JSON data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Dictionary containing configuration parameters</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></dt>
+<dd>A new instance initialized with the provided data</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the class_name in the data doesn't match 'LlmConfig'</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
 <dl>
 <dt id="par_ai_core.llm_config.LlmConfig.base_url"><code class="name">var <span class="ident">base_url</span> : str | None</code></dt>
 <dd>
@@ -943,30 +976,6 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
 <dt id="par_ai_core.llm_config.LlmConfig.user_agent_appid"><code class="name">var <span class="ident">user_agent_appid</span> : str | None</code></dt>
 <dd>
 <div class="desc"><p>App id to add to user agent for the API request. Can be used for authenticating</p></div>
-</dd>
-</dl>
-<h3>Static methods</h3>
-<dl>
-<dt id="par_ai_core.llm_config.LlmConfig.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>data: dict) ‑> <a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Creates an LlmConfig instance from JSON data.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>data</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Dictionary containing configuration parameters</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="par_ai_core.llm_config.LlmConfig" href="#par_ai_core.llm_config.LlmConfig">LlmConfig</a></code></dt>
-<dd>A new instance initialized with the provided data</dd>
-</dl>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>ValueError</code></dt>
-<dd>If the class_name in the data doesn't match 'LlmConfig'</dd>
-</dl></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1831,7 +1840,7 @@ This method is thread-safe and can be called from multiple threads.</p></div>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>

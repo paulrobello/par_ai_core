@@ -40,6 +40,7 @@ from par_ai_core.llm_providers import (
     provider_env_key_names,
     provider_name_to_enum,
 )
+from par_ai_core.utils import extract_url_auth
 
 warnings.simplefilter("ignore", category=LangChainDeprecationWarning)
 
@@ -280,12 +281,20 @@ class LlmConfig:
 
         from langchain_ollama import ChatOllama, OllamaEmbeddings, OllamaLLM
 
+        url = self.base_url or OLLAMA_HOST or provider_base_urls[self.provider]
+        if not url:
+            raise ValueError("Could not determine OLLAMA URL")
+        clean_url, auth = extract_url_auth(url)
+        client_kwargs: dict[str, Any] = {"timeout": self.timeout}
+        if auth:
+            client_kwargs["auth"] = auth
+
         if self.mode == LlmMode.BASE:
             return OllamaLLM(
                 model=self.model_name,
                 temperature=self.temperature,
-                base_url=self.base_url,
-                client_kwargs={"timeout": self.timeout},
+                base_url=clean_url,
+                client_kwargs=client_kwargs,
                 num_ctx=self.num_ctx or None,
                 num_predict=self.num_predict,
                 repeat_last_n=self.repeat_last_n,
@@ -302,8 +311,8 @@ class LlmConfig:
             return ChatOllama(
                 model=self.model_name,
                 temperature=self.temperature,
-                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
-                client_kwargs={"timeout": self.timeout},
+                base_url=clean_url,
+                client_kwargs=client_kwargs,
                 num_ctx=self.num_ctx or None,
                 num_predict=self.num_predict,
                 repeat_last_n=self.repeat_last_n,
@@ -320,7 +329,8 @@ class LlmConfig:
             )
         if self.mode == LlmMode.EMBEDDINGS:
             return OllamaEmbeddings(
-                base_url=self.base_url or OLLAMA_HOST or provider_base_urls[self.provider],
+                base_url=clean_url,
+                client_kwargs=client_kwargs,
                 model=self.model_name,
             )
 
