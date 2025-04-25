@@ -61,6 +61,11 @@ jobs:
         with:
           name: coverage-report-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.arch }}.xml
           path: coverage.xml
+      - name: Upload codecov.yml
+        uses: actions/upload-artifact@v4
+        with:
+          name: codecov-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.arch }}.yml
+          path: codecov.yml
       - name: Package
         run: make packagecheck
       - name: Cache build artifacts
@@ -84,7 +89,11 @@ jobs:
         with:
           name: coverage-report-ubuntu-latest-3.12-x64.xml
           path: ./
-
+      - name: Download codecov.yml
+        uses: actions/download-artifact@v4
+        with:
+          name: codecov-ubuntu-latest-3.12-x64.yml
+          path: ./
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -92,6 +101,7 @@ jobs:
           slug: paulrobello/par_ai_core
           fail_ci_if_error: true
           files: ./coverage-report-ubuntu-latest-3.12-x64.xml
+          codecov_yml_path: ./codecov-ubuntu-latest-3.12-x64.yml
           verbose: true
 
   tag-version:
