@@ -9,7 +9,8 @@
 
 
 ![PyPI - License](https://img.shields.io/pypi/l/par_ai_core)
-[![codecov](https://codecov.io/gh/paulrobello/par_ai_core/branch/main/graph/badge.svg)](https://codecov.io/gh/paulrobello/par_ai_core)
+
+[//]: # ([![codecov]&#40;https://codecov.io/gh/paulrobello/par_ai_core/branch/main/graph/badge.svg&#41;]&#40;https://codecov.io/gh/paulrobello/par_ai_core&#41;)
 
 ## Description
 Par AI Core is a Python library that provides a set of tools, helpers, and wrappers built on top of LangChain. 
