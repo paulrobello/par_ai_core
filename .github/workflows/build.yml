@@ -111,7 +111,7 @@ jobs:
       contents: write  # Grant write access to the repository
     needs:
       - build # Wait for all build jobs to complete
-      - upload-coverage
+#      - upload-coverage
     if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - name: Checkout repository
