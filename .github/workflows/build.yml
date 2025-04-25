@@ -92,6 +92,7 @@ jobs:
           slug: paulrobello/par_ai_core
           fail_ci_if_error: true
           files: ./coverage-report-ubuntu-latest-3.12-x64.xml
+          verbose: true
 
   tag-version:
     name: Tag Version
