@@ -239,6 +239,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.3.0:
+  - Added support for Azure OpenAI
 - Version 0.2.0:
   - Support for basic auth in ollama base urls
 - Version 0.1.25:

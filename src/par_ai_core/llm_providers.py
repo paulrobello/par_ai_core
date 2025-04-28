@@ -87,6 +87,7 @@ class LlmProvider(str, Enum):
     DEEPSEEK = "Deepseek"
     LITELLM = "LiteLLM"
     BEDROCK = "Bedrock"
+    AZURE = "Azure"
 
 
 llm_provider_types: list[LlmProvider] = list(LlmProvider)
@@ -100,12 +101,13 @@ provider_base_urls: dict[LlmProvider, str | None] = {
     LlmProvider.XAI: "https://api.x.ai/v1",
     LlmProvider.ANTHROPIC: "https://api.anthropic.com/v1",
     LlmProvider.GEMINI: "https://generativelanguage.googleapis.com/v1beta",
-    LlmProvider.BEDROCK: None,
     LlmProvider.GITHUB: "https://models.inference.ai.azure.com",
     LlmProvider.MISTRAL: "https://api.mistral.ai/v1",
     LlmProvider.OPENROUTER: "https://openrouter.ai/api/v1",
     LlmProvider.DEEPSEEK: "https://api.deepseek.com",
     LlmProvider.LITELLM: "http://localhost:4000",
+    LlmProvider.BEDROCK: None,
+    LlmProvider.AZURE: None,
 }
 
 provider_default_models: dict[LlmProvider, str] = {
@@ -122,6 +124,7 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.OPENROUTER: "deepseek/deepseek-chat",
     LlmProvider.DEEPSEEK: "deepseek-chat",
     LlmProvider.LITELLM: "gpt-4o",
+    LlmProvider.AZURE: "gpt-4o",
 }
 
 provider_light_models: dict[LlmProvider, str] = {
@@ -138,6 +141,7 @@ provider_light_models: dict[LlmProvider, str] = {
     LlmProvider.OPENROUTER: "google/gemini-2.0-flash-exp:free",
     LlmProvider.DEEPSEEK: "deepseek-chat",
     LlmProvider.LITELLM: "gpt-4o-mini",
+    LlmProvider.AZURE: "gpt-4o-mini",
 }
 
 provider_vision_models: dict[LlmProvider, str] = {
@@ -154,6 +158,7 @@ provider_vision_models: dict[LlmProvider, str] = {
     LlmProvider.OPENROUTER: "google/gemini-2.0-flash-exp:free",
     LlmProvider.DEEPSEEK: "deepseek-chat",
     LlmProvider.LITELLM: "gpt-4o",
+    LlmProvider.AZURE: "gpt-4o",
 }
 
 provider_default_embed_models: dict[LlmProvider, str] = {
@@ -170,6 +175,7 @@ provider_default_embed_models: dict[LlmProvider, str] = {
     LlmProvider.OPENROUTER: "",
     LlmProvider.DEEPSEEK: "",
     LlmProvider.LITELLM: "text-embedding-3-large",
+    LlmProvider.AZURE: "text-embedding-3-large",
 }
 
 provider_env_key_names: dict[LlmProvider, str] = {
@@ -186,6 +192,7 @@ provider_env_key_names: dict[LlmProvider, str] = {
     LlmProvider.OPENROUTER: "OPENROUTER_API_KEY",
     LlmProvider.DEEPSEEK: "DEEPSEEK_API_KEY",
     LlmProvider.LITELLM: "",
+    LlmProvider.AZURE: "AZURE_OPENAI_API_KEY",
 }
 
 
@@ -216,6 +223,8 @@ def get_provider_name_fuzzy(provider: str) -> str:
         if p.value.lower() == provider:
             return p.value
         if p.value.lower().startswith(provider):
+            return p.value
+        if p.value.lower().endswith(provider):
             return p.value
     return ""
 
@@ -345,6 +354,14 @@ provider_config: dict[LlmProvider, LlmProviderConfig] = {
         default_embeddings_model=provider_default_embed_models[LlmProvider.LITELLM],
         supports_base_url=True,
         env_key_name=provider_env_key_names[LlmProvider.LITELLM],
+    ),
+    LlmProvider.AZURE: LlmProviderConfig(
+        default_model=provider_default_models[LlmProvider.AZURE],
+        default_light_model=provider_light_models[LlmProvider.AZURE],
+        default_vision_model=provider_vision_models[LlmProvider.AZURE],
+        default_embeddings_model=provider_default_embed_models[LlmProvider.AZURE],
+        supports_base_url=True,
+        env_key_name=provider_env_key_names[LlmProvider.AZURE],
     ),
 }
 
