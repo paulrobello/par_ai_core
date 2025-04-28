@@ -354,7 +354,7 @@ class LlmConfig:
                 return AzureOpenAI(
                     api_key=api_key,
                     azure_deployment=self.model_name,
-                    api_version="2023-06-01-preview",
+                    api_version="2025-03-01-preview",
                     extra_body=self.extra_body,
                     temperature=self.temperature,
                     streaming=self.streaming,
@@ -371,7 +371,7 @@ class LlmConfig:
                 return AzureChatOpenAI(
                     api_key=api_key,
                     azure_deployment=self.model_name,
-                    api_version="2023-06-01-preview",
+                    api_version="2025-03-01-preview",
                     extra_body=self.extra_body,
                     temperature=self.temperature,
                     stream_usage=True,
@@ -390,7 +390,7 @@ class LlmConfig:
                 return AzureOpenAIEmbeddings(
                     api_key=api_key,
                     azure_deployment=self.model_name,
-                    api_version="2023-06-01-preview",
+                    api_version="2025-03-01-preview",
                     azure_endpoint=self.base_url,
                     timeout=self.timeout,
                 )
