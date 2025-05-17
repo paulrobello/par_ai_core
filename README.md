@@ -239,6 +239,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.3.1:
+  - Update dependencies
 - Version 0.3.0:
   - Added support for Azure OpenAI
 - Version 0.2.0:
