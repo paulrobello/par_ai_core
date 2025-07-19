@@ -75,5 +75,4 @@ __pypackages__/
 /history.json
 **/.ruff_cache/
 **/*~
-**/uv.lock
 **/.DS_Store
