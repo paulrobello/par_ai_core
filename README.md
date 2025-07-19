@@ -10,12 +10,12 @@
 
 ![PyPI - License](https://img.shields.io/pypi/l/par_ai_core)
 
-[//]: # ([![codecov]&#40;https://codecov.io/gh/paulrobello/par_ai_core/branch/main/graph/badge.svg&#41;]&#40;https://codecov.io/gh/paulrobello/par_ai_core&#41;)
+[![codecov](https://codecov.io/gh/paulrobello/par_ai_core/branch/main/graph/badge.svg)](https://codecov.io/gh/paulrobello/par_ai_core)
 
 ## Description
-Par AI Core is a Python library that provides a set of tools, helpers, and wrappers built on top of LangChain. 
-It is designed to accelerate the development of AI-powered applications by offering a streamlined and efficient way 
-to interact with various Large Language Models (LLMs) and related services. This library serves as the foundation 
+Par AI Core is a Python library that provides a set of tools, helpers, and wrappers built on top of LangChain.
+It is designed to accelerate the development of AI-powered applications by offering a streamlined and efficient way
+to interact with various Large Language Models (LLMs) and related services. This library serves as the foundation
 for my AI projects, encapsulating common functionalities and best practices for LLM integration.
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/probello3)
@@ -202,7 +202,7 @@ def main() -> None:
     - OPENAI_API_KEY environment variable to be set
     - A prompt provided as the first command-line argument
     """
-    
+
     load_dotenv()
 
     # Validate OpenAI API key is available
@@ -239,6 +239,9 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.3.2:
+  - Improved test coverage to 93%
+  - Fixed nest_asyncio safety handling
 - Version 0.3.1:
   - Update dependencies
 - Version 0.3.0:

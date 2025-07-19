@@ -562,3 +562,343 @@ def test_llm_run_manager_thread_safety() -> None:
         retrieved = manager.get_config(config_id)
         assert retrieved is not None
         assert retrieved[1].model_name == config.model_name
+
+
+def test_provider_wrong_builder_validation_errors() -> None:
+    """Test wrong provider validation for each builder method."""
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="test")
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but OLLAMA requested"):
+        config._build_ollama_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but GROQ requested"):
+        config._build_groq_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but XAI requested"):
+        config._build_xai_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but OPENROUTER requested"):
+        config._build_openrouter_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but DEEPSEEK requested"):
+        config._build_deepseek_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but ANTHROPIC requested"):
+        config._build_anthropic_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but GOOGLE requested"):
+        config._build_google_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but BEDROCK requested"):
+        config._build_bedrock_llm()
+
+    with pytest.raises(ValueError, match="LLM provider is 'OpenAI' but LITELLM requested"):
+        config._build_litellm_llm()
+
+
+def test_ollama_url_determination_failure() -> None:
+    """Test OLLAMA URL determination failure."""
+    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test")
+
+    with patch.dict(os.environ, {}, clear=True):
+        with patch("par_ai_core.llm_config.OLLAMA_HOST", None):
+            with patch("par_ai_core.llm_config.provider_base_urls", {LlmProvider.OLLAMA: None}):
+                with pytest.raises(ValueError, match="Could not determine OLLAMA URL"):
+                    config._build_ollama_llm()
+
+
+def test_ollama_with_authentication() -> None:
+    """Test OLLAMA authentication handling."""
+    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test", base_url="http://user:pass@localhost:11434")
+
+    with patch("langchain_ollama.ChatOllama") as mock_chat:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+        config.build_chat_model()
+
+        call_args = mock_chat.call_args[1]
+        assert "client_kwargs" in call_args
+        assert "auth" in call_args["client_kwargs"]
+
+
+def test_azure_openai_api_key_fallback() -> None:
+    """Test Azure OpenAI API key fallback logic."""
+    config = LlmConfig(provider=LlmProvider.AZURE, model_name="gpt-4", mode=LlmMode.CHAT)
+
+    with patch.dict(os.environ, {provider_env_key_names[LlmProvider.OPENAI]: "fallback-key"}, clear=True):
+        with patch("langchain_openai.AzureChatOpenAI") as mock_azure:
+            mock_instance = MagicMock(spec=BaseChatModel)
+            mock_azure.return_value = mock_instance
+            config.build_chat_model()
+            call_args = mock_azure.call_args[1]
+            assert call_args["api_key"].get_secret_value() == "fallback-key"
+
+
+def test_azure_openai_all_modes() -> None:
+    """Test Azure OpenAI BASE and EMBEDDINGS modes."""
+    # Test BASE mode
+    config = LlmConfig(provider=LlmProvider.AZURE, model_name="gpt-4", mode=LlmMode.BASE)
+    with patch("langchain_openai.AzureOpenAI") as mock_azure:
+        mock_instance = MagicMock(spec=BaseLanguageModel)
+        mock_azure.return_value = mock_instance
+        config.build_llm_model()
+        mock_azure.assert_called_once()
+
+    # Test EMBEDDINGS mode
+    config.mode = LlmMode.EMBEDDINGS
+    with patch("langchain_openai.AzureOpenAIEmbeddings") as mock_embeddings:
+        mock_instance = MagicMock(spec=Embeddings)
+        mock_embeddings.return_value = mock_instance
+        config.build_embeddings()
+        mock_embeddings.assert_called_once()
+
+
+def test_litellm_chat_mode() -> None:
+    """Test LiteLLM CHAT mode implementation."""
+    config = LlmConfig(provider=LlmProvider.LITELLM, model_name="gpt-4", mode=LlmMode.CHAT)
+    with patch("langchain_community.chat_models.ChatLiteLLM") as mock_litellm:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_litellm.return_value = mock_instance
+        config.build_chat_model()
+        mock_litellm.assert_called_once()
+
+
+def test_anthropic_reasoning_budget_validation() -> None:
+    """Test Anthropic reasoning budget validation."""
+    from par_ai_core.llm_config import ReasoningEffort
+
+    # Test budget too low
+    config = LlmConfig(
+        provider=LlmProvider.ANTHROPIC,
+        model_name="claude-3",
+        reasoning_budget=500,  # Less than 1024
+    )
+    with pytest.raises(ValueError, match="Reasoning budget must be at least 1024 tokens"):
+        config.build_chat_model()
+
+    # Test valid budget
+    config.reasoning_budget = 2048
+    with patch("langchain_anthropic.ChatAnthropic") as mock_anthropic:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_anthropic.return_value = mock_instance
+        config.build_chat_model()
+        call_args = mock_anthropic.call_args[1]
+        assert call_args["thinking"]["budget_tokens"] == 2048
+
+
+def test_bedrock_base_and_embeddings_modes() -> None:
+    """Test Bedrock BASE and EMBEDDINGS modes."""
+    with patch("boto3.Session") as mock_session:
+        mock_client = MagicMock()
+        mock_session.return_value.client.return_value = mock_client
+
+        # Test BASE mode
+        config = LlmConfig(provider=LlmProvider.BEDROCK, model_name="test", mode=LlmMode.BASE)
+        with patch("langchain_aws.BedrockLLM") as mock_bedrock:
+            mock_instance = MagicMock(spec=BaseLanguageModel)
+            mock_bedrock.return_value = mock_instance
+            config.build_llm_model()
+            mock_bedrock.assert_called_once()
+
+        # Test EMBEDDINGS mode
+        config.mode = LlmMode.EMBEDDINGS
+        with patch("langchain_aws.BedrockEmbeddings") as mock_embeddings:
+            mock_instance = MagicMock(spec=Embeddings)
+            mock_embeddings.return_value = mock_instance
+            config.build_embeddings()
+            mock_embeddings.assert_called_once()
+
+
+def test_mistral_base_mode_error_and_embeddings() -> None:
+    """Test Mistral BASE mode error and EMBEDDINGS mode."""
+    # Test BASE mode error
+    config = LlmConfig(provider=LlmProvider.MISTRAL, model_name="mistral-7b", mode=LlmMode.BASE)
+    with pytest.raises(ValueError, match="Mistral provider does not support mode Base"):
+        config.build_llm_model()
+
+    # Test EMBEDDINGS mode
+    config.mode = LlmMode.EMBEDDINGS
+    with patch("langchain_mistralai.MistralAIEmbeddings") as mock_embeddings:
+        mock_instance = MagicMock(spec=Embeddings)
+        mock_embeddings.return_value = mock_instance
+        config.build_embeddings()
+        mock_embeddings.assert_called_once()
+
+
+def test_o1_o3_model_temperature_adjustment_base_mode() -> None:
+    """Test O1/O3 model temperature adjustment for base models."""
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="o1-preview", temperature=0.7, mode=LlmMode.BASE)
+    with patch("langchain_openai.OpenAI") as mock_openai:
+        mock_instance = MagicMock(spec=BaseLanguageModel)
+        mock_openai.return_value = mock_instance
+        config.build_llm_model()
+        assert config.temperature == 1
+
+
+def test_invalid_llm_type_exceptions() -> None:
+    """Test invalid LLM type exceptions."""
+    # Create a mock that's not a valid LLM type
+    invalid_mock = MagicMock()
+    invalid_mock.__class__.__name__ = "InvalidType"
+
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="test")
+
+    # Test wrong type for build_llm_model
+    with patch.object(config, "_build_llm", return_value=invalid_mock):
+        with pytest.raises(ValueError, match="Invalid LLM type returned for base mode"):
+            config.build_llm_model()
+
+    # Test wrong type for build_chat_model
+    with patch.object(config, "_build_llm", return_value=invalid_mock):
+        with pytest.raises(ValueError, match="Invalid LLM type returned for chat mode"):
+            config.build_chat_model()
+
+    # Test wrong type for build_embeddings
+    with patch.object(config, "_build_llm", return_value=invalid_mock):
+        with pytest.raises(ValueError, match="does not support embeddings"):
+            config.build_embeddings()
+
+
+def test_api_key_checking_method() -> None:
+    """Test API key checking method."""
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="test")
+    with patch("par_ai_core.llm_config.is_provider_api_key_set", return_value=True) as mock_check:
+        result = config.is_api_key_set()
+        assert result is True
+        mock_check.assert_called_once_with(LlmProvider.OPENAI)
+
+
+def test_set_env_with_all_optional_parameters() -> None:
+    """Test set_env with all optional parameters."""
+    from par_ai_core.llm_config import ReasoningEffort
+
+    config = LlmConfig(
+        provider=LlmProvider.OPENAI,
+        model_name="gpt-4",
+        user_agent_appid="test-app",
+        num_ctx=2048,
+        num_predict=100,
+        repeat_last_n=64,
+        repeat_penalty=1.1,
+        mirostat=1,
+        mirostat_eta=0.1,
+        mirostat_tau=5.0,
+        tfs_z=1.0,
+        top_k=40,
+        top_p=0.9,
+        seed=42,
+        timeout=30,
+        reasoning_effort=ReasoningEffort.HIGH,
+        reasoning_budget=2048,
+    )
+
+    config.set_env()
+
+    # Verify all optional environment variables are set
+    assert os.environ["PARAI_USER_AGENT_APPID"] == "test-app"
+    assert os.environ["PARAI_NUM_CTX"] == "2048"
+    assert os.environ["PARAI_NUM_PREDICT"] == "100"
+    assert os.environ["PARAI_REPEAT_LAST_N"] == "64"
+    assert os.environ["PARAI_REPEAT_PENALTY"] == "1.1"
+    assert os.environ["PARAI_MIROSTAT"] == "1"
+    assert os.environ["PARAI_MIROSTAT_ETA"] == "0.1"
+    assert os.environ["PARAI_MIROSTAT_TAU"] == "5.0"
+    assert os.environ["PARAI_TFS_Z"] == "1.0"
+    assert os.environ["PARAI_TOP_K"] == "40"
+    assert os.environ["PARAI_TOP_P"] == "0.9"
+    assert os.environ["PARAI_SEED"] == "42"
+    assert os.environ["PARAI_TIMEOUT"] == "30"
+    assert os.environ["PARAI_REASONING_EFFORT"] == "high"
+    assert os.environ["PARAI_REASONING_BUDGET"] == "2048"
+
+
+def test_llm_run_manager_no_matches() -> None:
+    """Test LlmRunManager when no matches are found."""
+    manager = LlmRunManager()
+
+    # Test get_runnable_config_by_model with no matches
+    result = manager.get_runnable_config_by_model("non-existent-model")
+    assert result is None
+
+    # Test get_runnable_config_by_model with empty string
+    result = manager.get_runnable_config_by_model("")
+    assert result is None
+
+
+def test_from_json_with_missing_fields() -> None:
+    """Test from_json with missing optional fields."""
+    minimal_data = {
+        "class_name": "LlmConfig",
+        "provider": "OpenAI",
+        "model_name": "gpt-4",
+        "mode": "Chat",  # Add required mode field
+    }
+    config = LlmConfig.from_json(minimal_data)
+    assert config.provider == LlmProvider.OPENAI
+    assert config.model_name == "gpt-4"
+    assert config.temperature == 0.8  # Default value
+
+
+def test_from_json_with_extra_fields() -> None:
+    """Test from_json ignores extra fields not in dataclass."""
+    data_with_extras = {
+        "class_name": "LlmConfig",
+        "provider": "OpenAI",
+        "model_name": "gpt-4",
+        "mode": "Chat",  # Add required mode field
+        "extra_field": "should_be_ignored",
+        "another_extra": 123,
+    }
+    config = LlmConfig.from_json(data_with_extras)
+    assert config.provider == LlmProvider.OPENAI
+    assert config.model_name == "gpt-4"
+    assert not hasattr(config, "extra_field")
+
+
+def test_invalid_mode_for_various_providers() -> None:
+    """Test invalid mode errors for various providers."""
+    # Test Groq with BASE mode
+    config = LlmConfig(provider=LlmProvider.GROQ, model_name="test", mode=LlmMode.BASE)
+    with pytest.raises(ValueError, match="Groq provider does not support mode Base"):
+        config.build_llm_model()
+
+    # Test XAI with BASE mode
+    config = LlmConfig(provider=LlmProvider.XAI, model_name="test", mode=LlmMode.BASE)
+    with pytest.raises(ValueError, match="XAI provider does not support mode Base"):
+        config.build_llm_model()
+
+    # Test XAI with EMBEDDINGS mode
+    config = LlmConfig(provider=LlmProvider.XAI, model_name="test", mode=LlmMode.EMBEDDINGS)
+    with pytest.raises(ValueError, match="XAI provider does not support mode Embeddings"):
+        config.build_embeddings()
+
+
+def test_mistral_provider_dispatch() -> None:
+    """Test Mistral provider dispatch."""
+    config = LlmConfig(provider=LlmProvider.MISTRAL, model_name="mistral-7b", mode=LlmMode.CHAT)
+    with patch.object(config, "_build_mistral_llm") as mock_mistral:
+        mock_mistral.return_value = MagicMock(spec=BaseChatModel)
+        config._build_llm()
+        mock_mistral.assert_called_once()
+
+
+def test_deepseek_setup() -> None:
+    """Test Deepseek configuration setup."""
+    config = LlmConfig(provider=LlmProvider.DEEPSEEK, model_name="deepseek-chat", mode=LlmMode.CHAT)
+
+    # Test that the provider dispatch works
+    with patch.object(config, "_build_deepseek_llm") as mock_deepseek:
+        mock_deepseek.return_value = MagicMock(spec=BaseChatModel)
+        config._build_llm()
+        mock_deepseek.assert_called_once()
+
+
+def test_openrouter_setup() -> None:
+    """Test OpenRouter configuration setup."""
+    config = LlmConfig(provider=LlmProvider.OPENROUTER, model_name="openrouter-model", mode=LlmMode.CHAT)
+
+    with patch("langchain_openai.ChatOpenAI") as mock_chat:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+        config.build_chat_model()
+        mock_chat.assert_called_once()

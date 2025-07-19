@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  setup:
+    uses: ./.github/workflows/reusable-setup.yml
+
   github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    needs: setup
     permissions:
       contents: write
       id-token: write
@@ -15,42 +19,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
-      - name: Install dependencies
-        run: |
-          uv sync
-
-      - name: Get version from __init__.py
-        id: get_version
-        run: |
-          version=$(uv run python -c "from src.par_ai_core import __version__; print(__version__)")
-          echo "Raw version output: $version"
-          echo "VERSION=$version" >> $GITHUB_ENV
-
-      - name: Check version
-        id: check_version
-        run: |
-          echo "Version in env: ${{ env.VERSION }}"
-          if [ -z "${{ env.VERSION }}" ]; then
-            echo "Error: VERSION is empty"
-            exit 1
-          fi
-
       - name: Restore cached build artifacts
+        id: cache
         uses: actions/cache@v4
         with:
           path: dist
-          key: ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-${{ github.sha }}
+          key: dist-${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml', 'src/**/*.py') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml') }}-
-            ${{ runner.os }}-3.12-x64-
+            dist-${{ runner.os }}-3.12-x64-${{ hashFiles('**/pyproject.toml', 'src/**/*.py') }}-
+            dist-${{ runner.os }}-3.12-x64-
+          fail-on-cache-miss: false
+
+      - name: Build package if cache miss
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: make package-all
+        timeout-minutes: 15
 
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0
@@ -64,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release create \
-          'release-v${{ env.VERSION }}' \
+          'release-v${{ needs.setup.outputs.version }}' \
           --repo '${{ github.repository }}' \
           --generate-notes \
           --latest
@@ -74,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release upload \
-          'release-v${{ env.VERSION }}' dist/** \
+          'release-v${{ needs.setup.outputs.version }}' dist/** \
           --repo '${{ github.repository }}'
 
       - name: Discord notification

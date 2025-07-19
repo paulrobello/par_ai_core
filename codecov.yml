@@ -1,2 +1,25 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
 fixes:
-    - "/home/runner/work/par_ai_core::"
+  - "/home/runner/work/par_ai_core/par_ai_core/::"
+  - "/Users/runner/work/par_ai_core/par_ai_core/::"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+
+flags:
+  unittests:
+    paths:
+      - src/
+    carryforward: true

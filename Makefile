@@ -6,7 +6,6 @@ run    := uv run
 python := $(run) python
 pyright := $(run) pyright
 ruff  := $(run) ruff
-twine  := $(run) twine
 #build  := $(python) -m build
 build := uvx --from build pyproject-build --installer uv
 
@@ -85,7 +84,7 @@ typecheck-stats:			# Perform static type checks with pyright and print stats
 	$(pyright) --stats
 
 .PHONY: checkall
-checkall: format lint typecheck 	        # Check all the things
+checkall: format lint typecheck test	        # Check all the things
 
 .PHONY: pre-commit              # run pre-commit checks on all files
 pre-commit:
@@ -105,18 +104,8 @@ package:			# Package the library
 spackage:			# Create a source package for the library
 	$(build) -s
 
-.PHONY: packagecheck
-packagecheck: clean package spackage docs		# Check the packaging.
-	$(twine) check dist/*
-
-.PHONY: testdist
-testdist: packagecheck		# Perform a test distribution
-	$(twine) upload --repository testpypi dist/*
-	#$(twine) upload --skip-existing --repository testpypi dist/*
-
-.PHONY: dist
-dist: packagecheck		# Upload to pypi
-	$(twine) upload --skip-existing dist/*
+.PHONY: package-check
+package-all: clean package spackage
 
 .PHONY: test
 test:				# Run tests with coverage report
