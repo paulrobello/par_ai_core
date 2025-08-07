@@ -44,9 +44,9 @@ class LlmMode(StrEnum):
     """Enumeration of LLM operating modes.
 
     Defines the different ways an LLM can be used:
-        BASE: Basic text completion mode
-        CHAT: Interactive conversation mode
-        EMBEDDINGS: Vector embedding generation mode
+        BASE: Basic text completion mode.
+        CHAT: Interactive conversation mode.
+        EMBEDDINGS: Vector embedding generation mode.
     """
 
     BASE = "Base"
