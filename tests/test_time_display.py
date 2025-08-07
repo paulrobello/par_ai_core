@@ -1,6 +1,12 @@
 """Tests for the time_display module."""
 
-from datetime import UTC, datetime
+import sys
+from datetime import datetime, timezone
+
+if sys.version_info >= (3, 11):  # noqa: UP036
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 
 from par_ai_core.time_display import (
     convert_to_local,

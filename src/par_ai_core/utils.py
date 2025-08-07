@@ -815,7 +815,10 @@ def get_file_list_for_context(file_patterns: list[str | Path]) -> list[Path]:
         try:
             if isinstance(pattern, Path):
                 pattern = pattern.as_posix()
-            files += glob.glob(pattern, recursive=True, include_hidden=False)
+            if sys.version_info >= (3, 11):  # noqa: UP036
+                files += glob.glob(pattern, recursive=True, include_hidden=False)
+            else:
+                files += glob.glob(pattern, recursive=True)
         except Exception as _:
             raise _
     result = []
