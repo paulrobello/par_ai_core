@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for the main module."""
 
 from unittest.mock import MagicMock, patch

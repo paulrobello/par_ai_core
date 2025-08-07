@@ -54,3 +54,22 @@ jobs:
         with:
           args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} ${{ needs.setup.outputs.version }} has been published to TestPyPI.'
         continue-on-error: true
+
+  trigger-release:
+    name: Trigger GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+      - publish-to-testpypi
+    if: success()
+    steps:
+      - name: Trigger Release workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release.yml',
+              ref: 'main'
+            })

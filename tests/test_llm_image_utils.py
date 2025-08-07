@@ -2,14 +2,15 @@
 
 import base64
 from pathlib import Path
+
 import pytest
 
 from src.par_ai_core.llm_image_utils import (
     UnsupportedImageTypeError,
     b64_encode_image,
-    try_get_image_type,
     image_to_base64,
     image_to_chat_message,
+    try_get_image_type,
 )
 
 

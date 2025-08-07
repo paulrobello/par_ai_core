@@ -665,7 +665,6 @@ def test_litellm_chat_mode() -> None:
 
 def test_anthropic_reasoning_budget_validation() -> None:
     """Test Anthropic reasoning budget validation."""
-    from par_ai_core.llm_config import ReasoningEffort
 
     # Test budget too low
     config = LlmConfig(

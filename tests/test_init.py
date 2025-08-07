@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 import par_ai_core
 
 
@@ -115,23 +113,15 @@ def test_apply_nest_asyncio_safely_exception_handling(mock_nest_asyncio):
 def test_warnings_suppressed():
     """Test that warnings are properly suppressed."""
     import warnings
-    from langchain_core._api import LangChainBetaWarning
 
     # Check that the warnings filters are set
     filters = warnings.filters
-    langchain_filters = [
-        f
-        for f in filters
-        if len(f) > 2
-        and f[2] is not None
-        and (f[2] == LangChainBetaWarning or (hasattr(f[2], "__name__") and f[2].__name__ == "LangChainBetaWarning"))
-    ]
     deprecation_filters = [
         f
         for f in filters
         if len(f) > 2
         and f[2] is not None
-        and (f[2] == DeprecationWarning or (hasattr(f[2], "__name__") and f[2].__name__ == "DeprecationWarning"))
+        and (f[2] is DeprecationWarning or (hasattr(f[2], "__name__") and f[2].__name__ == "DeprecationWarning"))
     ]
 
     # Since warnings may be filtered in various ways, just check that the module imports successfully

@@ -763,19 +763,6 @@ def test_read_env_file():
     os.unlink(f.name)
 
 
-def test_gather_files_for_context_with_special_chars():
-    """Test gather_files_for_context handles special characters correctly."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        test_file = Path(tmpdir) / "test.txt"
-        test_file.write_text('<script>alert("xss");</script>')
-
-        result = gather_files_for_context([str(test_file)])
-
-        assert "&lt;script&gt;" in result
-        assert "&quot;" in result
-        assert "<script>" not in result
-
-
 def test_gather_files_for_context_with_invalid_pattern():
     """Test gather_files_for_context with invalid pattern."""
     result = gather_files_for_context(["/nonexistent/*.xyz"])

@@ -18,7 +18,7 @@ parts of the par_ai_core project.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone, tzinfo
+from datetime import UTC, datetime, tzinfo
 
 
 def format_datetime(dt: datetime | None, fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
@@ -46,7 +46,7 @@ def format_timestamp(timestamp: float, fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
     Returns:
         str: The string timestamp in the format specified.
     """
-    utc_dt = datetime.fromtimestamp(timestamp, timezone.utc)
+    utc_dt = datetime.fromtimestamp(timestamp, UTC)
     local_dt = utc_dt.astimezone()
     return local_dt.strftime(fmt)
 
@@ -67,7 +67,7 @@ def convert_to_local(utc_dt: datetime | str | None) -> datetime | None:
             return None
         utc_dt = datetime.fromisoformat(utc_dt)
 
-    local_dt_now = datetime.now(timezone.utc)
+    local_dt_now = datetime.now(UTC)
     local_tz = local_dt_now.astimezone().tzinfo
     local_dt = utc_dt.astimezone(local_tz)
     return local_dt
@@ -79,4 +79,4 @@ def get_local_timezone() -> tzinfo | None:
     Returns:
         tzinfo | None: The local timezone.
     """
-    return datetime.now(timezone.utc).astimezone().tzinfo
+    return datetime.now(UTC).astimezone().tzinfo

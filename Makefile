@@ -54,7 +54,7 @@ remove-venv:			# Remove the virtual environment
 
 .PHONY: depsupdate
 depsupdate:			# Update all dependencies
-	uv sync --python -U
+	uv sync --upgrade
 
 .PHONY: depsshow
 depsshow:			# Show the dependency graph
@@ -73,7 +73,7 @@ format:				# Reformat the code with ruff.
 
 .PHONY: lint
 lint:				# Run ruff over the library
-	$(ruff) check src/$(lib) --fix
+	$(ruff) check src/$(lib) tests --fix
 
 .PHONY: typecheck
 typecheck:			# Perform static type checks with pyright
@@ -104,7 +104,7 @@ package:			# Package the library
 spackage:			# Create a source package for the library
 	$(build) -s
 
-.PHONY: package-check
+.PHONY: package-all
 package-all: clean package spackage
 
 .PHONY: test

@@ -40,7 +40,7 @@ def test_mk_usage_metadata():
     "provider_name,input_model,expected_model",
     [
         ("", "gpt-4", "gpt-4"),
-        ("", "claude-3-sonnet-20240229", "claude-3-sonnet-20240229"),
+        ("", "claude-3-5-sonnet-20241022", "claude-3-5-sonnet-20241022"),
         ("", "gpt-4-turbo", "gpt-4-turbo"),
         ("", "unknown-model", "unknown-model"),
         ("openai", "gpt-4", "openai/gpt-4"),
@@ -109,7 +109,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
         ),
         (
             LlmProvider.ANTHROPIC.value,
-            "claude-3-sonnet-20240229",
+            "claude-3-5-sonnet-20241022",
             {
                 "mode": "chat",
                 "input_cost_per_token": 0.000003,

@@ -1,7 +1,6 @@
 """Tests for user_agents module."""
 
 import re
-from typing import Any
 
 import pytest
 

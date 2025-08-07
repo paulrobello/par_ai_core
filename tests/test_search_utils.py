@@ -355,13 +355,13 @@ def test_youtube_search_with_comments(mock_build):
         assert "Comment 2" in results[0]["content"]
 
 
-def test_youtube_get_transcript_error():
+@patch("par_ai_core.search_utils.YouTubeTranscriptApi")
+def test_youtube_get_transcript_error(mock_transcript_api):
     """Test YouTube transcript fetching error handling."""
-    with patch(
-        "par_ai_core.search_utils.YouTubeTranscriptApi.get_transcript", side_effect=Exception("Transcript error")
-    ):
-        with pytest.raises(Exception, match="Transcript error"):
-            youtube_get_transcript("test_video_id")
+    mock_transcript_api.get_transcript.side_effect = Exception("Transcript error")
+
+    with pytest.raises(Exception, match="Transcript error"):
+        youtube_get_transcript("test_video_id")
 
 
 @patch("par_ai_core.search_utils.praw.Reddit")

@@ -57,7 +57,7 @@ from langchain_community.utilities.brave_search import BraveSearchWrapper
 from langchain_core.language_models import BaseChatModel
 from pydantic import SecretStr
 from tavily import TavilyClient
-from youtube_transcript_api._api import YouTubeTranscriptApi  # type: ignore
+from youtube_transcript_api import YouTubeTranscriptApi  # type: ignore
 
 from par_ai_core.llm_utils import summarize_content
 from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
@@ -404,7 +404,7 @@ def youtube_get_comments(youtube, video_id: str, max_results: int = 10) -> list[
 
 def youtube_get_transcript(video_id: str, languages: list[str] | None = None) -> str:
     """Fetch transcript for a YouTube video."""
-    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])
+    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])  # type: ignore
     transcript_text = " ".join([item["text"] for item in transcript_list])
     return transcript_text.replace("\n", " ")
 

@@ -8,8 +8,8 @@ import pytest
 from par_ai_core.llm_providers import (
     LlmProvider,
     get_provider_name_fuzzy,
-    get_providers_with_api_keys,
     get_provider_select_options,
+    get_providers_with_api_keys,
     is_provider_api_key_set,
     provider_name_to_enum,
 )

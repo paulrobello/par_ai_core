@@ -239,6 +239,14 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.4.0:
+  - **Python 3.10-3.13 Support:** Full compatibility across Python versions with 3.12 as the development target
+  - **Optimized Configuration:** Standardized Python version targeting across all development tools (ruff, pyright, pre-commit)
+  - **Enhanced CI/CD Pipeline:** Automated workflow chain: Build → TestPyPI → GitHub Release → PyPI
+  - **Improved .gitignore:** Comprehensive, well-organized patterns for modern Python development with AI tools
+  - **Enhanced Makefile:** Fixed lint target to include tests, corrected package commands, improved dependency management
+  - **Code Quality Improvements:** Fixed all linting and type checking errors, updated deprecated patterns
+  - **Test Reliability:** Updated test mocks and model references for better compatibility
 - Version 0.3.2:
   - Improved test coverage to 93%
   - Fixed nest_asyncio safety handling

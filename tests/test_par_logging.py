@@ -1,7 +1,6 @@
 """Tests for par_logging module."""
 
 import logging
-import os
 from unittest.mock import patch
 
 import pytest
@@ -51,6 +50,7 @@ def test_log_level_configuration(monkeypatch, env_level, expected_level):
     with patch("logging.basicConfig") as mock_basic_config:
         # Import the module to trigger configuration
         import importlib
+
         import par_ai_core.par_logging
 
         importlib.reload(par_ai_core.par_logging)
