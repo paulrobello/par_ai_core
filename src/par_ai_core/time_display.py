@@ -19,11 +19,12 @@ parts of the par_ai_core project.
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, tzinfo
 
 if sys.version_info >= (3, 11):  # noqa: UP036
     from datetime import UTC
 else:
+    from datetime import timezone
     UTC = timezone.utc
 
 
