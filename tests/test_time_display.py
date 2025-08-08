@@ -3,7 +3,7 @@
 import sys
 from datetime import datetime, timezone
 
-if sys.version_info >= (3, 11):  # noqa: UP036
+if sys.version_info >= (3, 11):
     from datetime import UTC
 else:
     UTC = timezone.utc

@@ -39,7 +39,7 @@ target-version = "py312"
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
-select = ["E4", "E5", "E7", "E9", "F", "W", "UP", "I"]
+select = ["E4", "E5", "E7", "E9", "F", "W", "I"]
 ignore = ["E501"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -81,3 +81,9 @@ docstring-code-line-length = "dynamic"
 
 [lint.isort]
 combine-as-imports = true
+
+[lint.per-file-ignores]
+# Ignore pyupgrade rules in files with Python 3.10 compatibility code
+"src/par_ai_core/time_display.py" = ["UP036", "UP035", "UP037", "F401", "F811"]
+"tests/test_time_display.py" = ["UP036", "UP035", "UP037", "F401", "F811"]  
+"src/par_ai_core/utils.py" = ["UP036"]

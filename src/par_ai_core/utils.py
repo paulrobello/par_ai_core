@@ -818,7 +818,8 @@ def get_file_list_for_context(file_patterns: list[str | Path]) -> list[Path]:
             if sys.version_info >= (3, 11):  # noqa: UP036
                 files += glob.glob(pattern, recursive=True, include_hidden=False)
             else:
-                files += glob.glob(pattern, recursive=True)
+                # Python 3.10 doesn't have include_hidden parameter
+                files += glob.glob(pattern, recursive=True)  # noqa: UP036
         except Exception as _:
             raise _
     result = []
