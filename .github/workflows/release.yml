@@ -73,6 +73,8 @@ jobs:
   trigger-pypi-publish:
     name: Trigger PyPI Publish
     runs-on: ubuntu-latest
+    permissions:
+      actions: write  # Required for workflow dispatch
     needs:
       - setup
       - github-release

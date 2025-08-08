@@ -58,6 +58,8 @@ jobs:
   trigger-release:
     name: Trigger GitHub Release
     runs-on: ubuntu-latest
+    permissions:
+      actions: write  # Required for workflow dispatch
     needs:
       - setup
       - publish-to-testpypi
