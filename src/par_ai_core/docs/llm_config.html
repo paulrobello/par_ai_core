@@ -337,52 +337,112 @@ class LlmConfig:
 
     def _build_openai_compat_llm(self) -&gt; BaseLanguageModel | BaseChatModel | Embeddings:
         &#34;&#34;&#34;Build the OPENAI LLM.&#34;&#34;&#34;
-        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+        if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.AZURE]:
             raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but OPENAI requested.&#34;)
         if self.provider == LlmProvider.GITHUB:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.GITHUB], &#34;&#34;))
+        elif self.provider == LlmProvider.AZURE:
+            api_key = SecretStr(
+                os.environ.get(
+                    provider_env_key_names[LlmProvider.AZURE],
+                    os.environ.get(provider_env_key_names[LlmProvider.OPENAI], &#34;&#34;),
+                )
+            )
         else:
             api_key = SecretStr(os.environ.get(provider_env_key_names[LlmProvider.OPENAI], &#34;&#34;))
 
-        from langchain_openai import ChatOpenAI, OpenAI, OpenAIEmbeddings
+        if self.provider == LlmProvider.AZURE:
+            if self.mode == LlmMode.BASE:
+                from langchain_openai import AzureOpenAI
 
-        if self.mode == LlmMode.BASE:
-            return OpenAI(
-                api_key=api_key,
-                model=self.model_name,
-                extra_body=self.extra_body,
-                temperature=self.temperature,
-                streaming=self.streaming,
-                base_url=self.base_url,
-                timeout=self.timeout,
-                frequency_penalty=self.repeat_penalty or 0,
-                top_p=self.top_p or 1,
-                seed=self.seed,
-                max_tokens=self.num_ctx or -1,
-            )
-        if self.mode == LlmMode.CHAT:
-            return ChatOpenAI(
-                api_key=api_key,
-                model=self.model_name,
-                extra_body=self.extra_body,
-                temperature=self.temperature,
-                stream_usage=True,
-                streaming=self.streaming,
-                base_url=self.base_url,
-                timeout=self.timeout,
-                top_p=self.top_p,
-                seed=self.seed,
-                max_tokens=self.num_ctx,  # type: ignore
-                disable_streaming=not self.streaming,
-                reasoning_effort=self.reasoning_effort,
-            )
-        if self.mode == LlmMode.EMBEDDINGS:
-            return OpenAIEmbeddings(
-                api_key=api_key,
-                model=self.model_name,
-                base_url=self.base_url,
-                timeout=self.timeout,
-            )
+                return AzureOpenAI(
+                    api_key=api_key,
+                    azure_deployment=self.model_name,
+                    api_version=&#34;2025-03-01-preview&#34;,
+                    extra_body=self.extra_body,
+                    temperature=self.temperature,
+                    streaming=self.streaming,
+                    azure_endpoint=self.base_url,
+                    timeout=self.timeout,
+                    frequency_penalty=self.repeat_penalty or 0,
+                    top_p=self.top_p or 1,
+                    seed=self.seed,
+                    max_tokens=self.num_ctx or -1,
+                )
+            if self.mode == LlmMode.CHAT:
+                from langchain_openai import AzureChatOpenAI
+
+                return AzureChatOpenAI(
+                    api_key=api_key,
+                    azure_deployment=self.model_name,
+                    api_version=&#34;2025-03-01-preview&#34;,
+                    extra_body=self.extra_body,
+                    temperature=self.temperature,
+                    stream_usage=True,
+                    streaming=self.streaming,
+                    azure_endpoint=self.base_url,
+                    timeout=self.timeout,
+                    top_p=self.top_p,
+                    seed=self.seed,
+                    max_tokens=self.num_ctx,  # type: ignore
+                    disable_streaming=not self.streaming,
+                    reasoning_effort=self.reasoning_effort,
+                )
+            if self.mode == LlmMode.EMBEDDINGS:
+                from langchain_openai import AzureOpenAIEmbeddings
+
+                return AzureOpenAIEmbeddings(
+                    api_key=api_key,
+                    azure_deployment=self.model_name,
+                    api_version=&#34;2025-03-01-preview&#34;,
+                    azure_endpoint=self.base_url,
+                    timeout=self.timeout,
+                )
+
+        else:
+            if self.mode == LlmMode.BASE:
+                from langchain_openai import OpenAI
+
+                return OpenAI(
+                    api_key=api_key,
+                    model=self.model_name,
+                    extra_body=self.extra_body,
+                    temperature=self.temperature,
+                    streaming=self.streaming,
+                    base_url=self.base_url,
+                    timeout=self.timeout,
+                    frequency_penalty=self.repeat_penalty or 0,
+                    top_p=self.top_p or 1,
+                    seed=self.seed,
+                    max_tokens=self.num_ctx or -1,
+                )
+            if self.mode == LlmMode.CHAT:
+                from langchain_openai import ChatOpenAI
+
+                return ChatOpenAI(
+                    api_key=api_key,
+                    model=self.model_name,
+                    extra_body=self.extra_body,
+                    temperature=self.temperature,
+                    stream_usage=True,
+                    streaming=self.streaming,
+                    base_url=self.base_url,
+                    timeout=self.timeout,
+                    top_p=self.top_p,
+                    seed=self.seed,
+                    max_tokens=self.num_ctx,  # type: ignore
+                    disable_streaming=not self.streaming,
+                    reasoning_effort=self.reasoning_effort,
+                )
+            if self.mode == LlmMode.EMBEDDINGS:
+                from langchain_openai import OpenAIEmbeddings
+
+                return OpenAIEmbeddings(
+                    api_key=api_key,
+                    model=self.model_name,
+                    base_url=self.base_url,
+                    timeout=self.timeout,
+                )
 
         raise ValueError(f&#34;Invalid LLM mode &#39;{self.mode.value}&#39;&#34;)
 
@@ -393,9 +453,9 @@ class LlmConfig:
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
             raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
 
-        from langchain_community.chat_models import ChatLiteLLM
-
         if self.mode == LlmMode.CHAT:
+            from langchain_community.chat_models import ChatLiteLLM
+
             return ChatLiteLLM(
                 model=self.model_name,
                 extra_body=self.extra_body,  # type: ignore
@@ -416,11 +476,12 @@ class LlmConfig:
         if self.provider != LlmProvider.GROQ:
             raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but GROQ requested.&#34;)
 
-        from langchain_groq import ChatGroq
-
         if self.mode == LlmMode.BASE:
             raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
+
         if self.mode == LlmMode.CHAT:
+            from langchain_groq import ChatGroq
+
             return ChatGroq(
                 model=self.model_name,
                 temperature=self.temperature,
@@ -442,9 +503,9 @@ class LlmConfig:
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
             raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
 
-        from langchain_xai import ChatXAI
-
         if self.mode == LlmMode.CHAT:
+            from langchain_xai import ChatXAI
+
             return ChatXAI(
                 model=self.model_name,
                 temperature=self.temperature,
@@ -470,9 +531,9 @@ class LlmConfig:
                 self.extra_body = {}
             self.extra_body = self.extra_body | {&#34;models&#34;: self.fallback_models}
 
-        from langchain_openai import ChatOpenAI
-
         if self.mode == LlmMode.CHAT:
+            from langchain_openai import ChatOpenAI
+
             return ChatOpenAI(
                 api_key=api_key,
                 model=self.model_name,
@@ -498,9 +559,9 @@ class LlmConfig:
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
             raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
 
-        from langchain_deepseek import ChatDeepSeek
-
         if self.mode == LlmMode.CHAT:
+            from langchain_deepseek import ChatDeepSeek
+
             return ChatDeepSeek(
                 model=self.model_name,
                 temperature=self.temperature,
@@ -521,9 +582,9 @@ class LlmConfig:
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
             raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
 
-        from langchain_anthropic import ChatAnthropic
-
         if self.mode == LlmMode.CHAT:
+            from langchain_anthropic import ChatAnthropic
+
             if self.reasoning_budget:
                 if self.reasoning_budget &lt; 1024:
                     raise ValueError(&#34;Reasoning budget must be at least 1024 tokens&#34;)
@@ -551,15 +612,13 @@ class LlmConfig:
         if self.provider != LlmProvider.GEMINI:
             raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but GOOGLE requested.&#34;)
 
-        from langchain_google_genai import (
-            ChatGoogleGenerativeAI,
-            GoogleGenerativeAI,
-            GoogleGenerativeAIEmbeddings,
-            HarmBlockThreshold,
-            HarmCategory,
-        )
-
         if self.mode == LlmMode.BASE:
+            from langchain_google_genai import (
+                GoogleGenerativeAI,
+                HarmBlockThreshold,
+                HarmCategory,
+            )
+
             return GoogleGenerativeAI(
                 model=self.model_name,
                 temperature=self.temperature,
@@ -570,6 +629,12 @@ class LlmConfig:
                 safety_settings={HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE},
             )
         if self.mode == LlmMode.CHAT:
+            from langchain_google_genai import (
+                ChatGoogleGenerativeAI,
+                HarmBlockThreshold,
+                HarmCategory,
+            )
+
             return ChatGoogleGenerativeAI(
                 model=self.model_name,
                 temperature=self.temperature,
@@ -581,6 +646,10 @@ class LlmConfig:
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
+            from langchain_google_genai import (
+                GoogleGenerativeAIEmbeddings,
+            )
+
             return GoogleGenerativeAIEmbeddings(
                 model=self.model_name,
                 client_options={&#34;timeout&#34;: self.timeout},
@@ -594,7 +663,6 @@ class LlmConfig:
             raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but BEDROCK requested.&#34;)
         import boto3
         from botocore.config import Config
-        from langchain_aws import BedrockEmbeddings, BedrockLLM, ChatBedrockConverse
 
         session = boto3.Session(
             region_name=os.environ.get(&#34;AWS_REGION&#34;, &#34;us-east-1&#34;),
@@ -611,6 +679,8 @@ class LlmConfig:
         )
 
         if self.mode == LlmMode.BASE:
+            from langchain_aws import BedrockLLM
+
             return BedrockLLM(
                 client=bedrock_client,
                 model=self.model_name,
@@ -620,6 +690,8 @@ class LlmConfig:
                 streaming=self.streaming,
             )
         if self.mode == LlmMode.CHAT:
+            from langchain_aws import ChatBedrockConverse
+
             return ChatBedrockConverse(
                 client=bedrock_client,
                 model=self.model_name,
@@ -630,6 +702,8 @@ class LlmConfig:
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
+            from langchain_aws import BedrockEmbeddings
+
             return BedrockEmbeddings(
                 client=bedrock_client,
                 model_id=self.model_name or &#34;amazon.titan-embed-text-v1&#34;,
@@ -644,12 +718,12 @@ class LlmConfig:
         if self.provider != LlmProvider.MISTRAL:
             raise ValueError(f&#34;LLM provider is &#39;{self.provider.value}&#39; but MISTRAL requested.&#34;)
 
-        from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
-
         if self.mode == LlmMode.BASE:
             raise ValueError(f&#34;{self.provider.value} provider does not support mode {self.mode.value}&#34;)
 
         if self.mode == LlmMode.CHAT:
+            from langchain_mistralai import ChatMistralAI
+
             return ChatMistralAI(
                 model=self.model_name,  # type: ignore
                 temperature=self.temperature,
@@ -659,6 +733,8 @@ class LlmConfig:
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
+            from langchain_mistralai import MistralAIEmbeddings
+
             return MistralAIEmbeddings(
                 model=self.model_name,
                 timeout=self.timeout if self.timeout is not None else 10,
@@ -673,7 +749,7 @@ class LlmConfig:
         self.base_url = self.base_url or provider_base_urls.get(self.provider)
         if self.provider == LlmProvider.OLLAMA:
             return self._build_ollama_llm()
-        if self.provider in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
+        if self.provider in [LlmProvider.OPENAI, LlmProvider.AZURE, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
             return self._build_openai_compat_llm()
         if self.provider == LlmProvider.GROQ:
             return self._build_groq_llm()
@@ -698,7 +774,7 @@ class LlmConfig:
 
     def build_llm_model(self) -&gt; BaseLanguageModel:
         &#34;&#34;&#34;Build the LLM model.&#34;&#34;&#34;
-        if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
+        if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;) or self.model_name.startswith(&#34;gpt-5&#34;):
             self.temperature = 1
         else:
             self.reasoning_effort = None
@@ -712,7 +788,7 @@ class LlmConfig:
 
     def build_chat_model(self) -&gt; BaseChatModel:
         &#34;&#34;&#34;Build the chat model.&#34;&#34;&#34;
-        if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
+        if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;) or self.model_name.startswith(&#34;gpt-5&#34;):
             self.temperature = 1
             self.streaming = False
         else:
@@ -990,7 +1066,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
 </summary>
 <pre><code class="python">def build_chat_model(self) -&gt; BaseChatModel:
     &#34;&#34;&#34;Build the chat model.&#34;&#34;&#34;
-    if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
+    if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;) or self.model_name.startswith(&#34;gpt-5&#34;):
         self.temperature = 1
         self.streaming = False
     else:
@@ -1034,7 +1110,7 @@ generate more focused and conservative text. (Default: 0.9)</p></div>
 </summary>
 <pre><code class="python">def build_llm_model(self) -&gt; BaseLanguageModel:
     &#34;&#34;&#34;Build the LLM model.&#34;&#34;&#34;
-    if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;):
+    if self.model_name.startswith(&#34;o1&#34;) or self.model_name.startswith(&#34;o3&#34;) or self.model_name.startswith(&#34;gpt-5&#34;):
         self.temperature = 1
     else:
         self.reasoning_effort = None
@@ -1234,7 +1310,7 @@ suitable for JSON serialization</dd>
 </dd>
 <dt id="par_ai_core.llm_config.LlmMode"><code class="flex name class">
 <span>class <span class="ident">LlmMode</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1245,9 +1321,9 @@ suitable for JSON serialization</dd>
     &#34;&#34;&#34;Enumeration of LLM operating modes.
 
     Defines the different ways an LLM can be used:
-        BASE: Basic text completion mode
-        CHAT: Interactive conversation mode
-        EMBEDDINGS: Vector embedding generation mode
+        BASE: Basic text completion mode.
+        CHAT: Interactive conversation mode.
+        EMBEDDINGS: Vector embedding generation mode.
     &#34;&#34;&#34;
 
     BASE = &#34;Base&#34;
@@ -1256,9 +1332,9 @@ suitable for JSON serialization</dd>
 </details>
 <div class="desc"><p>Enumeration of LLM operating modes.</p>
 <p>Defines the different ways an LLM can be used:
-BASE: Basic text completion mode
-CHAT: Interactive conversation mode
-EMBEDDINGS: Vector embedding generation mode</p></div>
+BASE: Basic text completion mode.
+CHAT: Interactive conversation mode.
+EMBEDDINGS: Vector embedding generation mode.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>strenum.StrEnum</li>
@@ -1715,7 +1791,7 @@ This method is thread-safe and can be called from multiple threads.</p></div>
 </dd>
 <dt id="par_ai_core.llm_config.ReasoningEffort"><code class="flex name class">
 <span>class <span class="ident">ReasoningEffort</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <details class="source">

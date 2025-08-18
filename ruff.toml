@@ -85,5 +85,5 @@ combine-as-imports = true
 [lint.per-file-ignores]
 # Ignore pyupgrade rules in files with Python 3.10 compatibility code
 "src/par_ai_core/time_display.py" = ["UP036", "UP035", "UP037", "F401", "F811"]
-"tests/test_time_display.py" = ["UP036", "UP035", "UP037", "F401", "F811"]  
+"tests/test_time_display.py" = ["UP036", "UP035", "UP037", "F401", "F811"]
 "src/par_ai_core/utils.py" = ["UP036"]

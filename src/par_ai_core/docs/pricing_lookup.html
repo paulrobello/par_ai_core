@@ -456,7 +456,7 @@ token counts, cache operations, tool calls, and costs.</p>
 <dl>
 <dt id="par_ai_core.pricing_lookup.PricingDisplay"><code class="flex name class">
 <span>class <span class="ident">PricingDisplay</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -468,18 +468,7 @@ token counts, cache operations, tool calls, and costs.</p>
     PRICE = &#34;price&#34;
     DETAILS = &#34;details&#34;</code></pre>
 </details>
-<div class="desc"><p>StrEnum is a Python <code>enum.Enum</code> that inherits from <code>str</code>. The default
-<code>auto()</code> behavior uses the member name as its value.</p>
-<p>Example usage::</p>
-<pre><code>class Example(StrEnum):
-    UPPER_CASE = auto()
-    lower_case = auto()
-    MixedCase = auto()
-
-assert Example.UPPER_CASE == "UPPER_CASE"
-assert Example.lower_case == "lower_case"
-assert Example.MixedCase == "MixedCase"
-</code></pre></div>
+<div class="desc"><p>An enumeration.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>strenum.StrEnum</li>

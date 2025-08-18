@@ -208,7 +208,7 @@ The following environment variables are used:</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def summarize_content(content: str, llm: BaseChatModel) -&gt; str:
-    &#34;&#34;&#34;Summarize content using an LLM.
+    &#34;&#34;&#34;Summarize content using an LLM with context size awareness and chunking.
 
     Args:
         content: Text content to summarize
@@ -220,27 +220,102 @@ The following environment variables are used:</p>
         - Key points
         - Summary paragraph
     &#34;&#34;&#34;
-    summarize_content_instructions = &#34;&#34;&#34;Your goal is to generate a summary of the user provided content.
+    model_name = getattr(llm, &#34;model_name&#34;, &#34;&#34;) or getattr(llm, &#34;name&#34;, &#34;&#34;) or &#34;gpt-4&#34;
 
-    Your response should include the following:
-    - Title
-    - List of key points
-    - Summary
+    # Get model context size
+    context_size = _get_model_context_size(model_name)
 
-    Do not include the content itself.
-    Do not include a preamble such as &#34;Summary of the content:&#34;
-    &#34;&#34;&#34;
-    return str(
-        llm.invoke(
-            [
-                SystemMessage(content=summarize_content_instructions),
-                HumanMessage(content=content),
-            ],
-            config=llm_run_manager.get_runnable_config(llm.name or &#34;&#34;),
-        ).content
-    )</code></pre>
+    # Reserve tokens for system message, response, and safety margin
+    system_message_tokens = 100  # Rough estimate
+    response_tokens = 500  # Expected response size
+    safety_margin = 200  # Safety buffer
+
+    max_content_tokens = context_size - system_message_tokens - response_tokens - safety_margin
+
+    # Check if content fits within context size
+    content_tokens = _estimate_tokens(content, model_name)
+
+    if content_tokens &lt;= max_content_tokens:
+        # Content fits, use normal summarization
+        summarize_content_instructions = &#34;&#34;&#34;Your goal is to generate a summary of the user provided content.
+
+        Your response should include the following:
+        - Title
+        - List of key points
+        - Summary
+
+        Do not include the content itself.
+        Do not include a preamble such as &#34;Summary of the content:&#34;
+        &#34;&#34;&#34;
+        return str(
+            llm.invoke(
+                [
+                    SystemMessage(content=summarize_content_instructions),
+                    HumanMessage(content=content),
+                ],
+                config=llm_run_manager.get_runnable_config(llm.name or &#34;&#34;),
+            ).content
+        )
+    else:
+        # Content is too large, chunk it
+        chunks = _chunk_text(content, max_content_tokens, model_name)
+
+        # Summarize each chunk
+        chunk_summaries = []
+        for i, chunk in enumerate(chunks):
+            chunk_instructions = f&#34;&#34;&#34;Your goal is to generate a summary of the user provided content.
+
+            This is part {i + 1} of {len(chunks)} chunks from a larger document that exceeded the context size limit.
+
+            Your response should include the following:
+            - Title (if this chunk contains title information)
+            - Key points from this section
+            - Summary of this section
+
+            Do not include the content itself.
+            Do not include a preamble such as &#34;Summary of the content:&#34;
+            Focus on the most important information from this section.
+            &#34;&#34;&#34;
+
+            chunk_summary = str(
+                llm.invoke(
+                    [
+                        SystemMessage(content=chunk_instructions),
+                        HumanMessage(content=chunk),
+                    ],
+                    config=llm_run_manager.get_runnable_config(llm.name or &#34;&#34;),
+                ).content
+            )
+            chunk_summaries.append(chunk_summary)
+
+        # Combine chunk summaries into a final summary
+        combined_summaries = &#34;\n\n&#34;.join(chunk_summaries)
+
+        final_instructions = f&#34;&#34;&#34;Your goal is to create a unified summary from the provided chunk summaries.
+
+        The original content was split into {len(chunks)} chunks due to context size limits, and each chunk was summarized separately. Your task is to combine these summaries into a coherent final summary.
+
+        Your response should include the following:
+        - Title (synthesized from all chunks)
+        - List of key points (consolidated from all chunks)
+        - Summary (unified overview of the entire content)
+
+        Do not include the chunk summaries themselves.
+        Do not include a preamble such as &#34;Summary of the content:&#34;
+        Focus on creating a cohesive summary that captures the main themes and important details from all chunks.
+        &#34;&#34;&#34;
+
+        return str(
+            llm.invoke(
+                [
+                    SystemMessage(content=final_instructions),
+                    HumanMessage(content=combined_summaries),
+                ],
+                config=llm_run_manager.get_runnable_config(llm.name or &#34;&#34;),
+            ).content
+        )</code></pre>
 </details>
-<div class="desc"><p>Summarize content using an LLM.</p>
+<div class="desc"><p>Summarize content using an LLM with context size awareness and chunking.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content</code></strong></dt>

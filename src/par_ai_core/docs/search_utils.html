@@ -606,7 +606,7 @@ raw_content (str): Full content if available and requested</dd>
 </summary>
 <pre><code class="python">def youtube_get_transcript(video_id: str, languages: list[str] | None = None) -&gt; str:
     &#34;&#34;&#34;Fetch transcript for a YouTube video.&#34;&#34;&#34;
-    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or [&#34;en&#34;])
+    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or [&#34;en&#34;])  # type: ignore
     transcript_text = &#34; &#34;.join([item[&#34;text&#34;] for item in transcript_list])
     return transcript_text.replace(&#34;\n&#34;, &#34; &#34;)</code></pre>
 </details>

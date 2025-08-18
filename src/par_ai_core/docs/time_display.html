@@ -80,7 +80,7 @@ parts of the par_ai_core project.</p>
             return None
         utc_dt = datetime.fromisoformat(utc_dt)
 
-    local_dt_now = datetime.now(timezone.utc)
+    local_dt_now = datetime.now(UTC)
     local_tz = local_dt_now.astimezone().tzinfo
     local_dt = utc_dt.astimezone(local_tz)
     return local_dt</code></pre>
@@ -151,7 +151,7 @@ parts of the par_ai_core project.</p>
     Returns:
         str: The string timestamp in the format specified.
     &#34;&#34;&#34;
-    utc_dt = datetime.fromtimestamp(timestamp, timezone.utc)
+    utc_dt = datetime.fromtimestamp(timestamp, UTC)
     local_dt = utc_dt.astimezone()
     return local_dt.strftime(fmt)</code></pre>
 </details>
@@ -183,7 +183,7 @@ parts of the par_ai_core project.</p>
     Returns:
         tzinfo | None: The local timezone.
     &#34;&#34;&#34;
-    return datetime.now(timezone.utc).astimezone().tzinfo</code></pre>
+    return datetime.now(UTC).astimezone().tzinfo</code></pre>
 </details>
 <div class="desc"><p>Get the local timezone.</p>
 <h2 id="returns">Returns</h2>

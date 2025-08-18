@@ -104,6 +104,8 @@ and updating existing configurations as provider offerings evolve.</p>
             return p.value
         if p.value.lower().startswith(provider):
             return p.value
+        if p.value.lower().endswith(provider):
+            return p.value
     return &#34;&#34;</code></pre>
 </details>
 <div class="desc"><p>Get provider name using fuzzy matching.</p>
@@ -344,7 +346,7 @@ class LangChainConfig:
 </dd>
 <dt id="par_ai_core.llm_providers.LlmProvider"><code class="flex name class">
 <span>class <span class="ident">LlmProvider</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -379,7 +381,8 @@ class LangChainConfig:
     MISTRAL = &#34;Mistral&#34;
     DEEPSEEK = &#34;Deepseek&#34;
     LITELLM = &#34;LiteLLM&#34;
-    BEDROCK = &#34;Bedrock&#34;</code></pre>
+    BEDROCK = &#34;Bedrock&#34;
+    AZURE = &#34;Azure&#34;</code></pre>
 </details>
 <div class="desc"><p>Enumeration of supported LLM providers.</p>
 <p>Supported providers:
@@ -401,6 +404,10 @@ BEDROCK: AWS Bedrock API</p></div>
 <h3>Class variables</h3>
 <dl>
 <dt id="par_ai_core.llm_providers.LlmProvider.ANTHROPIC"><code class="name">var <span class="ident">ANTHROPIC</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="par_ai_core.llm_providers.LlmProvider.AZURE"><code class="name">var <span class="ident">AZURE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -564,6 +571,7 @@ class LlmProviderConfig:
 <h4><code><a title="par_ai_core.llm_providers.LlmProvider" href="#par_ai_core.llm_providers.LlmProvider">LlmProvider</a></code></h4>
 <ul class="two-column">
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.ANTHROPIC" href="#par_ai_core.llm_providers.LlmProvider.ANTHROPIC">ANTHROPIC</a></code></li>
+<li><code><a title="par_ai_core.llm_providers.LlmProvider.AZURE" href="#par_ai_core.llm_providers.LlmProvider.AZURE">AZURE</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.BEDROCK" href="#par_ai_core.llm_providers.LlmProvider.BEDROCK">BEDROCK</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.DEEPSEEK" href="#par_ai_core.llm_providers.LlmProvider.DEEPSEEK">DEEPSEEK</a></code></li>
 <li><code><a title="par_ai_core.llm_providers.LlmProvider.GEMINI" href="#par_ai_core.llm_providers.LlmProvider.GEMINI">GEMINI</a></code></li>
