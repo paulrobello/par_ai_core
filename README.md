@@ -239,6 +239,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.4.1:
+  - **Dependency Fix:** Fixed compatibility issue between litellm and openai libraries by constraining openai to <1.100.0 to maintain compatibility with litellm 1.75.x
 - Version 0.4.0:
   - **Python 3.10-3.13 Support:** Full compatibility across Python versions with 3.12 as the development target
   - **Optimized Configuration:** Standardized Python version targeting across all development tools (ruff, pyright, pre-commit)

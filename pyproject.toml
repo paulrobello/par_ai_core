@@ -77,6 +77,7 @@ dependencies = [
     "litellm>=1.75.0",
     "google-generativeai>=0.8.5",
     "nest-asyncio>=1.6.0",
+    "openai>=1.99.0,<1.100.0",
 ]
 packages = [
     "src/par_ai_core",
