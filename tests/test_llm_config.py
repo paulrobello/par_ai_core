@@ -304,16 +304,23 @@ def test_llm_config_bedrock_setup() -> None:
     """Test Bedrock LLM configuration setup."""
     config = LlmConfig(provider=LlmProvider.BEDROCK, model_name="test-model", timeout=30, user_agent_appid="test-app")
 
-    with patch("boto3.Session") as mock_session:
+    with (
+        patch("boto3.Session") as mock_session,
+        patch("langchain_aws.ChatBedrockConverse") as mock_chat_bedrock,
+    ):
         mock_client = MagicMock()
         mock_session.return_value.client.return_value = mock_client
+        mock_chat_instance = MagicMock(spec=BaseChatModel)
+        mock_chat_bedrock.return_value = mock_chat_instance
 
-        config.build_chat_model()
+        result = config.build_chat_model()
 
         mock_session.assert_called_once()
         mock_session.return_value.client.assert_called_once_with(
             "bedrock-runtime", config=ANY, endpoint_url=config.base_url
         )
+        mock_chat_bedrock.assert_called_once()
+        assert result == mock_chat_instance
 
 
 def test_llm_config_google_setup() -> None:
