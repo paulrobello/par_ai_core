@@ -117,7 +117,7 @@ Each provider is configured through:
 - Google-style docstrings for all public APIs
 - Line length: 120 characters
 - Import grouping and sorting enforced by ruff
-- Follow Python 3.10+ best practices (use `|` for unions, built-in generics)
+- Follow Python 3.11+ best practices (use `|` for unions, built-in generics)
 
 ### Testing
 - Run `make checkall` before committing

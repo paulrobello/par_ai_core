@@ -6,7 +6,7 @@ dynamic = [
 description = "PAR AI Core"
 url = "https://github.com/paulrobello/par_ai_core"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Paul Robello", email = "probello@gmail.com" },
 ]
@@ -19,10 +19,10 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: Microsoft :: Windows :: Windows 11",
@@ -46,7 +46,6 @@ dependencies = [
     "botocore>=1.40.58",
     "langchain-anthropic>=0.3.22",
     "langchain-aws>=0.2.35",
-    "langchain-chroma>=0.2.6",
     "langchain-community>=0.3.31",
     "langchain-core>=0.3.79",
     "langchain-experimental>=0.3.4",
@@ -54,7 +53,6 @@ dependencies = [
     "langchain-groq>=0.3.8",
     "langchain-ollama>=0.3.10",
     "langchain-openai>=0.3.32",
-    "langchain-qdrant>=0.2.1",
     "langchain-text-splitters>=0.3.11",
     "langchain-xai>=0.2.5",
     "langchain-mistralai>=0.2.12",

@@ -26,7 +26,7 @@ for my AI projects, encapsulating common functionalities and best practices for 
 
 ## Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher
 - UV package manager
 - API keys for chosen AI provider (except for Ollama and LlamaCpp)
     - See (Environment Variables)[#environment-variables] below for provider-specific variables
@@ -241,6 +241,13 @@ if __name__ == "__main__":
 ## Whats New
 - Version 0.4.2:
   - Updated dependencies
+- Version 0.4.3:
+  - **Python 3.14 Support:** Added support for Python 3.14 while maintaining compatibility with Python 3.11-3.13
+  - **Dropped Python 3.10:** Minimum required Python version is now 3.11
+  - **Removed Unused Dependencies:** Removed langchain-chroma and langchain-qdrant (not used in codebase)
+  - **Updated Development Tools:** Ruff and Pyright now target Python 3.14
+  - **CI/CD Updates:** GitHub Actions workflows updated to test against Python 3.11-3.14
+  - Updated dependencies and ensured Python 3.14 compatibility
 - Version 0.4.1:
   - **Dependency Fix:** Fixed compatibility issue between litellm and openai libraries by constraining openai to <1.100.0 to maintain compatibility with litellm 1.75.x
 - Version 0.4.0:

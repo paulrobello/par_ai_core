@@ -14,7 +14,7 @@ def test_module_attributes():
     assert par_ai_core.__credits__ == ["Paul Robello"]
     assert par_ai_core.__maintainer__ == "Paul Robello"
     assert par_ai_core.__email__ == "probello@gmail.com"
-    assert par_ai_core.__version__ == "0.4.2"
+    assert par_ai_core.__version__ == "0.4.3"
     assert par_ai_core.__application_title__ == "Par AI Core"
     assert par_ai_core.__application_binary__ == "par_ai_core"
     assert par_ai_core.__licence__ == "MIT"
