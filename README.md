@@ -258,6 +258,10 @@ if __name__ == "__main__":
   - **Enhanced Makefile:** Fixed lint target to include tests, corrected package commands, improved dependency management
   - **Code Quality Improvements:** Fixed all linting and type checking errors, updated deprecated patterns
   - **Test Reliability:** Updated test mocks and model references for better compatibility
+- Version 0.5.4:
+  - Updated default OpenAI model from gpt-5 to gpt-5.1
+  - Updated LiteLLM default model from gpt-5 to gpt-5.1
+  - Updated vision model from gpt-5 to gpt-5.1
 - Version 0.3.2:
   - Improved test coverage to 93%
   - Fixed nest_asyncio safety handling

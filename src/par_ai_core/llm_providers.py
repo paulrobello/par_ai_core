@@ -113,7 +113,7 @@ provider_base_urls: dict[LlmProvider, str | None] = {
 provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.OLLAMA: "",
     LlmProvider.LLAMACPP: "default",
-    LlmProvider.OPENAI: "gpt-5",
+    LlmProvider.OPENAI: "gpt-5.1",
     LlmProvider.GROQ: "llama-3.3-70b-versatile",
     LlmProvider.XAI: "grok-4-0709",
     LlmProvider.ANTHROPIC: "claude-sonnet-4-20250514",
@@ -123,7 +123,7 @@ provider_default_models: dict[LlmProvider, str] = {
     LlmProvider.MISTRAL: "mistral-large-2411",
     LlmProvider.OPENROUTER: "deepseek/deepseek-chat",
     LlmProvider.DEEPSEEK: "deepseek-chat",
-    LlmProvider.LITELLM: "gpt-5",
+    LlmProvider.LITELLM: "gpt-5.1",
     LlmProvider.AZURE: "gpt-4o",
 }
 
@@ -147,7 +147,7 @@ provider_light_models: dict[LlmProvider, str] = {
 provider_vision_models: dict[LlmProvider, str] = {
     LlmProvider.OLLAMA: "",
     LlmProvider.LLAMACPP: "default",
-    LlmProvider.OPENAI: "gpt-5",
+    LlmProvider.OPENAI: "gpt-5.1",
     LlmProvider.GROQ: "meta-llama/llama-4-scout-17b-16e-instruct",
     LlmProvider.XAI: "grok-4-0709",
     LlmProvider.ANTHROPIC: "claude-sonnet-4-20250514",

@@ -770,7 +770,7 @@ class LlmConfig:
 
     def build_llm_model(self) -> BaseLanguageModel:
         """Build the LLM model."""
-        if self.model_name.startswith("o1") or self.model_name.startswith("o3") or self.model_name.startswith("gpt-5"):
+        if self.model_name.startswith("o1") or self.model_name.startswith("o3") or self.model_name.startswith("gpt-5."):
             self.temperature = 1
         else:
             self.reasoning_effort = None
@@ -784,7 +784,7 @@ class LlmConfig:
 
     def build_chat_model(self) -> BaseChatModel:
         """Build the chat model."""
-        if self.model_name.startswith("o1") or self.model_name.startswith("o3") or self.model_name.startswith("gpt-5"):
+        if self.model_name.startswith("o1") or self.model_name.startswith("o3") or self.model_name.startswith("gpt-5."):
             self.temperature = 1
             self.streaming = False
         else:
