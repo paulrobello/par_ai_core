@@ -101,6 +101,14 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         with self._lock:
             return self._usage_metadata.__repr__()
 
+    def __hash__(self) -> int:
+        """Return hash of this callback handler instance."""
+        return id(self)
+
+    def __eq__(self, other: object) -> bool:
+        """Check equality based on instance identity."""
+        return self is other
+
     @property
     def always_verbose(self) -> bool:
         """Whether to call verbose callbacks even if verbose is False."""
