@@ -648,7 +648,7 @@ class LlmConfig:
 
             return GoogleGenerativeAIEmbeddings(
                 model=self.model_name,
-                client_options={"timeout": self.timeout},
+                request_options={"timeout": self.timeout},
             )
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")

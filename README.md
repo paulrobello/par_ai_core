@@ -239,6 +239,8 @@ if __name__ == "__main__":
 ```
 
 ## Whats New
+- Version 0.5.5:
+  - **Fix:** Made `ParAICallbackHandler` hashable to prevent LangChain callback merge errors
 - Version 0.4.2:
   - Updated dependencies
 - Version 0.4.3:
