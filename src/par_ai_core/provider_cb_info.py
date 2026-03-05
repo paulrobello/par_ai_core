@@ -148,8 +148,7 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
             console.print(Panel(f"Prompt: {prompts[0]}", title="Prompt"))
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-        """Print out the token."""
-        pass
+        """Required by BaseCallbackHandler; intentionally a no-op since token streaming is handled elsewhere."""
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Collect token usage."""

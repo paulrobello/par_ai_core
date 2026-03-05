@@ -210,16 +210,8 @@ def _estimate_tokens(text: str, model_name: str) -> int:
         Estimated number of tokens
     """
     try:
-        # Try to get appropriate tokenizer for the model
-        if "gpt" in model_name.lower():
-            encoding = tiktoken.encoding_for_model("gpt-4")
-        elif "claude" in model_name.lower():
-            # Claude uses a similar tokenizer to GPT
-            encoding = tiktoken.encoding_for_model("gpt-4")
-        else:
-            # Default to GPT-4 tokenizer
-            encoding = tiktoken.encoding_for_model("gpt-4")
-
+        # cl100k_base is the tokenizer used by GPT-4 and is a reasonable approximation for all models
+        encoding = tiktoken.get_encoding("cl100k_base")
         return len(encoding.encode(text))
     except Exception:
         # Fallback: estimate 4 characters per token (rough approximation)

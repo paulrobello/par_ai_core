@@ -12,6 +12,22 @@
 
 [![codecov](https://codecov.io/gh/paulrobello/par_ai_core/branch/main/graph/badge.svg)](https://codecov.io/gh/paulrobello/par_ai_core)
 
+## Table of Contents
+
+- [Description](#description)
+- [Technology](#technology)
+- [Prerequisites](#prerequisites)
+- [Features](#features)
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Update](#update)
+- [Environment Variables](#environment-variables)
+- [Example](#example)
+- [What's New](#whats-new)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
+
 ## Description
 Par AI Core is a Python library that provides a set of tools, helpers, and wrappers built on top of LangChain.
 It is designed to accelerate the development of AI-powered applications by offering a streamlined and efficient way
@@ -72,6 +88,7 @@ DEEPSEEK_API_KEY=
 AWS_PROFILE=
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
+AZURE_OPENAI_API_KEY=
 
 # Search
 GOOGLE_CSE_ID=
@@ -101,6 +118,8 @@ PARAI_MODEL=
 PARAI_AI_BASE_URL=
 PARAI_TEMPERATURE=
 PARAI_TIMEOUT=
+PARAI_STREAMING=
+PARAI_USER_AGENT_APPID=
 PARAI_NUM_CTX=
 PARAI_NUM_REDICT=
 PARAI_REPEAT_LAST_N=
@@ -112,6 +131,9 @@ PARAI_TFS_Z=
 PARAI_TOP_K=
 PARAI_TOP_P=
 PARAI_SEED=
+PARAI_REASONING_EFFORT=
+PARAI_REASONING_BUDGET=
+PARAI_LOG_LEVEL=
 ```
 
 ### AI API KEYS
@@ -123,7 +145,7 @@ PARAI_SEED=
 * XAI_API_KEY is required for XAI. Get a free key from https://x.ai/api
 * GROQ_API_KEY is required for Groq. Get a free key from https://console.groq.com/
 * MISTRAL_API_KEY is required for Mistral. Get a free key from https://console.mistral.ai/
-* OPENROUTER_KEY is required for OpenRouter. Get a key from https://openrouter.ai/
+* OPENROUTER_API_KEY is required for OpenRouter. Get a key from https://openrouter.ai/
 * DEEPSEEK_API_KEY is required for Deepseek. Get a key from https://platform.deepseek.com/
 * AWS_PROFILE or AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are used for Bedrock authentication. The environment must
   already be authenticated with AWS.
@@ -156,13 +178,18 @@ If a specify provider is not listed but has an OpenAI compatible endpoint you ca
   from https://smith.langchain.com/settings
 
 ### PARAI Related
-* PARAI_AI_PROVIDER is one of Ollama|OpenAI|Groq|XAI|Anthropic|Gemini|Bedrock|Github|LlamaCpp,OpenRouter,LiteLLM
+* PARAI_AI_PROVIDER is one of Ollama|OpenAI|Groq|XAI|Anthropic|Gemini|Bedrock|Github|LlamaCpp|OpenRouter|LiteLLM
 * PARAI_MODEL is the model to use with the selected provider
 * PARAI_AI_BASE_URL can be used to override the base url used to call a provider
 * PARAI_TEMPERATURE sets model temperature. Range depends on provider usually 0.0 to 1.0
 * PARAI_TIMEOUT length of time to wait in seconds for ai response
+* PARAI_STREAMING enables or disables streaming responses (true/false)
+* PARAI_USER_AGENT_APPID sets an app identifier added to the User-Agent header for API requests
 * PARAI_NUM_CTX sets the context window size. Max size varies by model
-* Other PARAI related params are to tweak model responses not all are supported / used by all providers
+* PARAI_REASONING_EFFORT sets reasoning effort for OpenAI thinking models (low/medium/high)
+* PARAI_REASONING_BUDGET sets the reasoning token budget for Anthropic models
+* PARAI_LOG_LEVEL sets the logging level (DEBUG/INFO/WARNING/ERROR)
+* Other PARAI related params (NUM_PREDICT, REPEAT_LAST_N, REPEAT_PENALTY, MIROSTAT*, TFS_Z, TOP_K, TOP_P, SEED) are to tweak model responses; not all are supported by all providers
 
 
 
@@ -184,7 +211,6 @@ from par_ai_core.llm_providers import (
 from par_ai_core.par_logging import console_out
 from par_ai_core.pricing_lookup import PricingDisplay
 from par_ai_core.provider_cb_info import get_parai_callback
-from par_ai_core.output_utils import DisplayOutputFormat, display_formatted_output
 
 
 def main() -> None:
@@ -231,18 +257,20 @@ def main() -> None:
         result = chat_model.invoke(messages, config=llm_run_manager.get_runnable_config(chat_model.name or ""))
 
         # Print the model's response
-        display_formatted_output(result.content, DisplayOutputFormat.MD)
+        console_out.print(result.content)
 
 
 if __name__ == "__main__":
     main()
 ```
 
-## Whats New
+## What's New
 - Version 0.5.5:
   - **Fix:** Made `ParAICallbackHandler` hashable to prevent LangChain callback merge errors
-- Version 0.4.2:
-  - Updated dependencies
+- Version 0.5.4:
+  - Updated default OpenAI model from gpt-5 to gpt-5.1
+  - Updated LiteLLM default model from gpt-5 to gpt-5.1
+  - Updated vision model from gpt-5 to gpt-5.1
 - Version 0.4.3:
   - **Python 3.14 Support:** Added support for Python 3.14 while maintaining compatibility with Python 3.11-3.13
   - **Dropped Python 3.10:** Minimum required Python version is now 3.11
@@ -250,6 +278,8 @@ if __name__ == "__main__":
   - **Updated Development Tools:** Ruff and Pyright now target Python 3.14
   - **CI/CD Updates:** GitHub Actions workflows updated to test against Python 3.11-3.14
   - Updated dependencies and ensured Python 3.14 compatibility
+- Version 0.4.2:
+  - Updated dependencies
 - Version 0.4.1:
   - **Dependency Fix:** Fixed compatibility issue between litellm and openai libraries by constraining openai to <1.100.0 to maintain compatibility with litellm 1.75.x
 - Version 0.4.0:
@@ -260,10 +290,6 @@ if __name__ == "__main__":
   - **Enhanced Makefile:** Fixed lint target to include tests, corrected package commands, improved dependency management
   - **Code Quality Improvements:** Fixed all linting and type checking errors, updated deprecated patterns
   - **Test Reliability:** Updated test mocks and model references for better compatibility
-- Version 0.5.4:
-  - Updated default OpenAI model from gpt-5 to gpt-5.1
-  - Updated LiteLLM default model from gpt-5 to gpt-5.1
-  - Updated vision model from gpt-5 to gpt-5.1
 - Version 0.3.2:
   - Improved test coverage to 93%
   - Fixed nest_asyncio safety handling
@@ -274,13 +300,13 @@ if __name__ == "__main__":
 - Version 0.2.0:
   - Support for basic auth in ollama base urls
 - Version 0.1.25:
-  - Supress pricing not found warning
+  - Suppress pricing not found warning
 - Version 0.1.24:
   - Changed default fetch wait from idle to sleep
 - Version 0.1.23:
-  - Fix issue caused by providing reasoning effort to models that dont support it.
+  - Fix issue caused by providing reasoning effort to models that don't support it
 - Version 0.1.22:
-  - Fix some asyncio issues with web fetch utils.
+  - Fix some asyncio issues with web fetch utils
 - Version 0.1.21:
   - Added config options for OpenAI reasoning effort, and Anthropic reasoning token budget
   - Fix o3 error when temperature is set

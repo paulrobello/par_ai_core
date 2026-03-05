@@ -24,8 +24,10 @@ Typical usage examples:
     results = reddit_search("python tips", subreddit="learnpython", max_comments=5, max_results=3)
 
 4. Search YouTube with transcript fetching:
-    from par_ai_core.llm_config import get_llm
-    llm = get_llm()
+    from par_ai_core.llm_config import LlmConfig
+    from par_ai_core.llm_providers import LlmProvider, provider_light_models
+    llm_config = LlmConfig(provider=LlmProvider.OPENAI, model_name=provider_light_models[LlmProvider.OPENAI])
+    llm = llm_config.build_chat_model()
     results = youtube_search("OpenAI GPT-4", fetch_transcript=True, summarize_llm=llm)
 
 5. Perform a Google search using Serper:
@@ -123,26 +125,30 @@ def jina_search(query: str, *, max_results: int = 3) -> list[dict[str, Any]]:
     Raises:
         Exception: If the Jina API request fails or returns an error status code.
     """
+    jina_api_key = os.environ.get("JINA_API_KEY")
+    if not jina_api_key:
+        raise ValueError("JINA_API_KEY environment variable is not set")
+
     response = requests.get(
         f"https://s.jina.ai/{quote(query)}",
         headers={
-            "Authorization": f"Bearer {os.environ['JINA_API_KEY']}",
+            "Authorization": f"Bearer {jina_api_key}",
             "X-Retain-Images": "none",
             "Accept": "application/json",
         },
+        timeout=10,
     )
 
     if response.status_code == 200:
         res = response.json()
-        # print(res)
         return [
             {"title": r["title"], "url": r["url"], "content": r["description"], "raw_content": r["content"]}
             for r in res["data"][:max_results]
             if "warning" not in r
         ]
 
-    else:
-        raise Exception(f"Jina API request failed with status code {response.status_code}")
+    response.raise_for_status()
+    return []
 
 
 def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -> list[dict[str, Any]]:
@@ -178,8 +184,11 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
         date_range = f"{start_date.strftime('%Y-%m-%d')}to{end_date.strftime('%Y-%m-%d')}"
     else:
         date_range = "false"
+    brave_api_key = os.environ.get("BRAVE_API_KEY")
+    if not brave_api_key:
+        raise ValueError("BRAVE_API_KEY environment variable is not set")
     wrapper = BraveSearchWrapper(
-        api_key=SecretStr(os.environ["BRAVE_API_KEY"]),
+        api_key=SecretStr(brave_api_key),
         search_kwargs={"count": max_results, "summary": True, "freshness": date_range},
     )
     res = json.loads(wrapper.run(query))
@@ -188,7 +197,6 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
         content = fetch_url_and_convert_to_markdown(urls)
         for r, c in zip(res, content):
             r["raw_content"] = c
-    # print(res)
     return [
         {
             "title": r["title"],
@@ -226,27 +234,9 @@ def serper_search(
     """
     if days < 0:
         raise ValueError("days parameter must be >= 0")
-    """Search the web using Google Serper.
-
-    Args:
-        query (str): The search query to execute
-        days (int): Number of days to search (default is 0 meaning all time)
-        max_results (int): Maximum number of results to return
-        scrape (bool): Whether to scrape the search result urls (default is False)
-
-    Returns:
-        - results (list): List of search result dictionaries, each containing:
-            - title (str): Title of the search result
-            - url (str): URL of the search result
-            - description (str): Snippet/summary of the content
-            - raw_content (str): Full content of the page if available
-    """
     search = GoogleSerperAPIWrapper(type=type)
     res = search.results(query)
-    # console_err.print(res)
-    # result_type = "news" if type == "news" else "organic"
     results_list = res.get(type, [])[:max_results]
-    # console_err.print(results_list)
 
     if scrape:
         urls = [r["link"] for r in results_list]
@@ -302,8 +292,7 @@ def reddit_search(
     )
     try:
         sub_reddit = reddit.subreddit(subreddit)
-    except Exception as _:
-        # console.log("[red]Subreddit not found, falling back to all")
+    except Exception:
         subreddit = "all"
         sub_reddit = reddit.subreddit(subreddit)
     if query == "hot":
@@ -396,7 +385,7 @@ def youtube_get_comments(youtube, video_id: str, max_results: int = 10) -> list[
                 request = youtube.commentThreads().list_next(previous_request=request, previous_response=response)
             else:
                 request = None
-        except Exception as _:
+        except Exception:
             break
 
     return comments
@@ -468,7 +457,6 @@ def youtube_search(
 
     results = []
     for item in response["items"]:
-        # console.print(item)
         video_id = item["id"]["videoId"]
         video_title = item["snippet"]["title"]
         video_url = f"https://www.youtube.com/watch?v={video_id}"
@@ -485,17 +473,6 @@ def youtube_search(
         if comments:
             content += "\n\nComments:\n" + "\n".join(comments)
 
-        # requires Oauth to download transcript so we use a workaround lib which uses scraping
-        # tracks = youtube.captions().list(
-        #     part="snippet",
-        #     videoId=video_id,
-        # ).execute()
-        # tracks = [t for t in tracks["items"] if t["snippet"]["language"] == "en" and t["snippet"]["trackKind"] == "standard"]
-        # console.print(tracks)
-        # if tracks:
-        #     transcript = youtube.captions().download(id=tracks[0]["id"]).execute()
-        #     console.print(transcript)
-
         if fetch_transcript:
             transcript_text = youtube_get_transcript(video_id, languages=["en"])
             transcript_summary = ""
@@ -511,11 +488,3 @@ def youtube_search(
         results.append({"title": video_title, "url": video_url, "content": content, "raw_content": transcript_text})
 
     return results
-
-
-# if __name__ == "__main__":
-#     from dotenv import load_dotenv
-#
-#     load_dotenv(Path("~/.par_gpt.env").expanduser())
-#     # console.print(youtube_search("open ai", days=1, max_comments=3, fetch_transcript=False, max_results=1))
-#     # console.print(serper_search("open ai", days=0, max_results=1, scrape=True))

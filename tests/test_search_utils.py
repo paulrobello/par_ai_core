@@ -8,6 +8,7 @@ from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 from langchain_core.language_models import BaseChatModel
 
 from par_ai_core.search_utils import (
@@ -273,12 +274,15 @@ def test_jina_search(mock_get):
 
 @patch("par_ai_core.search_utils.requests.get")
 def test_jina_search_error(mock_get):
-    """Test Jina search error handling."""
-    mock_get.return_value.status_code = 400
+    """Test Jina search error handling via raise_for_status."""
+    mock_response = MagicMock()
+    mock_response.status_code = 400
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("400 Client Error")
+    mock_get.return_value = mock_response
 
     with (
         patch.dict(os.environ, {"JINA_API_KEY": "test_key"}),
-        pytest.raises(Exception, match="Jina API request failed with status code 400"),
+        pytest.raises(requests.exceptions.HTTPError),
     ):
         jina_search("test query")
 

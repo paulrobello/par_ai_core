@@ -284,20 +284,20 @@ def test_llm_config_provider_errors(provider: LlmProvider, mode: LlmMode, expect
 
 
 def test_llm_config_o1_model_adjustments() -> None:
-    """Test automatic adjustments for O1 models."""
+    """Test automatic adjustments for O1 models.
+
+    After ARC-002, build methods clone before mutating, so the original config
+    should NOT be modified. The clone gets temperature=1, streaming=False.
+    """
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="o1-test", temperature=0.7, streaming=True)
 
     with patch("langchain_openai.ChatOpenAI") as mock_chat:
-        mock_instance = MagicMock(spec=BaseChatModel)
-        mock_chat.return_value = mock_instance
-
-        mock_chat_instance = MagicMock(spec=BaseChatModel)
-        mock_chat.return_value = mock_chat_instance
         mock_chat_instance = MagicMock(spec=BaseChatModel)
         mock_chat.return_value = mock_chat_instance
         config.build_chat_model()
-        assert config.temperature == 1
-        assert config.streaming is False
+        # Original config must remain unchanged (clone-before-mutate)
+        assert config.temperature == 0.7
+        assert config.streaming is True
 
 
 def test_llm_config_bedrock_setup() -> None:
@@ -732,17 +732,25 @@ def test_mistral_base_mode_error_and_embeddings() -> None:
 
 
 def test_o1_o3_model_temperature_adjustment_base_mode() -> None:
-    """Test O1/O3 model temperature adjustment for base models."""
+    """Test O1/O3 model temperature adjustment for base models.
+
+    After ARC-002, build methods clone before mutating, so original config stays unchanged.
+    """
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="o1-preview", temperature=0.7, mode=LlmMode.BASE)
     with patch("langchain_openai.OpenAI") as mock_openai:
         mock_instance = MagicMock(spec=BaseLanguageModel)
         mock_openai.return_value = mock_instance
         config.build_llm_model()
-        assert config.temperature == 1
+        # Original config must remain unchanged (clone-before-mutate)
+        assert config.temperature == 0.7
 
 
 def test_invalid_llm_type_exceptions() -> None:
-    """Test invalid LLM type exceptions."""
+    """Test invalid LLM type exceptions.
+
+    Build methods now operate on a clone, so we patch at the class level
+    to ensure the clone also gets the patched _build_llm.
+    """
     # Create a mock that's not a valid LLM type
     invalid_mock = MagicMock()
     invalid_mock.__class__.__name__ = "InvalidType"
@@ -750,17 +758,17 @@ def test_invalid_llm_type_exceptions() -> None:
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="test")
 
     # Test wrong type for build_llm_model
-    with patch.object(config, "_build_llm", return_value=invalid_mock):
+    with patch.object(LlmConfig, "_build_llm", return_value=invalid_mock):
         with pytest.raises(ValueError, match="Invalid LLM type returned for base mode"):
             config.build_llm_model()
 
     # Test wrong type for build_chat_model
-    with patch.object(config, "_build_llm", return_value=invalid_mock):
+    with patch.object(LlmConfig, "_build_llm", return_value=invalid_mock):
         with pytest.raises(ValueError, match="Invalid LLM type returned for chat mode"):
             config.build_chat_model()
 
     # Test wrong type for build_embeddings
-    with patch.object(config, "_build_llm", return_value=invalid_mock):
+    with patch.object(LlmConfig, "_build_llm", return_value=invalid_mock):
         with pytest.raises(ValueError, match="does not support embeddings"):
             config.build_embeddings()
 

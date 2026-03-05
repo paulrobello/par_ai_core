@@ -9,48 +9,10 @@ from __future__ import annotations
 import os
 import warnings
 
-import nest_asyncio
 from langchain_core._api import LangChainBetaWarning  # type: ignore
 
-
-# Apply nest_asyncio only when it's safe to do so
-def _apply_nest_asyncio_safely():
-    """Apply nest_asyncio only when it's safe to do so."""
-    try:
-        import asyncio
-
-        # Check if we're in a running event loop
-        try:
-            loop = asyncio.get_running_loop()
-            loop_type = type(loop).__name__
-
-            # Don't patch uvloop - it doesn't support nest_asyncio
-            if "uvloop" in loop_type.lower():
-                return False
-
-            # Don't patch if already patched
-            if hasattr(loop, "_nest_patched"):
-                return True
-
-        except RuntimeError:
-            # No running loop - safe to apply
-            pass
-
-        # Apply nest_asyncio
-        nest_asyncio.apply()
-        return True
-
-    except Exception:
-        # If anything fails, don't apply
-        return False
-
-
-# Apply nest_asyncio safely
-_applied = _apply_nest_asyncio_safely()
-
-
-warnings.simplefilter("ignore", category=LangChainBetaWarning)
-warnings.simplefilter("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=LangChainBetaWarning, module=r"par_ai_core\..*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module=r"par_ai_core\..*")
 
 
 __author__ = "Paul Robello"
@@ -63,7 +25,48 @@ __application_binary__ = "par_ai_core"
 __licence__ = "MIT"
 
 
-os.environ["USER_AGENT"] = f"{__application_title__} {__version__}"
+def apply_nest_asyncio() -> bool:
+    """Apply nest_asyncio to allow nested event loops.
+
+    Call this explicitly if you need nested asyncio support (e.g., calling
+    sync wrappers from within an already-running async event loop).
+
+    Returns:
+        True if nest_asyncio was applied successfully, False otherwise.
+    """
+    try:
+        import asyncio
+
+        import nest_asyncio
+
+        try:
+            loop = asyncio.get_running_loop()
+            loop_type = type(loop).__name__
+
+            if "uvloop" in loop_type.lower():
+                return False
+
+            if hasattr(loop, "_nest_patched"):
+                return True
+
+        except RuntimeError:
+            pass
+
+        nest_asyncio.apply()
+        return True
+
+    except Exception:
+        return False
+
+
+def configure_user_agent(user_agent: str | None = None) -> None:
+    """Set the USER_AGENT environment variable.
+
+    Args:
+        user_agent: Custom user agent string. If None, uses default
+            "{application_title} {version}" format.
+    """
+    os.environ["USER_AGENT"] = user_agent or f"{__application_title__} {__version__}"
 
 
 __all__: list[str] = [
@@ -75,4 +78,6 @@ __all__: list[str] = [
     "__application_binary__",
     "__licence__",
     "__application_title__",
+    "apply_nest_asyncio",
+    "configure_user_agent",
 ]
