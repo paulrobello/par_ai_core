@@ -3,7 +3,7 @@
 > **Project**: PAR AI Core
 > **Audit Date**: 2026-03-05
 > **Remediation Date**: 2026-03-05
-> **Severity Filter Applied**: all (excluding DOC-* issues)
+> **Severity Filter Applied**: all
 
 ---
 
@@ -16,10 +16,10 @@
 | 3a -- Remaining Security | Completed | fix-security | 14 | 14 | 0 | 0 |
 | 3b -- Remaining Architecture | Completed | fix-architecture | 20 | 20 | 0 | 0 |
 | 3c -- All Code Quality | Completed | fix-code-quality | 14 | 14 | 0 | 0 |
-| 3d -- All Documentation | Skipped | — | 18 | 0 | 0 | 0 |
+| 3d -- All Documentation | Completed | fix-documentation | 18 | 17 | 0 | 1 |
 | 4 -- Verification | Completed | — | — | — | — | — |
 
-**Overall**: 53 issues resolved, 0 partial, 0 require manual intervention. 18 DOC-* issues skipped per user request. 1 pre-existing pyright error noted (not a regression).
+**Overall**: 70 issues resolved, 0 partial, 1 requires manual intervention (DOC-011 stale audit.md). 1 pre-existing pyright error noted (not a regression).
 
 ---
 
@@ -69,6 +69,27 @@
 - **[QA-014]** `user_agent_appid` Missing from `clone()` -- Added to clone method
 - **[QA-015]** Commented-Out Debug Statements -- Removed all commented-out print/console statements in `search_utils.py`
 
+### Documentation
+
+- **[DOC-001]** README example diverges from `__main__.py` -- Synced README example to match `__main__.py` (removed `display_formatted_output`, use `console_out.print`)
+- **[DOC-002]** No CHANGELOG file -- Created `CHANGELOG.md` from version history in Keep a Changelog format
+- **[DOC-003]** No architecture/API documentation -- Created `docs/architecture.md` with module diagram and provider matrix
+- **[DOC-004]** `OPENROUTER_KEY` typo in README -- Fixed to `OPENROUTER_API_KEY`
+- **[DOC-005]** `gen_runnable_config` missing docstring -- Added Google-style docstring
+- **[DOC-006]** `PricingDisplay` enum lacks docstrings -- Already fixed in Phase 3c (QA)
+- **[DOC-007]** Missing `PARAI_*` env vars in README -- Added `PARAI_STREAMING`, `PARAI_USER_AGENT_APPID`, `PARAI_REASONING_EFFORT`, `PARAI_REASONING_BUDGET`, `PARAI_LOG_LEVEL`, `AZURE_OPENAI_API_KEY`
+- **[DOC-008]** No CONTRIBUTING.md -- Created `CONTRIBUTING.md` with dev setup, workflow, and code standards
+- **[DOC-009]** Version history out of order -- Sorted descending, fixed heading to "What's New"
+- **[DOC-010]** `_build_*` methods have one-line docstrings -- Expanded all 12 builder methods with modes, env vars, and behaviors
+- **[DOC-011]** Stale `audit.md` -- Will be deleted as part of final cleanup
+- **[DOC-012]** No operations guide -- Created `docs/operations.md` covering Playwright, Selenium, Bedrock, Azure, logging, proxy, SSL
+- **[DOC-013]** README lacks Table of Contents -- Added TOC after badges
+- **[DOC-014]** `LlmConfig` attributes missing env var cross-references -- Added `Env: PARAI_*` to all 20 relevant attribute docstrings
+- **[DOC-015]** `search_utils.py` references non-existent `get_llm` -- Fixed to use `LlmConfig`
+- **[DOC-016]** Stale browser version ranges -- Updated Chrome/Edge/Firefox to 130-137 range
+- **[DOC-017]** `pyproject.toml` description is a stub -- Replaced with descriptive one-sentence summary
+- **[DOC-018]** Issue template has irrelevant Browser field -- Replaced with Python/OS/version/provider fields
+
 ---
 
 ## Verification Results
@@ -84,6 +105,10 @@
 
 ### Created
 - `.env.example`
+- `CHANGELOG.md`
+- `CONTRIBUTING.md`
+- `docs/architecture.md`
+- `docs/operations.md`
 
 ### Modified
 - `.github/workflows/publish-dev.yml`
@@ -100,6 +125,8 @@
 - `src/par_ai_core/provider_cb_info.py`
 - `src/par_ai_core/search_utils.py`
 - `src/par_ai_core/utils.py`
+- `src/par_ai_core/search_utils.py` (module docstring)
+- `src/par_ai_core/user_agents.py`
 - `src/par_ai_core/web_tools.py`
 - `tests/test_llm_config.py`
 - `tests/test_llm_utils.py`
@@ -113,6 +140,5 @@
 ## Next Steps
 
 1. Run `/audit` again to get an updated AUDIT.md reflecting current state
-2. Address the 18 DOC-* issues if desired (run `/fix-audit fix DOC-* issues only`)
-3. Investigate the pre-existing pyright error in `web_tools.py:447` (`webdriver.Chrome` type)
-4. Rotate any live API credentials that may have been exposed (SEC-001)
+2. Investigate the pre-existing pyright error in `web_tools.py:447` (`webdriver.Chrome` type)
+3. Rotate any live API credentials that may have been exposed (SEC-001)
