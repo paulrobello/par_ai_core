@@ -40,10 +40,11 @@ def get_random_user_agent() -> str:
         ("Macintosh; Apple M2 Mac OS X 14_2_1", "arm64"),
     ]
     browser_list = ["Chrome", "Firefox", "Safari", "Edge"]
+    # NOTE: Update these ranges periodically to reflect current browser versions
     webkit_version = f"{random.randint(537, 615)}.{random.randint(36, 50)}"
-    chrome_version = f"{random.randint(120, 122)}.0.{random.randint(6000, 6500)}.{random.randint(100, 200)}"
-    edge_version = f"{random.randint(120, 122)}.0.{random.randint(2000, 2500)}.{random.randint(100, 200)}"
-    firefox_version = f"{random.randint(121, 123)}.0"
+    chrome_version = f"{random.randint(130, 137)}.0.{random.randint(6000, 7000)}.{random.randint(100, 200)}"
+    edge_version = f"{random.randint(130, 137)}.0.{random.randint(2000, 3000)}.{random.randint(100, 200)}"
+    firefox_version = f"{random.randint(130, 137)}.0"
     os, platform = random.choice(os_list)
     browser = random.choice(browser_list)
 

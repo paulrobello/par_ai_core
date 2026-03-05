@@ -100,67 +100,67 @@ class LlmConfig:
     """
 
     provider: LlmProvider
-    """AI Provider to use."""
+    """AI Provider to use. Env: ``PARAI_AI_PROVIDER``"""
     model_name: str
-    """Model name to use."""
+    """Model name to use. Env: ``PARAI_MODEL``"""
     fallback_models: list[str] | None = None
     """Fallback models to use if the primary model fails. Only supported by OpenRouter"""
     temperature: float = 0.8
     """The temperature of the model. Increasing the temperature will
-    make the model answer more creatively. (Default: 0.8)"""
+    make the model answer more creatively. (Default: 0.8) Env: ``PARAI_TEMPERATURE``"""
     mode: LlmMode = LlmMode.CHAT
     """The mode of the LLM. (Default: LlmMode.CHAT)"""
     streaming: bool = True
-    """Whether to stream the results or not."""
+    """Whether to stream the results or not. Env: ``PARAI_STREAMING``"""
     base_url: str | None = None
-    """Base url the model is hosted under."""
+    """Base url the model is hosted under. Env: ``PARAI_AI_BASE_URL``"""
     timeout: int | None = None
-    """Timeout in seconds."""
+    """Timeout in seconds. Env: ``PARAI_TIMEOUT``"""
     user_agent_appid: str | None = None
-    """App id to add to user agent for the API request. Can be used for authenticating"""
+    """App id to add to user agent for the API request. Can be used for authenticating. Env: ``PARAI_USER_AGENT_APPID``"""
     class_name: str = "LlmConfig"
     """Used for serialization."""
     num_ctx: int | None = None
     """Sets the size of the context window used to generate the
-    next token. (Default: 2048)	"""
+    next token. (Default: 2048) Env: ``PARAI_NUM_CTX``"""
     num_predict: int | None = None
     """Maximum number of tokens to predict when generating text.
-    (Default: 128, -1 = infinite generation, -2 = fill context)"""
+    (Default: 128, -1 = infinite generation, -2 = fill context) Env: ``PARAI_NUM_PREDICT``"""
     repeat_last_n: int | None = None
     """Sets how far back for the model to look back to prevent
-    repetition. (Default: 64, 0 = disabled, -1 = num_ctx)"""
+    repetition. (Default: 64, 0 = disabled, -1 = num_ctx) Env: ``PARAI_REPEAT_LAST_N``"""
     repeat_penalty: float | None = None
     """Sets how strongly to penalize repetitions. A higher value (e.g., 1.5)
     will penalize repetitions more strongly, while a lower value (e.g., 0.9)
-    will be more lenient. (Default: 1.1)"""
+    will be more lenient. (Default: 1.1) Env: ``PARAI_REPEAT_PENALTY``"""
     mirostat: int | None = None
     """Enable Mirostat sampling for controlling perplexity.
-    (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0)"""
+    (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0) Env: ``PARAI_MIROSTAT``"""
     mirostat_eta: float | None = None
     """Influences how quickly the algorithm responds to feedback
     from the generated text. A lower learning rate will result in
     slower adjustments, while a higher learning rate will make
-    the algorithm more responsive. (Default: 0.1)"""
+    the algorithm more responsive. (Default: 0.1) Env: ``PARAI_MIROSTAT_ETA``"""
     mirostat_tau: float | None = None
     """Controls the balance between coherence and diversity
     of the output. A lower value will result in more focused and
-    coherent text. (Default: 5.0)"""
+    coherent text. (Default: 5.0) Env: ``PARAI_MIROSTAT_TAU``"""
     tfs_z: float | None = None
     """Tail free sampling is used to reduce the impact of less probable
     tokens from the output. A higher value (e.g., 2.0) will reduce the
-    impact more, while a value of 1.0 disables this setting. (default: 1)"""
+    impact more, while a value of 1.0 disables this setting. (default: 1) Env: ``PARAI_TFS_Z``"""
     top_k: int | None = None
     """Reduces the probability of generating nonsense. A higher value (e.g. 100)
     will give more diverse answers, while a lower value (e.g. 10)
-    will be more conservative. (Default: 40)"""
+    will be more conservative. (Default: 40) Env: ``PARAI_TOP_K``"""
     top_p: float | None = None
     """Works together with top-k. A higher value (e.g., 0.95) will lead
     to more diverse text, while a lower value (e.g., 0.5) will
-    generate more focused and conservative text. (Default: 0.9)"""
+    generate more focused and conservative text. (Default: 0.9) Env: ``PARAI_TOP_P``"""
     seed: int | None = None
     """Sets the random number seed to use for generation. Setting this
     to a specific number will make the model generate the same text for
-    the same prompt."""
+    the same prompt. Env: ``PARAI_SEED``"""
     env_prefix: str = "PARAI"
     """Prefix to use for environment variables"""
     format: Literal["", "json"] = ""
@@ -168,9 +168,9 @@ class LlmConfig:
     extra_body: dict[str, Any] | None = None
     """Extra body parameters to send with the API request. Only used by OpenAI compatible providers"""
     reasoning_effort: ReasoningEffort | None = None
-    """OpenAI thinking model reasoning effort"""
+    """OpenAI thinking model reasoning effort. Env: ``PARAI_REASONING_EFFORT``"""
     reasoning_budget: int | None = None
-    """Reasoning token budget for anthropic"""
+    """Reasoning token budget for Anthropic. Env: ``PARAI_REASONING_BUDGET``"""
 
     def to_json(self) -> dict:
         """Converts the configuration to a JSON-serializable dictionary.
@@ -267,6 +267,16 @@ class LlmConfig:
         )
 
     def gen_runnable_config(self) -> RunnableConfig:
+        """Generate a RunnableConfig with a unique config_id for tracking.
+
+        Creates a UUID-based config_id that links this invocation to the
+        LlmConfig instance via LlmRunManager. The config_id is stored in
+        both metadata and tags for retrieval.
+
+        Returns:
+            RunnableConfig with metadata (all config fields + config_id)
+            and tags for provider/model identification.
+        """
         config_id = str(uuid.uuid4())
         return RunnableConfig(
             metadata=self.to_json() | {"config_id": config_id},
@@ -274,7 +284,14 @@ class LlmConfig:
         )
 
     def _build_ollama_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the OLLAMA LLM."""
+        """Build an Ollama LLM instance.
+
+        Handles ``LlmProvider.OLLAMA``. Supports all three modes: BASE
+        (``OllamaLLM``), CHAT (``ChatOllama``), and EMBEDDINGS
+        (``OllamaEmbeddings``). Reads ``OLLAMA_HOST`` env var for the
+        server URL. Supports basic auth extracted from the URL and all
+        Ollama-specific sampling parameters (mirostat, tfs_z, etc.).
+        """
         if self.provider != LlmProvider.OLLAMA:
             raise ValueError(f"LLM provider is '{self.provider.value}' but OLLAMA requested.")
 
@@ -336,7 +353,16 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_openai_compat_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the OPENAI LLM."""
+        """Build an OpenAI-compatible LLM instance.
+
+        Handles ``LlmProvider.OPENAI``, ``LlmProvider.GITHUB``,
+        ``LlmProvider.LLAMACPP``, and ``LlmProvider.AZURE``. Supports
+        BASE, CHAT, and EMBEDDINGS modes. Azure uses the
+        ``AZURE_API_VERSION`` constant and ``AZURE_OPENAI_API_KEY`` (falls
+        back to ``OPENAI_API_KEY``). GitHub uses ``GITHUB_TOKEN``.
+        Supports ``reasoning_effort`` for o1/o3 thinking models (temperature
+        is forced to 1 by the calling build method).
+        """
         if self.provider not in [LlmProvider.OPENAI, LlmProvider.GITHUB, LlmProvider.LLAMACPP, LlmProvider.AZURE]:
             raise ValueError(f"LLM provider is '{self.provider.value}' but OPENAI requested.")
         if self.provider == LlmProvider.GITHUB:
@@ -447,7 +473,12 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_litellm_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the LiteLLM LLM."""
+        """Build a LiteLLM LLM instance.
+
+        Handles ``LlmProvider.LITELLM``. Only supports CHAT mode
+        (BASE and EMBEDDINGS raise ``ValueError``). Uses
+        ``ChatLiteLLM`` from ``langchain_community``.
+        """
         if self.provider not in [LlmProvider.LITELLM]:
             raise ValueError(f"LLM provider is '{self.provider.value}' but LITELLM requested.")
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
@@ -472,7 +503,11 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_groq_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the GROQ LLM."""
+        """Build a Groq LLM instance.
+
+        Handles ``LlmProvider.GROQ``. Only supports CHAT mode (BASE and
+        EMBEDDINGS raise ``ValueError``). Reads ``GROQ_API_KEY`` env var.
+        """
         if self.provider != LlmProvider.GROQ:
             raise ValueError(f"LLM provider is '{self.provider.value}' but GROQ requested.")
 
@@ -497,7 +532,12 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_xai_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the XAI LLM."""
+        """Build an XAI (Grok) LLM instance.
+
+        Handles ``LlmProvider.XAI``. Only supports CHAT mode (BASE and
+        EMBEDDINGS raise ``ValueError``). Reads ``XAI_API_KEY`` env var.
+        Supports ``extra_body`` for provider-specific parameters.
+        """
         if self.provider != LlmProvider.XAI:
             raise ValueError(f"LLM provider is '{self.provider.value}' but XAI requested.")
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
@@ -519,7 +559,13 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_openrouter_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the OpenRouter LLM."""
+        """Build an OpenRouter LLM instance.
+
+        Handles ``LlmProvider.OPENROUTER``. Only supports CHAT mode.
+        Reads ``OPENROUTER_API_KEY`` env var. Uses ``ChatOpenAI`` with
+        the OpenRouter base URL. Supports ``fallback_models`` via
+        ``extra_body["models"]`` and ``reasoning_effort``.
+        """
         if self.provider != LlmProvider.OPENROUTER:
             raise ValueError(f"LLM provider is '{self.provider.value}' but OPENROUTER requested.")
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
@@ -553,7 +599,12 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_deepseek_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the DEEPSEEK LLM."""
+        """Build a Deepseek LLM instance.
+
+        Handles ``LlmProvider.DEEPSEEK``. Only supports CHAT mode (BASE
+        and EMBEDDINGS raise ``ValueError``). Reads ``DEEPSEEK_API_KEY``
+        env var. Supports ``extra_body`` for provider-specific parameters.
+        """
         if self.provider != LlmProvider.DEEPSEEK:
             raise ValueError(f"LLM provider is '{self.provider.value}' but DEEPSEEK requested.")
         if self.mode in (LlmMode.BASE, LlmMode.EMBEDDINGS):
@@ -575,7 +626,14 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_anthropic_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the ANTHROPIC LLM."""
+        """Build an Anthropic LLM instance.
+
+        Handles ``LlmProvider.ANTHROPIC``. Only supports CHAT mode (BASE
+        and EMBEDDINGS raise ``ValueError``). Reads ``ANTHROPIC_API_KEY``
+        env var. Supports ``reasoning_budget`` for extended thinking
+        (minimum 1024 tokens; forces temperature to 1 when enabled and
+        auto-sizes ``num_ctx`` to 2x the budget if not set).
+        """
         if self.provider != LlmProvider.ANTHROPIC:
             raise ValueError(f"LLM provider is '{self.provider.value}' but ANTHROPIC requested.")
 
@@ -605,7 +663,14 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_google_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the GOOGLE LLM."""
+        """Build a Google Gemini LLM instance.
+
+        Handles ``LlmProvider.GEMINI``. Supports BASE
+        (``GoogleGenerativeAI``), CHAT (``ChatGoogleGenerativeAI``),
+        and EMBEDDINGS (``GoogleGenerativeAIEmbeddings``). Reads
+        ``GOOGLE_API_KEY`` env var. Disables all harm-category safety
+        settings by default.
+        """
 
         if self.provider != LlmProvider.GEMINI:
             raise ValueError(f"LLM provider is '{self.provider.value}' but GOOGLE requested.")
@@ -656,7 +721,16 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_bedrock_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the BEDROCK LLM."""
+        """Build an AWS Bedrock LLM instance.
+
+        Handles ``LlmProvider.BEDROCK``. Supports BASE (``BedrockLLM``),
+        CHAT (``ChatBedrockConverse``), and EMBEDDINGS
+        (``BedrockEmbeddings``, defaults to ``amazon.titan-embed-text-v1``).
+        Reads ``AWS_PROFILE``, ``AWS_ACCESS_KEY_ID``,
+        ``AWS_SECRET_ACCESS_KEY``, ``AWS_SESSION_TOKEN``, and
+        ``AWS_REGION`` (defaults to ``us-east-1``) env vars. Passes
+        ``user_agent_appid`` to the boto3 client config.
+        """
         if self.provider != LlmProvider.BEDROCK:
             raise ValueError(f"LLM provider is '{self.provider.value}' but BEDROCK requested.")
         import boto3
@@ -711,7 +785,13 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_mistral_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the MISTRAL LLM."""
+        """Build a Mistral LLM instance.
+
+        Handles ``LlmProvider.MISTRAL``. Supports CHAT
+        (``ChatMistralAI``) and EMBEDDINGS (``MistralAIEmbeddings``);
+        BASE raises ``ValueError``. Reads ``MISTRAL_API_KEY`` env var.
+        Defaults timeout to 10 seconds if not set.
+        """
 
         if self.provider != LlmProvider.MISTRAL:
             raise ValueError(f"LLM provider is '{self.provider.value}' but MISTRAL requested.")
@@ -741,7 +821,11 @@ class LlmConfig:
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
     def _build_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
-        """Build the LLM."""
+        """Build the LLM by dispatching to the provider-specific builder.
+
+        Sets ``base_url`` from provider defaults if not already set, then
+        delegates to the appropriate ``_build_<provider>_llm`` method.
+        """
         if not isinstance(self.provider, LlmProvider):
             raise ValueError(f"Invalid LLM provider '{self.provider}'")
         self.base_url = self.base_url or provider_base_urls.get(self.provider)

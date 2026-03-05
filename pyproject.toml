@@ -3,7 +3,7 @@ name = "par_ai_core"
 dynamic = [
     "version",
 ]
-description = "PAR AI Core"
+description = "A Python library providing tools, helpers, and LangChain wrappers for building AI-powered applications with multi-provider LLM support"
 url = "https://github.com/paulrobello/par_ai_core"
 readme = "README.md"
 requires-python = ">=3.11"

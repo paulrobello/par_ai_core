@@ -12,9 +12,9 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
+1. Install version '...'
+2. Configure with '...'
+3. Run '...'
 4. See error
 
 **Expected behavior**
@@ -23,12 +23,11 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
- - Terminal [e.g. VSCode, Iterm2, Windows Terminal]
- - Terminal version [e.g. 1.0.0]
+**Environment (please complete the following information):**
+ - OS: [e.g. macOS 14.2, Ubuntu 22.04, Windows 11]
+ - Python version: [e.g. 3.13.1]
+ - par_ai_core version: [e.g. 0.5.5]
+ - LLM Provider: [e.g. OpenAI, Anthropic, Ollama]
 
 **Additional context**
 Add any other context about the problem here.

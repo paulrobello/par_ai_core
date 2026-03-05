@@ -24,8 +24,10 @@ Typical usage examples:
     results = reddit_search("python tips", subreddit="learnpython", max_comments=5, max_results=3)
 
 4. Search YouTube with transcript fetching:
-    from par_ai_core.llm_config import get_llm
-    llm = get_llm()
+    from par_ai_core.llm_config import LlmConfig
+    from par_ai_core.llm_providers import LlmProvider, provider_light_models
+    llm_config = LlmConfig(provider=LlmProvider.OPENAI, model_name=provider_light_models[LlmProvider.OPENAI])
+    llm = llm_config.build_chat_model()
     results = youtube_search("OpenAI GPT-4", fetch_transcript=True, summarize_llm=llm)
 
 5. Perform a Google search using Serper:
