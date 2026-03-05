@@ -518,7 +518,9 @@ def md5_hash(data: str) -> str:
     """
     import warnings
 
-    warnings.warn("md5_hash uses a cryptographically broken algorithm. Use sha256_hash instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn(
+        "md5_hash uses a cryptographically broken algorithm. Use sha256_hash instead.", DeprecationWarning, stacklevel=2
+    )
     md5 = hashlib.md5(data.encode("utf-8"))
     return md5.hexdigest()
 
@@ -537,7 +539,11 @@ def sha1_hash(data: str) -> str:
     """
     import warnings
 
-    warnings.warn("sha1_hash uses a cryptographically broken algorithm. Use sha256_hash instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn(
+        "sha1_hash uses a cryptographically broken algorithm. Use sha256_hash instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     sha1 = hashlib.sha1(data.encode("utf-8"))
     return sha1.hexdigest()
 
