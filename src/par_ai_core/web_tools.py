@@ -217,44 +217,22 @@ def fetch_url(
         raise ValueError("All URLs must be absolute URLs with a scheme (e.g. http:// or https://)")
     try:
         if fetch_using == "playwright":
-            try:
-                loop = asyncio.get_running_loop()
-            except Exception as _:
-                loop = None
-            if loop:
-                return loop.run_until_complete(
-                    fetch_url_playwright(
-                        urls,
-                        max_parallel=max_parallel,
-                        sleep_time=sleep_time,
-                        timeout=timeout,
-                        proxy_config=proxy_config,
-                        http_credentials=http_credentials,
-                        wait_type=wait_type,
-                        wait_selector=wait_selector,
-                        headless=headless,
-                        verbose=verbose,
-                        ignore_ssl=ignore_ssl,
-                        console=console,
-                    )
+            return asyncio.run(
+                fetch_url_playwright(
+                    urls,
+                    max_parallel=max_parallel,
+                    sleep_time=sleep_time,
+                    timeout=timeout,
+                    proxy_config=proxy_config,
+                    http_credentials=http_credentials,
+                    wait_type=wait_type,
+                    wait_selector=wait_selector,
+                    headless=headless,
+                    verbose=verbose,
+                    ignore_ssl=ignore_ssl,
+                    console=console,
                 )
-            else:
-                return asyncio.run(
-                    fetch_url_playwright(
-                        urls,
-                        max_parallel=max_parallel,
-                        sleep_time=sleep_time,
-                        timeout=timeout,
-                        proxy_config=proxy_config,
-                        http_credentials=http_credentials,
-                        wait_type=wait_type,
-                        wait_selector=wait_selector,
-                        headless=headless,
-                        verbose=verbose,
-                        ignore_ssl=ignore_ssl,
-                        console=console,
-                    )
-                )
+            )
 
         return fetch_url_selenium(
             urls,

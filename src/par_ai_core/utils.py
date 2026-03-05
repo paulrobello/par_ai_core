@@ -28,6 +28,7 @@ import csv
 import glob
 import hashlib
 import html
+import logging
 import math
 import os
 import random
@@ -53,6 +54,8 @@ from markdownify import MarkdownConverter
 from rich.console import Console
 
 from par_ai_core.par_logging import console_err
+
+logger = logging.getLogger(__name__)
 
 DECIMAL_PRECESSION = 5
 
@@ -871,8 +874,8 @@ def gather_files_for_context(file_patterns: list[str | Path], max_context_length
             doc.write(st)
             curr_len += len(st)
             i += 1
-        except Exception as _:
-            pass
+        except Exception:
+            logger.debug("Failed to read file for context: %s", file, exc_info=True)
 
     doc.write("</files>\n")
     return doc.getvalue()

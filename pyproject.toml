@@ -75,6 +75,7 @@ dependencies = [
     "litellm>=1.82.0",
     "nest-asyncio>=1.6.0",
     "openai>=2.24.0",
+    "tiktoken>=0.7.0",
 ]
 packages = [
     "src/par_ai_core",

@@ -2328,6 +2328,7 @@ dependencies = [
     { name = "selenium" },
     { name = "strenum" },
     { name = "tavily-python" },
+    { name = "tiktoken" },
     { name = "webdriver-manager" },
     { name = "youtube-transcript-api" },
 ]
@@ -2386,6 +2387,7 @@ requires-dist = [
     { name = "selenium", specifier = ">=4.41.0" },
     { name = "strenum", specifier = ">=0.4.15" },
     { name = "tavily-python", specifier = ">=0.7.22" },
+    { name = "tiktoken", specifier = ">=0.7.0" },
     { name = "webdriver-manager", specifier = ">=4.0.2" },
     { name = "youtube-transcript-api", specifier = ">=1.2.4" },
 ]

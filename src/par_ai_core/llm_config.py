@@ -244,6 +244,7 @@ class LlmConfig:
             streaming=self.streaming,
             base_url=self.base_url,
             timeout=self.timeout,
+            user_agent_appid=self.user_agent_appid,
             num_ctx=self.num_ctx,
             num_predict=self.num_predict,
             repeat_last_n=self.repeat_last_n,
@@ -770,40 +771,43 @@ class LlmConfig:
 
     def build_llm_model(self) -> BaseLanguageModel:
         """Build the LLM model."""
-        if self.model_name.startswith("o1") or self.model_name.startswith("o3") or self.model_name.startswith("gpt-5."):
-            self.temperature = 1
+        cfg = self.clone()
+        if cfg.model_name.startswith("o1") or cfg.model_name.startswith("o3") or cfg.model_name.startswith("gpt-5."):
+            cfg.temperature = 1
         else:
-            self.reasoning_effort = None
-        llm = self._build_llm()
+            cfg.reasoning_effort = None
+        llm = cfg._build_llm()
         if not isinstance(llm, BaseLanguageModel):
-            raise ValueError(f"Invalid LLM type returned for base mode from provider '{self.provider.value}'")
-        config = self.gen_runnable_config()
+            raise ValueError(f"Invalid LLM type returned for base mode from provider '{cfg.provider.value}'")
+        config = cfg.gen_runnable_config()
         llm.name = config["metadata"]["config_id"] if "metadata" in config else None
-        llm_run_manager.register_id(config, self)
+        llm_run_manager.register_id(config, cfg)
         return llm
 
     def build_chat_model(self) -> BaseChatModel:
         """Build the chat model."""
-        if self.model_name.startswith("o1") or self.model_name.startswith("o3") or self.model_name.startswith("gpt-5."):
-            self.temperature = 1
-            self.streaming = False
+        cfg = self.clone()
+        if cfg.model_name.startswith("o1") or cfg.model_name.startswith("o3") or cfg.model_name.startswith("gpt-5."):
+            cfg.temperature = 1
+            cfg.streaming = False
         else:
-            self.reasoning_effort = None
+            cfg.reasoning_effort = None
 
-        llm = self._build_llm()
+        llm = cfg._build_llm()
         if not isinstance(llm, BaseChatModel):
-            raise ValueError(f"Invalid LLM type returned for chat mode from provider '{self.provider.value}'")
-        config = self.gen_runnable_config()
+            raise ValueError(f"Invalid LLM type returned for chat mode from provider '{cfg.provider.value}'")
+        config = cfg.gen_runnable_config()
         llm.name = config["metadata"]["config_id"] if "metadata" in config else None
-        llm_run_manager.register_id(config, self)
+        llm_run_manager.register_id(config, cfg)
         return llm
 
     def build_embeddings(self) -> Embeddings:
         """Build the embeddings."""
-        self.reasoning_effort = None
-        llm = self._build_llm()
+        cfg = self.clone()
+        cfg.reasoning_effort = None
+        llm = cfg._build_llm()
         if not isinstance(llm, Embeddings):
-            raise ValueError(f"LLM mode '{self.mode.value}' does not support embeddings.")
+            raise ValueError(f"LLM mode '{cfg.mode.value}' does not support embeddings.")
         return llm
 
     def is_api_key_set(self) -> bool:
@@ -878,15 +882,25 @@ class LlmRunManager:
         >>> retrieved_config = llm_run_manager.get_config("123")
     """
 
-    _lock: threading.Lock = threading.Lock()
-    _id_to_config: dict[str, tuple[RunnableConfig, LlmConfig]] = {}
+    _MAX_ENTRIES: int = 1000
 
-    def register_id(self, config: RunnableConfig, llmConfig: LlmConfig) -> None:
+    def __init__(self, max_entries: int = _MAX_ENTRIES) -> None:
+        """Initialize the LLM run manager.
+
+        Args:
+            max_entries: Maximum number of config entries to retain. Oldest entries
+                are evicted when this limit is exceeded.
+        """
+        self._lock: threading.Lock = threading.Lock()
+        self._id_to_config: dict[str, tuple[RunnableConfig, LlmConfig]] = {}
+        self._max_entries = max_entries
+
+    def register_id(self, config: RunnableConfig, llm_config: LlmConfig) -> None:
         """Registers a configuration pair with a unique identifier.
 
         Args:
             config (RunnableConfig): The runnable configuration to register
-            llmConfig (LlmConfig): The associated LLM configuration
+            llm_config (LlmConfig): The associated LLM configuration
 
         Raises:
             ValueError: If the config lacks a config_id in its metadata
@@ -894,7 +908,10 @@ class LlmRunManager:
         if "metadata" not in config or "config_id" not in config["metadata"]:
             raise ValueError("Runnable config must have a config_id in metadata")
         with self._lock:
-            self._id_to_config[config["metadata"]["config_id"]] = (config, llmConfig)
+            self._id_to_config[config["metadata"]["config_id"]] = (config, llm_config)
+            if len(self._id_to_config) > self._max_entries:
+                oldest_key = next(iter(self._id_to_config))
+                del self._id_to_config[oldest_key]
 
     def get_config(self, config_id: str) -> tuple[RunnableConfig, LlmConfig] | None:
         """Retrieves the configuration pair associated with a config ID.
