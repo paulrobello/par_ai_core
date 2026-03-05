@@ -262,44 +262,44 @@ def test_get_model_context_size_metadata_exception(mock_get_metadata):
 
 
 def test_estimate_tokens_gpt_model():
-    """Test token estimation for GPT models."""
-    with patch("tiktoken.encoding_for_model") as mock_encoding:
+    """Test token estimation for GPT models using cl100k_base encoding."""
+    with patch("tiktoken.get_encoding") as mock_get_encoding:
         mock_encoder = MagicMock()
         mock_encoder.encode.return_value = [1, 2, 3, 4, 5]
-        mock_encoding.return_value = mock_encoder
+        mock_get_encoding.return_value = mock_encoder
 
         result = _estimate_tokens("test text", "gpt-4")
         assert result == 5
-        mock_encoding.assert_called_with("gpt-4")
+        mock_get_encoding.assert_called_with("cl100k_base")
 
 
 def test_estimate_tokens_claude_model():
-    """Test token estimation for Claude models."""
-    with patch("tiktoken.encoding_for_model") as mock_encoding:
+    """Test token estimation for Claude models using cl100k_base encoding."""
+    with patch("tiktoken.get_encoding") as mock_get_encoding:
         mock_encoder = MagicMock()
         mock_encoder.encode.return_value = [1, 2, 3]
-        mock_encoding.return_value = mock_encoder
+        mock_get_encoding.return_value = mock_encoder
 
         result = _estimate_tokens("test", "claude-3-sonnet")
         assert result == 3
-        mock_encoding.assert_called_with("gpt-4")  # Claude uses GPT-4 tokenizer
+        mock_get_encoding.assert_called_with("cl100k_base")
 
 
 def test_estimate_tokens_other_model():
-    """Test token estimation for other models."""
-    with patch("tiktoken.encoding_for_model") as mock_encoding:
+    """Test token estimation for other models using cl100k_base encoding."""
+    with patch("tiktoken.get_encoding") as mock_get_encoding:
         mock_encoder = MagicMock()
         mock_encoder.encode.return_value = [1, 2]
-        mock_encoding.return_value = mock_encoder
+        mock_get_encoding.return_value = mock_encoder
 
         result = _estimate_tokens("hi", "gemini-pro")
         assert result == 2
-        mock_encoding.assert_called_with("gpt-4")  # Default to GPT-4
+        mock_get_encoding.assert_called_with("cl100k_base")
 
 
 def test_estimate_tokens_fallback():
     """Test token estimation fallback when encoding fails."""
-    with patch("tiktoken.encoding_for_model", side_effect=Exception("Encoding error")):
+    with patch("tiktoken.get_encoding", side_effect=Exception("Encoding error")):
         result = _estimate_tokens("test text here", "gpt-4")
         # Fallback: len(text) // 4 = 14 // 4 = 3
         assert result == 3

@@ -28,6 +28,7 @@ import csv
 import glob
 import hashlib
 import html
+import logging
 import math
 import os
 import random
@@ -53,6 +54,8 @@ from markdownify import MarkdownConverter
 from rich.console import Console
 
 from par_ai_core.par_logging import console_err
+
+logger = logging.getLogger(__name__)
 
 DECIMAL_PRECESSION = 5
 
@@ -502,8 +505,10 @@ def read_text_file_to_stringio(file_path: str, encoding: str = "utf-8") -> Strin
 
 
 def md5_hash(data: str) -> str:
-    """
-    Returns a md5 hash of the input data.
+    """Returns a md5 hash of the input data.
+
+    .. deprecated::
+        MD5 is cryptographically broken. Use ``sha256_hash`` for integrity checks.
 
     Args:
             data (str): The input data.
@@ -511,13 +516,20 @@ def md5_hash(data: str) -> str:
     Returns:
             str: The md5 hash of the input data.
     """
+    import warnings
+
+    warnings.warn(
+        "md5_hash uses a cryptographically broken algorithm. Use sha256_hash instead.", DeprecationWarning, stacklevel=2
+    )
     md5 = hashlib.md5(data.encode("utf-8"))
     return md5.hexdigest()
 
 
 def sha1_hash(data: str) -> str:
-    """
-    Returns a SHA1 hash of the input data.
+    """Returns a SHA1 hash of the input data.
+
+    .. deprecated::
+        SHA1 is cryptographically broken. Use ``sha256_hash`` for integrity checks.
 
     Args:
             data (str): The input data.
@@ -525,6 +537,13 @@ def sha1_hash(data: str) -> str:
     Returns:
             str: The SHA1 hash of the input data.
     """
+    import warnings
+
+    warnings.warn(
+        "sha1_hash uses a cryptographically broken algorithm. Use sha256_hash instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     sha1 = hashlib.sha1(data.encode("utf-8"))
     return sha1.hexdigest()
 
@@ -656,12 +675,17 @@ def hash_list_by_key(data: list[dict], id_key: str = "message_id") -> dict:
 
 
 def run_shell_cmd(cmd: str) -> str | None:
-    """Run a command and return the output."""
+    """Run a shell command and return the output.
+
+    .. deprecated::
+        Prefer ``run_cmd`` which accepts a list[str] to avoid argument injection.
+    """
     try:
         return subprocess.run(
             shlex.split(cmd), shell=False, capture_output=True, check=True, encoding="utf-8"
         ).stdout.strip()
-    except Exception as _:
+    except Exception:
+        logger.debug("Shell command failed: %s", cmd, exc_info=True)
         return None
 
 
@@ -820,8 +844,8 @@ def get_file_list_for_context(file_patterns: list[str | Path]) -> list[Path]:
             else:
                 # Python 3.10 doesn't have include_hidden parameter
                 files += glob.glob(pattern, recursive=True)  # noqa: UP036
-        except Exception as _:
-            raise _
+        except Exception:
+            raise
     result = []
     for file in files:
         f = Path(file)
@@ -871,8 +895,8 @@ def gather_files_for_context(file_patterns: list[str | Path], max_context_length
             doc.write(st)
             curr_len += len(st)
             i += 1
-        except Exception as _:
-            pass
+        except Exception:
+            logger.debug("Failed to read file for context: %s", file, exc_info=True)
 
     doc.write("</files>\n")
     return doc.getvalue()

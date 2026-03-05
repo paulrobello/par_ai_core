@@ -238,7 +238,7 @@ def display_formatted_output(content: str, display_format: DisplayOutputFormat, 
         console = console_err
 
     if display_format == DisplayOutputFormat.PLAIN:
-        print(content)
+        console.print(content, markup=False, highlight=False)
     elif display_format == DisplayOutputFormat.MD:
         console.print(Markdown(content))
     elif display_format == DisplayOutputFormat.CSV:

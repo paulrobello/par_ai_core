@@ -754,8 +754,10 @@ def test_fetch_url_selenium_browser_launch_error():
     with patch("selenium.webdriver.Chrome", side_effect=Exception("Failed to launch browser")):
         result = fetch_url("https://example.com", fetch_using="selenium", verbose=True, console=mock_console)
 
-        # Verify error message was printed
-        mock_console.print.assert_called_with("[bold red]Error initializing Selenium driver[/bold red]")
+        # Verify error message was printed (now includes exception details)
+        mock_console.print.assert_called_with(
+            "[bold red]Error initializing Selenium driver: Failed to launch browser[/bold red]"
+        )
 
         # Verify empty string is returned
         assert result == [""]

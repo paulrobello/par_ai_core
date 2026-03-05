@@ -42,7 +42,7 @@ jobs:
         timeout-minutes: 15
 
       - name: Publish distribution 📦 to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.12.4
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
@@ -50,7 +50,7 @@ jobs:
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
+        uses: Ilshidur/action-discord@0.3.2
         with:
           args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} ${{ needs.setup.outputs.version }} has been published to TestPyPI.'
         continue-on-error: true

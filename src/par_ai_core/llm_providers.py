@@ -224,8 +224,6 @@ def get_provider_name_fuzzy(provider: str) -> str:
             return p.value
         if p.value.lower().startswith(provider):
             return p.value
-        if p.value.lower().endswith(provider):
-            return p.value
     return ""
 
 
