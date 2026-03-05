@@ -148,7 +148,7 @@ class MockConsole:
         """Initialize mock console."""
         self.printed: list[Any] = []
 
-    def print(self, content: Any) -> None:
+    def print(self, content: Any, **kwargs: Any) -> None:
         """Mock print method."""
         self.printed.append(content)
 
@@ -171,7 +171,9 @@ def test_display_formatted_output(format_type: DisplayOutputFormat, content: str
     if format_type == DisplayOutputFormat.NONE:
         assert len(mock_console.printed) == 0
     elif format_type == DisplayOutputFormat.PLAIN:
-        assert len(mock_console.printed) == 0
+        # PLAIN now uses console.print() with markup=False, highlight=False
+        assert len(mock_console.printed) == 1
+        assert mock_console.printed[0] == content
     else:
         assert len(mock_console.printed) == 1
         if expected_type is not str:
