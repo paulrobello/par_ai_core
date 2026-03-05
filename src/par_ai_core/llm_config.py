@@ -39,6 +39,9 @@ from par_ai_core.llm_providers import (
 )
 from par_ai_core.utils import extract_url_auth
 
+AZURE_API_VERSION = "2025-03-01-preview"
+"""Default Azure OpenAI API version. Override via LlmConfig or environment."""
+
 
 class LlmMode(StrEnum):
     """Enumeration of LLM operating modes.
@@ -355,7 +358,7 @@ class LlmConfig:
                 return AzureOpenAI(
                     api_key=api_key,
                     azure_deployment=self.model_name,
-                    api_version="2025-03-01-preview",
+                    api_version=AZURE_API_VERSION,
                     extra_body=self.extra_body,
                     temperature=self.temperature,
                     streaming=self.streaming,
@@ -372,7 +375,7 @@ class LlmConfig:
                 return AzureChatOpenAI(
                     api_key=api_key,
                     azure_deployment=self.model_name,
-                    api_version="2025-03-01-preview",
+                    api_version=AZURE_API_VERSION,
                     extra_body=self.extra_body,
                     temperature=self.temperature,
                     stream_usage=True,
@@ -391,7 +394,7 @@ class LlmConfig:
                 return AzureOpenAIEmbeddings(
                     api_key=api_key,
                     azure_deployment=self.model_name,
-                    api_version="2025-03-01-preview",
+                    api_version=AZURE_API_VERSION,
                     azure_endpoint=self.base_url,
                     timeout=self.timeout,
                 )
@@ -591,8 +594,6 @@ class LlmConfig:
                 model=self.model_name,  # type: ignore
                 temperature=self.temperature if not self.reasoning_budget else 1,
                 streaming=self.streaming,
-                # base_url=self.base_url,
-                # default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
                 timeout=self.timeout,
                 top_k=self.top_k,
                 top_p=self.top_p,

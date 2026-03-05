@@ -39,290 +39,17 @@ from par_ai_core.par_logging import console_err
 
 
 class PricingDisplay(StrEnum):
+    """Controls the level of cost display detail.
+
+    Members:
+        NONE: Do not display any pricing information.
+        PRICE: Display only the total cost.
+        DETAILS: Display full usage breakdown and per-model costs.
+    """
+
     NONE = "none"
     PRICE = "price"
     DETAILS = "details"
-
-
-pricing_lookup = {
-    # OpenAI
-    "gpt-4o": {
-        "input": (2.50 / 1_000_000),
-        "output": (10.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4o-latest": {
-        "input": (5.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4o-2024-05-13": {
-        "input": (5.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4o-mini": {
-        "input": (0.15 / 1_000_000),
-        "output": (0.6 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "o1": {
-        "input": (15.0 / 1_000_000),
-        "output": (60.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "o1-preview": {
-        "input": (15.0 / 1_000_000),
-        "output": (60.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "o1-mini": {
-        "input": (3.0 / 1_000_000),
-        "output": (12.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "o3-mini": {
-        "input": (1.10 / 1_000_000),
-        "output": (4.40 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4": {
-        "input": (30.0 / 1_000_000),
-        "output": (60.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4-32k": {
-        "input": (60.0 / 1_000_000),
-        "output": (120.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4-turbo": {
-        "input": (10.0 / 1_000_000),
-        "output": (30.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-4-turbo-2024-04-09": {
-        "input": (10.0 / 1_000_000),
-        "output": (30.0 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    "gpt-3.5-turbo-0125": {
-        "input": (0.5 / 1_000_000),
-        "output": (1.50 / 1_000_000),
-        "cache_read": 0.5,
-        "cache_write": 1,
-    },
-    # Anthropic
-    "claude-3-5-sonnet-20240620": {
-        "input": (3.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 3.75,
-    },
-    "claude-3-5-sonnet-20241022": {
-        "input": (3.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 3.75,
-    },
-    "claude-3-5-sonnet-latest": {
-        "input": (3.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 3.75,
-    },
-    "claude-3-5-haiku-20241022": {
-        "input": (1.0 / 1_000_000),
-        "output": (5.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1.25,
-    },
-    "claude-3-5-haiku-latest": {
-        "input": (1.0 / 1_000_000),
-        "output": (5.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1.25,
-    },
-    "claude-3-haiku-20240307": {
-        "input": (0.25 / 1_000_000),
-        "output": (1.25 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1.25,
-    },
-    "claude-3-sonnet-20240229": {
-        "input": (3.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1.25,
-    },
-    "claude-3-opus-20240229": {
-        "input": (15.0 / 1_000_000),
-        "output": (75.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1.25,
-    },
-    # AWS
-    "amazon.nova-micro-v1:0": {
-        "input": (0.035 / 1_000_000),
-        "output": (0.14 / 1_000_000),
-        "cache_read": 0.25,
-        "cache_write": 1,
-    },
-    "amazon.nova-lite-v1:0": {
-        "input": (0.06 / 1_000_000),
-        "output": (0.24 / 1_000_000),
-        "cache_read": 0.25,
-        "cache_write": 1,
-    },
-    "amazon.nova-pro-v1:0": {
-        "input": (0.8 / 1_000_000),
-        "output": (3.2 / 1_000_000),
-        "cache_read": 0.25,
-        "cache_write": 1,
-    },
-    "anthropic.claude-3-5-haiku-20241022-v1:0": {
-        "input": (1.0 / 1_000_000),
-        "output": (5.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1.25,
-    },
-    "anthropic.claude-3-5-sonnet-20240620-v1:0": {
-        "input": (3.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 3.75,
-    },
-    "anthropic.claude-3-5-sonnet-20241022-v2:0": {
-        "input": (3.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 3.75,
-    },
-    # Google
-    "flash1.5": {
-        "input": (0.075 / 1_000_000),
-        "output": (0.30 / 1_000_000),
-        "cache_read": 0.25,
-        "cache_write": 1,
-    },
-    "flash1.5-8b": {
-        "input": (0.0375 / 1_000_000),
-        "output": (0.15 / 1_000_000),
-        "cache_read": 0.27,
-        "cache_write": 1,
-    },
-    "pro1.5": {
-        "input": (1.25 / 1_000_000),
-        "output": (10.0 / 1_000_000),
-        "cache_read": 0.25,
-        "cache_write": 1,
-    },
-    "pro1.0": {
-        "input": (0.5 / 1_000_000),
-        "output": (1.5 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    # XAI
-    "grok-beta": {
-        "input": (5.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "grok-vision-beta": {
-        "input": (5.0 / 1_000_000),
-        "output": (15.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "grok-2-vision": {
-        "input": (2.0 / 1_000_000),
-        "output": (10.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "grok-2": {
-        "input": (2.0 / 1_000_000),
-        "output": (10.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    # Deepseek
-    "deepseek-chat": {
-        "input": (0.14 / 1_000_000),
-        "output": (0.28 / 1_000_000),
-        "cache_read": 0.1,
-        "cache_write": 1,
-    },
-    "deepseek-reasoner": {
-        "input": (0.55 / 1_000_000),
-        "output": (2.19 / 1_000_000),
-        "cache_read": 0.25,
-        "cache_write": 1,
-    },
-    # Mistral
-    "mistral-large": {
-        "input": (2.0 / 1_000_000),
-        "output": (6.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "mistral-small": {
-        "input": (0.1 / 1_000_000),
-        "output": (0.3 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "mistral-8b": {
-        "input": (0.1 / 1_000_000),
-        "output": (0.1 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "mistral-3b": {
-        "input": (0.04 / 1_000_000),
-        "output": (0.04 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "mistral-embed": {
-        "input": (0.1 / 1_000_000),
-        "output": (0.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "mistral-moderation": {
-        "input": (0.1 / 1_000_000),
-        "output": (0.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "codestral": {
-        "input": (0.3 / 1_000_000),
-        "output": (0.9 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-    "pixtral-large": {
-        "input": (2.0 / 1_000_000),
-        "output": (6.0 / 1_000_000),
-        "cache_read": 1,
-        "cache_write": 1,
-    },
-}
 
 
 def mk_usage_metadata() -> dict[str, int | float]:
@@ -408,7 +135,6 @@ def get_model_mode(
         metadata = get_model_metadata(provider.value.lower(), model_name)
         return metadata.get("mode") or "unknown"  # type: ignore
     except Exception:
-        # console_err.print(f"Error getting model metadata {get_api_cost_model_name(provider_name=provider.value.lower(), model_name=model_name)}: {e}", severity="error")
         return "unknown"
 
 
@@ -443,17 +169,13 @@ def get_api_call_cost(
     model_name = get_api_cost_model_name(
         provider_name=llm_config.provider, model_name=model_name_override or llm_config.model_name
     )
-    # console_err.print(f"price model name {model_name}")
 
     try:
         if "deepseek" in model_name and "deepseek/" not in model_name:
             model_name = f"deepseek/{model_name}"
         model_info = get_model_info(model=model_name)
-    except Exception as _:
-        # console_err.print(f"No pricing data found for model {llm_config.provider.lower()}/{model_name}")
+    except Exception:
         return 0
-    # console_err.print(usage_metadata)
-    # console_err.print(model_info)
 
     total_cost = (
         (
@@ -471,23 +193,6 @@ def get_api_call_cost(
         + (usage_metadata["output_tokens"] * (model_info.get("output_cost_per_token") or 0))
     )
     return total_cost * batch_multiplier
-
-    # if model_name in pricing_lookup:
-    #     model_info = pricing_lookup[model_name]
-    #     total_cost = (
-    #         (
-    #             (usage_metadata["input_tokens"] - usage_metadata["cache_read"] - usage_metadata["cache_write"])
-    #             * model_info["input"]
-    #         )
-    #         + (usage_metadata["cache_read"] * model_info["input"] * model_info["cache_read"])
-    #         + (usage_metadata["cache_write"] * model_info["input"] * model_info["cache_write"])
-    #         + (usage_metadata["output_tokens"] * model_info["output"])
-    #     )
-    #     return total_cost * batch_multiplier
-    # else:
-    #     console_err.print(f"No pricing data found for model {model_name}")
-
-    return 0
 
 
 def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | float]) -> None:
@@ -574,8 +279,3 @@ def show_llm_cost(
                 )
             )
     console.print(f"Total Cost [yellow]${grand_total:.5f}")
-
-
-# if __name__ == "__main__":
-#     model_info = get_model_info(model="gpt-4o", custom_llm_provider="openai")
-#     console_err.print(model_info)

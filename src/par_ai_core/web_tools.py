@@ -187,7 +187,7 @@ def fetch_url(
     wait_selector: str | None = None,
     headless: bool = True,
     verbose: bool = False,
-    ignore_ssl: bool = True,
+    ignore_ssl: bool = False,
     console: Console | None = None,
 ) -> list[str]:
     """
@@ -267,7 +267,7 @@ async def fetch_url_playwright(
     wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
     wait_selector: str | None = None,
     headless: bool = True,
-    ignore_ssl: bool = True,
+    ignore_ssl: bool = False,
     verbose: bool = False,
     console: Console | None = None,
 ) -> list[str]:
@@ -380,7 +380,7 @@ def fetch_url_selenium(
     wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
     wait_selector: str | None = None,
     headless: bool = True,
-    ignore_ssl: bool = True,
+    ignore_ssl: bool = False,
     verbose: bool = False,
     console: Console | None = None,
 ) -> list[str]:
@@ -491,9 +491,9 @@ def fetch_url_selenium(
                     results[index] = ""
                 finally:
                     queue.task_done()
-        except Exception as _:
+        except Exception as e:
             if verbose:
-                console.print("[bold red]Error initializing Selenium driver[/bold red]")
+                console.print(f"[bold red]Error initializing Selenium driver: {e}[/bold red]")
             while not queue.empty():
                 queue.get()
                 queue.task_done()
@@ -501,7 +501,7 @@ def fetch_url_selenium(
             if driver:
                 try:
                     driver.quit()
-                except Exception as _:
+                except Exception:
                     pass
 
     for i, url in enumerate(urls):
@@ -678,8 +678,6 @@ def fetch_url_and_convert_to_markdown(
     Returns:
         list[str]: The converted markdown content as a list of strings.
     """
-    import html2text
-
     if not console:
         console = console_err
 
@@ -695,96 +693,16 @@ def fetch_url_and_convert_to_markdown(
     if verbose:
         console.print("[bold green]Converting fetched content to markdown...[/bold green]")
     results: list[str] = []
-    for url, html_content in sources:
-        soup = BeautifulSoup(html_content, "html.parser")
-        title = soup.title.text if soup.title else None
-
-        if include_links:
-            url_attributes = [
-                "href",
-                "src",
-                "action",
-                "data",
-                "poster",
-                "background",
-                "cite",
-                "codebase",
-                "formaction",
-                "icon",
-            ]
-
-            # Convert relative links to fully qualified URLs
-            for tag in soup.find_all(True):
-                for attribute in url_attributes:
-                    if tag.has_attr(attribute):  # type: ignore
-                        attr_value = tag[attribute]  # type: ignore
-                        if attr_value.startswith("//"):  # type: ignore
-                            tag[attribute] = f"https:{attr_value}"  # type: ignore
-                        elif not attr_value.startswith(("http://", "https://")):  # type: ignore
-                            tag[attribute] = urljoin(url, attr_value)  # type: ignore
-
-        metadata = {
-            "source": url,
-            "title": title or "",
-            "tags": (" ".join(tags)).strip(),
-        }
-        for m in soup.find_all("meta"):
-            n = m.get("name", "").strip()  # type: ignore
-            if not n:
-                continue
-            v = m.get("content", "").strip()  # type: ignore
-            if not v:
-                continue
-            if n in meta:
-                metadata[n] = v
-
-        elements_to_remove = [
-            "head",
-            "header",
-            "footer",
-            "script",
-            "source",
-            "style",
-            "svg",
-            "iframe",
-        ]
-        if not include_links:
-            elements_to_remove.append("a")
-            elements_to_remove.append("link")
-
-        if not include_images:
-            elements_to_remove.append("img")
-
-        for element in elements_to_remove:
-            for tag in soup.find_all(element):
-                tag.decompose()
-
-        ### text separators
-        # Convert separator elements to <hr>
-        for element in soup.find_all(attrs={"role": "separator"}):
-            hr = soup.new_tag("hr")
-            element.replace_with(hr)
-            # Add extra newlines around hr to ensure proper markdown rendering
-            hr.insert_before(soup.new_string("\n"))
-            hr.insert_after(soup.new_string("\n"))
-
-        html_content = str(soup)
-
-        ### code blocks
-        html_content = html_content.replace("<pre", "```<pre")
-        html_content = html_content.replace("</pre>", "</pre>```")
-
-        ### convert to markdown
-        converter = html2text.HTML2Text()
-        converter.ignore_links = not include_links
-        converter.ignore_images = not include_images
-        markdown = converter.handle(html_content)
-
-        if include_metadata:
-            meta_markdown = "# Metadata\n\n"
-            for k, v in metadata.items():
-                meta_markdown += f"- {k}: {v}\n"
-            markdown = meta_markdown + markdown
+    for url, page_html in sources:
+        markdown = html_to_markdown(
+            page_html,
+            url=url,
+            include_links=include_links,
+            include_images=include_images,
+            include_metadata=include_metadata,
+            tags=tags,
+            meta=meta,
+        )
         results.append(markdown)
     if verbose:
         console.print("[bold green]Conversion to markdown complete.[/bold green]")
