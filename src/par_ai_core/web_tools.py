@@ -444,7 +444,7 @@ def fetch_url_selenium(
         driver = None
         try:
             service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=options)
+            driver = webdriver.Chrome(service=service, options=options)  # type: ignore[operator]
             driver.set_page_load_timeout(timeout)
 
             while not queue.empty():
