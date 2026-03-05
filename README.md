@@ -265,6 +265,8 @@ if __name__ == "__main__":
 ```
 
 ## What's New
+- Version 0.5.6:
+  - Post-audit release with all 72 audit issues resolved
 - Version 0.5.5:
   - **Fix:** Made `ParAICallbackHandler` hashable to prevent LangChain callback merge errors
 - Version 0.5.4:

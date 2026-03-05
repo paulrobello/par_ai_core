@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.6]
+
+### Changed
+- Bumped version for post-audit release
+
 ## [0.5.5]
 
 ### Added
