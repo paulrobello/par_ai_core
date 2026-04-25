@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.7]
+
+### Changed
+- Updated all dependencies to latest versions (langchain 1.2.15, langgraph 1.1.9, openai 2.32.0, litellm 1.83.0, pydantic 2.13.3, etc.)
+- `LlmRunManager.get_runnable_config_by_llm_config` signature now accepts `LlmConfig | None` to match runtime behavior
+
+### Fixed
+- Updated pricing-lookup tests to current LiteLLM model database (claude-sonnet-4-5, gemini-2.5-flash, gemini-2.0-flash-lite) after upstream removed older model IDs
+- Resolved all pyright type errors in test suite (TypedDict access, MockConsole inheritance, IO buffer typing)
+
 ## [0.5.6]
 
 ### Changed

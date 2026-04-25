@@ -174,7 +174,8 @@ def test_llm_run_manager() -> None:
     """Test LlmRunManager functionality."""
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4")
     runnable_config = config.gen_runnable_config()
-    config_id = runnable_config["metadata"]["config_id"]
+    metadata = runnable_config.get("metadata") or {}
+    config_id = metadata["config_id"]
 
     # Test registration
     llm_run_manager.register_id(runnable_config, config)
@@ -241,8 +242,10 @@ def test_llm_config_get_runnable_config_by_llm_config() -> None:
     # Test with matching config
     result = llm_run_manager.get_runnable_config_by_llm_config(config)
     assert result is not None
-    assert result["metadata"]["model_name"] == runnable_config["metadata"]["model_name"]
-    assert result["metadata"]["provider"] == runnable_config["metadata"]["provider"]
+    result_meta = result.get("metadata") or {}
+    runnable_meta = runnable_config.get("metadata") or {}
+    assert result_meta["model_name"] == runnable_meta["model_name"]
+    assert result_meta["provider"] == runnable_meta["provider"]
 
     # Test with non-matching config
     other_config = LlmConfig(provider=LlmProvider.OPENAI, model_name="different-model")

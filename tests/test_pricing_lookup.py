@@ -71,7 +71,7 @@ def test_get_api_cost_model_name(provider_name: str, input_model: str, expected_
     [
         (LlmProvider.OPENAI.value, "gpt-4", "chat"),
         (LlmProvider.BEDROCK.value, "anthropic.claude-3-5-sonnet-20241022-v2:0", "chat"),
-        (LlmProvider.GEMINI.value, "gemini-pro", "chat"),
+        (LlmProvider.GEMINI.value, "gemini-2.5-flash", "chat"),
         (LlmProvider.OPENAI.value, "text-embedding-3-small", "embedding"),
         (LlmProvider.MISTRAL.value, "mistral-embed", "embedding"),
         (LlmProvider.OPENAI.value, "whisper-1", "audio_transcription"),
@@ -109,7 +109,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
         ),
         (
             LlmProvider.ANTHROPIC.value,
-            "claude-3-5-sonnet-20241022",
+            "claude-sonnet-4-5",
             {
                 "mode": "chat",
                 "input_cost_per_token": 0.000003,
@@ -118,7 +118,7 @@ def test_get_model_mode(provider_name: str, model_name: str, expected_mode: str)
         ),
         (
             LlmProvider.GEMINI.value,
-            "gemini-1.5-flash",
+            "gemini-2.0-flash-lite",
             {
                 "mode": "chat",
                 "input_cost_per_token": 0.000000075,
@@ -147,7 +147,7 @@ def test_get_model_metadata(provider_name: str, model_name: str, expected_fields
 def test_get_api_call_cost():
     """Test API call cost calculation."""
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4")
-    usage = {
+    usage: dict[str, int | float] = {
         "input_tokens": 100,
         "output_tokens": 50,
         "cache_read": 20,
@@ -231,7 +231,7 @@ def test_accumulate_cost_object():
 
 def test_show_llm_cost():
     """Test LLM cost display functionality."""
-    usage = {
+    usage: dict[str, dict[str, int | float]] = {
         "gpt-4": {
             "total_cost": 0.123,
             "input_tokens": 100,
@@ -243,37 +243,41 @@ def test_show_llm_cost():
     show_llm_cost(usage, show_pricing=PricingDisplay.NONE)
 
     # Test PRICE display
-    console = Console(file=StringIO(), force_terminal=False)  # Disable colors
+    buf = StringIO()
+    console = Console(file=buf, force_terminal=False)  # Disable colors
     with patch("par_ai_core.pricing_lookup.console_err", console):
         show_llm_cost(usage, show_pricing=PricingDisplay.PRICE)
-        output = console.file.getvalue()
+        output = buf.getvalue()
         assert "0.1230" in output
 
     # Test DETAILS display
-    console = Console(file=StringIO(), force_terminal=True)
+    buf = StringIO()
+    console = Console(file=buf, force_terminal=True)
     with patch("par_ai_core.pricing_lookup.console_err", console):
         show_llm_cost(usage, show_pricing=PricingDisplay.DETAILS)
-        output = console.file.getvalue()
+        output = buf.getvalue()
         assert "gpt-4" in output
         assert "$0.123" in output
 
     # Test with missing total_cost
-    usage_no_cost = {
+    usage_no_cost: dict[str, dict[str, int | float]] = {
         "gpt-4": {
             "input_tokens": 100,
             "output_tokens": 50,
         }
     }
-    console = Console(file=StringIO(), force_terminal=False)
+    buf = StringIO()
+    console = Console(file=buf, force_terminal=False)
     with patch("par_ai_core.pricing_lookup.console_err", console):
         show_llm_cost(usage_no_cost, show_pricing=PricingDisplay.PRICE)
-        output = console.file.getvalue()
+        output = buf.getvalue()
         assert "0.0000" in output
 
     # Test with empty usage
-    empty_usage = {}
-    console = Console(file=StringIO(), force_terminal=False)
+    empty_usage: dict[str, dict[str, int | float]] = {}
+    buf = StringIO()
+    console = Console(file=buf, force_terminal=False)
     with patch("par_ai_core.pricing_lookup.console_err", console):
         show_llm_cost(empty_usage, show_pricing=PricingDisplay.PRICE)
-        output = console.file.getvalue()
+        output = buf.getvalue()
         assert "$0.0000" in output

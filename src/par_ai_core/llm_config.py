@@ -1056,7 +1056,7 @@ class LlmRunManager:
                     return item[0]
             return None
 
-    def get_runnable_config_by_llm_config(self, llm_config: LlmConfig) -> RunnableConfig | None:
+    def get_runnable_config_by_llm_config(self, llm_config: LlmConfig | None) -> RunnableConfig | None:
         """Retrieves a runnable configuration matching the provided LLM configuration.
 
         Searches through all registered configurations to find the first one

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import pytest
 from bs4 import BeautifulSoup
+from rich.console import Console
 
 from par_ai_core.utils import (
     add_module_path,
@@ -66,15 +67,17 @@ from par_ai_core.utils import (
 )
 
 
-class MockConsole:
+class MockConsole(Console):
     """Mock console for testing display output."""
 
     def __init__(self):
+        super().__init__()
         self.last_output = ""
 
-    def print(self, content: str) -> None:
+    def print(self, *objects, **kwargs) -> None:  # type: ignore[override]  # noqa: ARG002  # pyright: ignore[reportUnusedParameter]
         """Store the last printed output."""
-        self.last_output = str(content)
+        del kwargs
+        self.last_output = str(objects[0]) if objects else ""
 
 
 def test_has_stdin_content(monkeypatch):
@@ -590,17 +593,17 @@ def test_catch_to_logger():
     # Test with re_throw=False
     with catch_to_logger(logger):
         raise ValueError("Test error")
-    assert isinstance(logger.last_exception, ValueError)
+    assert isinstance(logger.last_exception, ValueError)  # pyright: ignore[reportUnreachable]
 
     # Test with re_throw=True
     with pytest.raises(ValueError):
         with catch_to_logger(logger, re_throw=True):
-            raise ValueError("Test error")
+            raise ValueError("Test error")  # pyright: ignore[reportUnreachable]
 
     # Test with logger=None
     with pytest.raises(ValueError):
         with catch_to_logger(None):
-            raise ValueError("Test error")
+            raise ValueError("Test error")  # pyright: ignore[reportUnreachable]
 
 
 def test_add_module_path():

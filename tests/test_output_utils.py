@@ -114,6 +114,7 @@ def test_highlight_json_valid(sample_json_data: str) -> None:
     """Test highlight_json with valid JSON."""
     syntax = highlight_json(sample_json_data)
     assert isinstance(syntax, Syntax)
+    assert syntax.lexer is not None
     assert syntax.lexer.name == "JSON"
 
 
@@ -121,6 +122,7 @@ def test_highlight_json_file(temp_json_file: Path) -> None:
     """Test highlight_json_file with a valid file."""
     syntax = highlight_json_file(temp_json_file)
     assert isinstance(syntax, Syntax)
+    assert syntax.lexer is not None
     assert syntax.lexer.name == "JSON"
 
 
@@ -150,6 +152,7 @@ class MockConsole:
 
     def print(self, content: Any, **kwargs: Any) -> None:
         """Mock print method."""
+        del kwargs
         self.printed.append(content)
 
 

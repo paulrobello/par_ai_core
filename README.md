@@ -265,6 +265,10 @@ if __name__ == "__main__":
 ```
 
 ## What's New
+- Version 0.5.7:
+  - Updated all dependencies to latest versions (langchain, langgraph, openai, litellm, pydantic, etc.)
+  - Refreshed pricing-lookup tests to current LiteLLM model database
+  - Resolved all pyright type errors in test suite
 - Version 0.5.6:
   - Post-audit release with all 72 audit issues resolved
 - Version 0.5.5:
