@@ -477,7 +477,7 @@ class LlmConfig:
 
         Handles ``LlmProvider.LITELLM``. Only supports CHAT mode
         (BASE and EMBEDDINGS raise ``ValueError``). Uses
-        ``ChatLiteLLM`` from ``langchain_community``.
+        ``ChatLiteLLM`` from ``langchain_litellm``.
         """
         if self.provider not in [LlmProvider.LITELLM]:
             raise ValueError(f"LLM provider is '{self.provider.value}' but LITELLM requested.")
@@ -485,7 +485,7 @@ class LlmConfig:
             raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
 
         if self.mode == LlmMode.CHAT:
-            from langchain_community.chat_models import ChatLiteLLM
+            from langchain_litellm import ChatLiteLLM
 
             return ChatLiteLLM(
                 model=self.model_name,

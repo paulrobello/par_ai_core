@@ -666,7 +666,7 @@ def test_azure_openai_all_modes() -> None:
 def test_litellm_chat_mode() -> None:
     """Test LiteLLM CHAT mode implementation."""
     config = LlmConfig(provider=LlmProvider.LITELLM, model_name="gpt-4", mode=LlmMode.CHAT)
-    with patch("langchain_community.chat_models.ChatLiteLLM") as mock_litellm:
+    with patch("langchain_litellm.ChatLiteLLM") as mock_litellm:
         mock_instance = MagicMock(spec=BaseChatModel)
         mock_litellm.return_value = mock_instance
         config.build_chat_model()

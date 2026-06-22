@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.8]
+
+### Changed
+- Updated all dependencies to latest versions (langchain 1.3.11, langchain-core 1.4.8, langchain-aws 1.6.0, langchain-openai 1.3.3, langchain-google-community 5.0.0, langgraph 1.2.6, litellm 1.89.3, openai 2.43.0, praw 8.0.1, etc.)
+
+### Fixed
+- Migrated `ChatLiteLLM` import from the sunset `langchain_community.chat_models` to the standalone `langchain-litellm` package (new dependency)
+- Updated `BeautifulSoup.find_all(attrs=...)` call in `web_tools.py` to pass `name` positionally, fixing a pyright error from beautifulsoup4 4.15 stub overloads
+
 ## [0.5.7]
 
 ### Changed

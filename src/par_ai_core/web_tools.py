@@ -618,7 +618,7 @@ def html_to_markdown(
 
     ### text separators
     # Convert separator elements to <hr>
-    for element in soup.find_all(attrs={"role": "separator"}):
+    for element in soup.find_all(None, attrs={"role": "separator"}):
         hr = soup.new_tag("hr")
         element.replace_with(hr)
         # Add extra newlines around hr to ensure proper markdown rendering
