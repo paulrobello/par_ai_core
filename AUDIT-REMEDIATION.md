@@ -4,7 +4,8 @@
 > **Audit Date**: 2026-07-09 (see `AUDIT.md`)
 > **Remediation Date**: 2026-07-10
 > **Severity Filter Applied**: `all` (every phase executed)
-> **Branch**: `fix/audit-remediation` (base `4cd3b80`; HEAD `697d1fb`)
+> **Branch**: `fix/audit-remediation` (base `4cd3b80`; HEAD `0d70bc6`)
+> **Follow-up**: backlog refactors ARC-010/013/014 were implemented after the initial phased run (commits `39de403`, `0d70bc6`); only ARC-008 remains deferred.
 
 ---
 
@@ -15,17 +16,19 @@
 | 1 — Critical Security | ✅ | fix-security | 6 | 6 | 0 | 0 |
 | 2 — Critical Architecture | ✅ | fix-architecture | 4 (+3 folded) | 7 | 0 | 0 |
 | 3a — Security (remaining) | ✅ | fix-security | 4 | 4 ¹ | 0 | 0 |
-| 3b — Architecture (remaining) | ✅ | fix-architecture | 17 | 12 | 4 | 0 |
+| 3b — Architecture (remaining) | ✅ | fix-architecture | 17 | 12 | 4 ³ | 0 |
 | 3c — Code Quality (all) | ✅ | fix-code-quality | 26 | 26 ² | 0 | 0 |
 | 3d — Documentation (all) | ✅ | fix-documentation | 18 | 18 | 0 | 0 |
 | 4 — Verification | ✅ | — | — | — | — | — |
+| 3e — Backlog refactors (follow-up) | ✅ | fix-architecture | 3 | 3 | 0 | 0 |
 
 ¹ SEC-004/005 required no change — `.idea/` and build/coverage artifacts were already untracked and gitignored at the audit base (the audit's tracking claim was stale against current HEAD). SEC-009/010 were resolved by change.
 ² Includes 8 cross-reference IDs resolved in earlier phases (QA-004/008/013/014/016/023/025 done, QA-026 folded into DOC-001) plus 18 active fixes this phase.
+³ Three of Phase 3b's four deferred refactors (ARC-010, ARC-013, ARC-014) were completed in the Phase 3e follow-up; only ARC-008 remains deferred.
 
-**Overall: 74 of 78 issues resolved. 4 deferred (all backlog-tier architecture refactors, each with a documented follow-up). 0 partial. 0 require human decision-making beyond the 4 deferred items.**
+**Overall: 77 of 78 issues resolved. 1 deferred (ARC-008, backlog-tier). 0 partial. 0 require human decision-making beyond ARC-008.**
 
-By domain: Security 10/10, Architecture 20/24 (4 deferred), Code Quality 26/26, Documentation 18/18.
+By domain: Security 10/10, Architecture 23/24 (1 deferred — ARC-008), Code Quality 26/26, Documentation 18/18.
 
 ### Orchestrator deviation (documented)
 Phase 3 prescribes running the four domain agents **in parallel**. This audit's File Conflict Map shows heavy multi-domain overlap on the same core files (`web_tools.py`, `llm_config.py`, `utils.py`, `search_utils.py`, `provider_cb_info.py` each touched by 3–4 domains). Per the orchestrator's own escape clause ("serialize their work rather than reaching for worktrees" when domains heavily overlap on the same core files) and to avoid silent overwrites, the four Phase 3 agents were run **sequentially** in dependency order — Architecture → Code Quality → Security → Documentation — with the authoritative gate (`make checkall`) run and a checkpoint commit after each.
@@ -66,6 +69,9 @@ Phase 3 prescribes running the four domain agents **in parallel**. This audit's 
 - **[ARC-022 (≡QA-012)]** Duplicate CSV rendering — resolved via QA-012.
 - **[ARC-023]** Import-time env reads — `llm_providers.py`/`llm_config.py` — `OLLAMA_HOST` read fresh at build time (post-import `load_dotenv()` honored).
 - **[ARC-024]** Makefile aliases + dead code — `Makefile`/`__main__.py` — added `build`/`fmt` standard targets; clarified `__main__.py` docstring.
+- **[ARC-010]** *(follow-up)* Correlation via `RunnableConfig` metadata — `llm_config.py`/`llm_utils.py`/`__main__.py` — `build_chat_model`/`build_llm_model` no longer overwrite `llm.name` with the config_id UUID; correlation flows exclusively through `RunnableConfig` metadata + tags (already in place). The two readers that used `llm.name` (`summarize_content`, the `__main__` demo) now route through `llm_run_manager` model-based lookups. +2 regression tests.
+- **[ARC-013]** *(follow-up)* Split `utils.py` + single HTML→Markdown pipeline — `utils.py` (931 lines) → `utils/` package of 10 cohesive submodules; `__init__.py` re-exports all 49 public names for full backward compat. Consolidated to one converter: dropped `markdownify`, made `html2text` canonical (preserves `web_tools.html_to_markdown`'s LLM-facing output; `md()` reimplemented on html2text).
+- **[ARC-014]** *(follow-up)* Typed `SearchResult` + relocate `web_search` — `search_utils.py`/`web_tools.py` — new dict-compatible `SearchResult` Pydantic model; all seven search functions return `list[SearchResult]`; `web_search` relocated to `search_utils` with a backward-compat re-export in `web_tools`; search subsystem decoupled from the LLM config stack (optional `summarizer` callable; `import par_ai_core.search_utils` no longer pulls in `llm_config`/`llm_utils`). *Breaking return-type change — see CHANGELOG `[Unreleased]`.*
 
 ### Code Quality
 - **[QA-001]** *Critical* — Playwright TEXT wait — `web_tools.py`/`tests` — replaced nonexistent `Locator.wait_for_text` with `page.wait_for_function(...)`; a documented feature was silently dead in production, hidden by an unconstrained mock. Test rewritten with `spec=Page`.
@@ -111,26 +117,11 @@ Phase 3 prescribes running the four domain agents **in parallel**. This audit's 
 
 ## Requires Manual Intervention 🔧
 
-These four architecture refactors were **deferred** to keep the tree green. The audit's own roadmap classifies them as **Long-term Backlog**; each is large enough that bundling it into the phased remediation risked destabilizing working code. None is a defect — they are structural improvements.
+One architecture refactor remains **deferred**. The audit's own roadmap classifies it as **Long-term Backlog**; it is large enough that bundling it into the phased remediation risked destabilizing working code. It is not a defect — a structural improvement. (ARC-010, ARC-013, and ARC-014 — the other three originally-deferred backlog refactors — were completed in the Phase 3e follow-up; see *Resolved Issues* above.)
 
 ### [ARC-008] Single-source provider registry
 - **Why deferred**: Largest mechanical restructure in the phase — collapses six parallel dicts + `provider_config` into one `dict[LlmProvider, LlmProviderConfig]` (adding `base_url`), deriving the legacy dicts as comprehensions. It touches the most-edited file and interacts subtly with ARC-023's lazy `OLLAMA_HOST` resolution.
 - **Recommended approach**: Add `base_url` to `LlmProviderConfig`; inline all values into `provider_config`; derive `provider_base_urls`/`provider_default_models`/`provider_light_models`/`provider_vision_models`/`provider_default_embed_models`/`provider_env_key_names` as comprehensions; assert `provider_base_urls[p] == provider_config[p].base_url` for all providers in a test.
-- **Estimated effort**: Medium.
-
-### [ARC-010] Correlation via `RunnableConfig` metadata instead of `llm.name`
-- **Why deferred**: Behaviorally delicate. `build_chat_model`/`build_llm_model` overwrite `model.name` with a config UUID; the callback correlates via `config_id=` tags. Changing the correlation path risks breaking run correlation if metadata isn't populated for every build.
-- **Recommended approach**: Carry `config_id` only in `RunnableConfig` metadata/tags; have the callback read it from there; add a test asserting `model.name` is not a bare UUID after `build_chat_model`.
-- **Estimated effort**: Medium.
-
-### [ARC-013] Split `utils.py`; single HTML→Markdown pipeline
-- **Why deferred**: `utils.py` is ~900 lines with many importers; splitting it and consolidating `html2text` vs `markdownify` is a large move with real regression surface across imports/tests.
-- **Recommended approach**: First standardize on one HTML→Markdown converter (higher value, lower risk); then optionally split `utils.py` behind re-exports for backward compatibility.
-- **Estimated effort**: Medium–Large.
-
-### [ARC-014] Typed `SearchResult` contract; relocate `web_search`
-- **Why deferred**: Returning `list[SearchResult]` is a breaking contract change for downstream consumers and warrants a CHANGELOG bump / minor version.
-- **Recommended approach**: Add a `SearchResult` Pydantic model; optionally move `web_search` from `web_tools` to `search_utils` with a re-export; accept an optional `summarizer` callable.
 - **Estimated effort**: Medium.
 
 ---
@@ -140,19 +131,19 @@ These four architecture refactors were **deferred** to keep the tree green. The 
 - **Format (`ruff format`)**: ✅ Pass — 15 files unchanged.
 - **Lint (`ruff check`)**: ✅ Pass — All checks passed (after adding `UP` + `B` rules and fixing fallout).
 - **Type Check (`pyright`, pinned v1.1.410)**: ✅ Pass — 0 errors, 0 warnings, 0 informations.
-- **Tests (`pytest`)**: ✅ Pass — **364 passed**, 4 warnings (all pre-existing third-party deprecations: `google.genai` `_UnionGenericAlias`, `langchain-community` sunset notice, and the two intentional `md5_hash`/`sha1_hash` deprecation tests). No new warnings. 92% coverage.
-- **Package build (`uv build`)**: ✅ Pass — wheel + sdist both build; wheel ships **0 HTML / 0 PNG**, includes `py.typed` and 15 `.py` modules; sdist has no `extraction_prompt.md` reference.
+- **Tests (`pytest`)**: ✅ Pass — **369 passed**, 4 warnings (all pre-existing third-party deprecations: `google.genai` `_UnionGenericAlias`, `langchain-community` sunset notice, and the two intentional `md5_hash`/`sha1_hash` deprecation tests). No new warnings. 93% coverage.
+- **Package build (`uv build`)**: ✅ Pass — wheel + sdist both build; wheel ships **0 HTML / 0 PNG**, includes `py.typed` and the `utils/` package (10 submodules); `markdownify` dropped from deps; sdist has no `extraction_prompt.md` reference.
 - **Docs generation (`make docs`)**: ✅ Pass — regenerates accurate reference to `./docs/build/`.
 
-**Test growth**: 330 (audit baseline) → 364 (+34 regression tests across phases: SSRF guards, ignore_ssl refusal, exception-safe callback, LiteLLM env, num_ctx split, OLLAMA_HOST timing, Playwright real-API wait, Selenium timing, from_json partial dicts, reasoning-model helper, csv_to_table, token normalization, UA fingerprint, etc.).
+**Test growth**: 330 (audit baseline) → 369 (+39 regression tests across phases: SSRF guards, ignore_ssl refusal, exception-safe callback, LiteLLM env, num_ctx split, OLLAMA_HOST timing, Playwright real-API wait, Selenium timing, from_json partial dicts, reasoning-model helper, csv_to_table, token normalization, UA fingerprint, no-name-hijack correlation, SearchResult dict-compat, summarizer decoupling, etc.).
 
-> ⚠️ **Pyright version watch item (not a failure)**: The host editor runs a newer pyright (v1.1.411+) than the project's pinned v1.1.410. The newer version surfaces stricter findings that the project gate does not — chiefly `StrEnum` member inference (`Literal['OpenAI']` vs `LlmProvider`) and `reportCallIssue` on LangChain provider kwargs (`max_tokens`, `model`, `extra_body`). These are **not regressions** (the code is runtime-correct; all 364 tests pass; the pinned gate is clean), but when the project bumps pyright, expect to address StrEnum narrowing and either add `# type: ignore[code]` or adjust the provider constructor call sites.
+> ⚠️ **Pyright version watch item (not a failure)**: The host editor runs a newer pyright (v1.1.411+) than the project's pinned v1.1.410. The newer version surfaces stricter findings that the project gate does not — chiefly `StrEnum` member inference (`Literal['OpenAI']` vs `LlmProvider`), `reportCallIssue` on LangChain provider kwargs (`max_tokens`, `model`, `extra_body`), and `reportTypedDictNotRequiredAccess` on `RunnableConfig["metadata"]`. These are **not regressions** (the code is runtime-correct; all 369 tests pass; the pinned gate is clean), but when the project bumps pyright, expect to address StrEnum narrowing and either add `# type: ignore[code]` or adjust the provider constructor call sites.
 
 ---
 
 ## Files Changed
 
-**Source modules (15 modified):** `__init__.py`, `__main__.py`, `llm_config.py`, `llm_image_utils.py`, `llm_providers.py`, `llm_utils.py`, `output_utils.py`, `par_logging.py`, `pricing_lookup.py`, `provider_cb_info.py`, `search_utils.py`, `time_display.py`, `user_agents.py`, `utils.py`, `web_tools.py`
+**Source modules (14 modified + `utils.py` split):** `__init__.py`, `__main__.py`, `llm_config.py`, `llm_image_utils.py`, `llm_providers.py`, `llm_utils.py`, `output_utils.py`, `par_logging.py`, `pricing_lookup.py`, `provider_cb_info.py`, `search_utils.py`, `time_display.py`, `user_agents.py`, `web_tools.py`, and `utils.py` → `utils/` package (10 cohesive submodules, ARC-013)
 
 **Build / config (6 modified):** `pyproject.toml`, `pyrightconfig.json`, `ruff.toml`, `Makefile`, `.gitignore`, `uv.lock`
 
@@ -164,10 +155,13 @@ These four architecture refactors were **deferred** to keep the tree green. The 
 
 **Deleted (14):** `src/par_ai_core/docs/*.html` — stale generated API reference, now gitignored and generated out-of-tree (ARC-015/DOC-001).
 
-**Net**: +2,329 / −10,115 lines (the large deletion is the removed generated HTML docs).
+**Net**: +3,241 / −11,106 lines (the large deletion is the removed generated HTML docs).
 
 ### Commits on the branch
 ```
+0d70bc6 refactor(architecture): implement ARC-014
+39de403 refactor(architecture): implement ARC-010 and ARC-013
+5e1edf5 docs: add audit remediation report (AUDIT-REMEDIATION.md)
 697d1fb docs: resolve Phase 3d documentation issues
 cabbcde fix(security): resolve Phase 3a remaining security issues
 5b751ee fix(quality): resolve Phase 3c code-quality issues
@@ -183,7 +177,7 @@ Each phase is an isolated, independently-revertable checkpoint commit.
 ## Next Steps
 
 1. **Security review of the behavioral changes** before release. These are opt-in-safe but change observable behavior (see CHANGELOG `[Unreleased]`): SEC-001 (`fetch_url` now rejects non-public URLs), SEC-002 (`ignore_ssl` + `http_credentials` now raises), SEC-003 (Gemini no longer forces `BLOCK_NONE`), ARC-001 (lean core — existing `pip install par_ai_core` users lose backends unless they switch to `[all]`), ARC-002 (no global logging mutation — callers must call `init_logging()`), ARC-006 (`num_ctx` deprecation on non-Ollama).
-2. **Pick up the four deferred refactors** (ARC-008/010/013/014) as dedicated, reviewed changes — see *Requires Manual Intervention*.
+2. **Pick up the remaining deferred refactor** (ARC-008) as a dedicated, reviewed change — see *Requires Manual Intervention*. (ARC-010/013/014 were completed in the Phase 3e follow-up.)
 3. **Decide on pyright bump strategy** — either stay on v1.1.410 or address the StrEnum/LangChain-kwarg findings when upgrading (see the watch item above).
-4. **Re-run `/audit`** to produce an updated `AUDIT.md` reflecting current state (expected to show the 4 deferred items and the pyright-version items as the remaining open work).
+4. **Re-run `/audit`** to produce an updated `AUDIT.md` reflecting current state (expected to show ARC-008 and the pyright-version items as the remaining open work).
 5. **Merge or iterate** — the branch is green and fully verified; ready for review/merge to `main` whenever you want.
