@@ -9,6 +9,8 @@ Release dates are derived from the corresponding git tag timestamps.
 
 ## [Unreleased]
 
+## [0.5.9] - 2026-07-10
+
 Comprehensive audit remediation — 77 of 78 issues resolved (1 backlog refactor,
 ARC-008, deferred). See `AUDIT-REMEDIATION.md` for the full per-issue record.
 

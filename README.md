@@ -300,6 +300,12 @@ if __name__ == "__main__":
 ```
 
 ## What's New
+- Version 0.5.9:
+  - Comprehensive audit remediation: 77 of 78 issues resolved across security, architecture, code quality, and documentation (see `AUDIT-REMEDIATION.md`)
+  - Lean core with optional extras — install only the providers you use (`pip install "par_ai_core[openai]"`, `[all]`, etc.)
+  - Security hardening: SSRF/local-file guard in `fetch_url`, TLS-bypass + credential safety, FIPS-safe hashing, SHA-pinned CI actions
+  - Search functions now return a typed, dict-compatible `SearchResult`; `utils.py` split into a `utils/` package (backward-compatible re-exports)
+  - Bug fixes: LiteLLM env configuration, context-size lookup, Playwright text wait, cost double-counting, CSV rendering, and more
 - Version 0.5.8:
   - Updated all dependencies to latest versions (langchain, langgraph, openai, litellm, etc.)
   - Migrated `ChatLiteLLM` to the standalone `langchain-litellm` package
@@ -307,8 +313,6 @@ if __name__ == "__main__":
   - Updated all dependencies to latest versions
   - Refreshed pricing-lookup tests to current LiteLLM model database
   - Resolved all pyright type errors in test suite
-- Version 0.5.6:
-  - Post-audit release with all 72 audit issues resolved
 
 See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
