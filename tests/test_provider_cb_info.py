@@ -57,6 +57,48 @@ def test_llm_end_chat_completion():
     assert metadata["successful_requests"] == 1
 
 
+def test_on_llm_end_resolves_config_via_tags_without_name_hijack():
+    """ARC-010: on_llm_end must resolve the LlmConfig from the ``config_id=`` tag,
+    not from ``llm.name`` (which is no longer hijacked to the config_id UUID).
+
+    Builds a chat model (which registers its RunnableConfig with llm_run_manager),
+    then fires on_llm_end with the matching ``config_id=`` tag against a handler
+    that has NO llm_config of its own. If tag-based correlation works, usage is
+    accumulated against the registered config's provider/model.
+
+    Uses a real Ollama build (local construction; no network) so the model object
+    is a real provider instance rather than a MagicMock.
+    """
+    from par_ai_core.llm_config import LlmConfig, LlmMode, LlmProvider, llm_run_manager
+
+    cfg = LlmConfig(
+        provider=LlmProvider.OLLAMA,
+        model_name="arc010-tag-model",
+        base_url="http://localhost:11434",
+        mode=LlmMode.CHAT,
+    )
+    cfg.build_chat_model()
+
+    registered = llm_run_manager.get_runnable_config_by_model(cfg.model_name)
+    assert registered is not None
+    config_id = registered["metadata"]["config_id"]
+
+    # Handler has no llm_config of its own; the tag must supply it.
+    handler = ParAICallbackHandler()
+    message = AIMessage(content="ok")
+    message.additional_kwargs["token_usage"] = {"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12}
+    generation = ChatGeneration(message=message)
+    response = LLMResult(generations=[[generation]])
+
+    handler.on_llm_end(response, tags=[f"config_id={config_id}"])
+
+    key = get_api_cost_model_name(provider_name=cfg.provider, model_name=cfg.model_name)
+    assert key in handler.usage_metadata, "tag-based correlation must populate usage for the registered config"
+    assert handler.usage_metadata[key]["input_tokens"] == 5
+    assert handler.usage_metadata[key]["output_tokens"] == 7
+    assert handler.usage_metadata[key]["successful_requests"] == 1
+
+
 def test_parai_callback_context_manager():
     """Test the get_parai_callback context manager."""
     config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4")

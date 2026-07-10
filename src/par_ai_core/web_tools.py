@@ -43,6 +43,7 @@ from typing import TYPE_CHECKING, Literal
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
+from html2text import HTML2Text
 from pydantic import BaseModel
 from rich.console import Console
 from rich.repr import rich_repr
@@ -649,8 +650,6 @@ def html_to_markdown(
     Returns:
         str: The converted markdown content
     """
-    import html2text
-
     if tags is None:
         tags = []
     if meta is None:
@@ -740,7 +739,7 @@ def html_to_markdown(
     html_content = str(soup)
 
     ### convert to markdown
-    converter = html2text.HTML2Text()
+    converter = HTML2Text()
     converter.ignore_links = not include_links
     converter.ignore_images = not include_images
     markdown = converter.handle(html_content)

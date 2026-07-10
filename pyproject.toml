@@ -46,7 +46,10 @@ dependencies = [
     "pydantic-core>=2.46.4",
     "pydantic>=2.13.4",
     "beautifulsoup4>=4.15.0",
-    "markdownify>=1.2.2",
+    # html2text is the single HTML→Markdown converter for the package
+    # (ARC-013): used by both ``utils.md`` and ``web_tools.html_to_markdown``.
+    # Replaces the previous markdownify core dep.
+    "html2text>=2025.4.15",
     "python-dotenv>=1.2.2",
     "tiktoken>=0.13.0",
     "nest-asyncio>=1.6.0",
@@ -75,7 +78,6 @@ web = [
     "playwright>=1.60.0",
     "selenium>=4.45.0",
     "webdriver-manager>=4.1.2",
-    "html2text>=2025.4.15",
 ]
 search = [
     "tavily-python>=0.7.26",

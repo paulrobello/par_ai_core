@@ -878,7 +878,11 @@ class LlmConfig:
         if not isinstance(llm, BaseLanguageModel):
             raise ValueError(f"Invalid LLM type returned for base mode from provider '{cfg.provider.value}'")
         config = cfg.gen_runnable_config()
-        llm.name = config["metadata"]["config_id"] if "metadata" in config else None
+        # ARC-010: do NOT overwrite llm.name with the config_id. Correlation
+        # between this build and its RunnableConfig flows through the config_id
+        # stored in RunnableConfig metadata + tags (see gen_runnable_config) and
+        # the llm_run_manager registry. Callers that need the RunnableConfig
+        # retrieve it via llm_run_manager.get_runnable_config_by_* , not llm.name.
         llm_run_manager.register_id(config, cfg)
         return llm
 
@@ -895,7 +899,8 @@ class LlmConfig:
         if not isinstance(llm, BaseChatModel):
             raise ValueError(f"Invalid LLM type returned for chat mode from provider '{cfg.provider.value}'")
         config = cfg.gen_runnable_config()
-        llm.name = config["metadata"]["config_id"] if "metadata" in config else None
+        # ARC-010: see build_llm_model — correlation is via RunnableConfig
+        # metadata + tags, not llm.name.
         llm_run_manager.register_id(config, cfg)
         return llm
 

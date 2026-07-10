@@ -61,7 +61,9 @@ def main() -> None:
         ]
 
         # Invoke the chat model and get the result
-        result = chat_model.invoke(messages, config=llm_run_manager.get_runnable_config(chat_model.name or ""))
+        # ARC-010: correlation is via llm_run_manager (model lookup), not
+        # chat_model.name (which is the provider-set model name, not a config_id).
+        result = chat_model.invoke(messages, config=llm_run_manager.get_runnable_config_by_llm_config(llm_config))
 
         # Print the model's response
         console_out.print(result.content)

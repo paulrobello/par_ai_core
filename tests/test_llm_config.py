@@ -303,6 +303,64 @@ def test_llm_config_o1_model_adjustments() -> None:
         assert config.streaming is True
 
 
+def test_build_model_does_not_hijack_name_with_config_id() -> None:
+    """ARC-010: builders must not overwrite the model's public ``name`` with the config_id UUID.
+
+    The old builders did ``llm.name = config["metadata"]["config_id"]``, hijacking a
+    public attribute for internal correlation. Correlation now flows through
+    RunnableConfig metadata + tags (see gen_runnable_config) and the
+    llm_run_manager registry. This test guards both invariants:
+      1. the built model's ``name`` is neither the registered config_id nor any
+         36-char UUID, and
+      2. the config_id registered by the build is still retrievable via
+         llm_run_manager.get_config(config_id) -- correlation survives without
+         the name hijack.
+
+    Uses real Ollama builds (construction is local; no network is hit) so the
+    ``.name`` attribute reflects a real provider rather than a MagicMock default.
+    """
+    import re
+
+    uuid_re = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+    dummy_url = "http://localhost:11434"
+
+    # --- build_chat_model ---
+    chat_cfg = LlmConfig(
+        provider=LlmProvider.OLLAMA, model_name="arc010-chat-model", base_url=dummy_url, mode=LlmMode.CHAT
+    )
+    chat_model = chat_cfg.build_chat_model()
+
+    chat_registered = llm_run_manager.get_runnable_config_by_model(chat_cfg.model_name)
+    assert chat_registered is not None, "build_chat_model must register its RunnableConfig"
+    chat_config_id = chat_registered["metadata"]["config_id"]
+
+    # (1) name is not the config_id and not any UUID
+    assert chat_model.name != chat_config_id
+    assert uuid_re.match(str(chat_model.name)) is None
+    # (2) correlation survives via the registry
+    chat_pair = llm_run_manager.get_config(chat_config_id)
+    assert chat_pair is not None
+    assert chat_pair[0] == chat_registered
+    assert chat_pair[1].model_name == chat_cfg.model_name
+
+    # --- build_llm_model ---
+    base_cfg = LlmConfig(
+        provider=LlmProvider.OLLAMA, model_name="arc010-base-model", base_url=dummy_url, mode=LlmMode.BASE
+    )
+    base_model = base_cfg.build_llm_model()
+
+    base_registered = llm_run_manager.get_runnable_config_by_model(base_cfg.model_name)
+    assert base_registered is not None, "build_llm_model must register its RunnableConfig"
+    base_config_id = base_registered["metadata"]["config_id"]
+
+    assert base_model.name != base_config_id
+    assert uuid_re.match(str(base_model.name)) is None
+    base_pair = llm_run_manager.get_config(base_config_id)
+    assert base_pair is not None
+    assert base_pair[0] == base_registered
+    assert base_pair[1].model_name == base_cfg.model_name
+
+
 def test_llm_config_from_json_missing_provider_raises() -> None:
     """QA-005: a partial dict without ``provider`` raises a documented ValueError."""
     with pytest.raises(ValueError, match="missing required field 'provider'"):

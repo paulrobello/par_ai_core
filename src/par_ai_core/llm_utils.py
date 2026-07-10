@@ -333,7 +333,7 @@ def summarize_content(content: str, llm: BaseChatModel) -> str:
                     SystemMessage(content=summarize_content_instructions),
                     HumanMessage(content=content),
                 ],
-                config=llm_run_manager.get_runnable_config(llm.name or ""),
+                config=llm_run_manager.get_runnable_config_by_model(model_name),
             ).content
         )
     else:
@@ -363,7 +363,7 @@ def summarize_content(content: str, llm: BaseChatModel) -> str:
                         SystemMessage(content=chunk_instructions),
                         HumanMessage(content=chunk),
                     ],
-                    config=llm_run_manager.get_runnable_config(llm.name or ""),
+                    config=llm_run_manager.get_runnable_config_by_model(model_name),
                 ).content
             )
             chunk_summaries.append(chunk_summary)
@@ -391,6 +391,6 @@ def summarize_content(content: str, llm: BaseChatModel) -> str:
                     SystemMessage(content=final_instructions),
                     HumanMessage(content=combined_summaries),
                 ],
-                config=llm_run_manager.get_runnable_config(llm.name or ""),
+                config=llm_run_manager.get_runnable_config_by_model(model_name),
             ).content
         )
