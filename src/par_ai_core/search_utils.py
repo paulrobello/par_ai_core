@@ -43,6 +43,7 @@ requirements and usage details.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from datetime import date, timedelta
@@ -56,6 +57,8 @@ from pydantic import SecretStr
 
 from par_ai_core.llm_utils import summarize_content
 from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
+
+logger = logging.getLogger(__name__)
 
 
 def tavily_search(
@@ -197,7 +200,7 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
     if scrape:
         urls = [r["link"] for r in res[:max_results]]
         content = fetch_url_and_convert_to_markdown(urls)
-        for r, c in zip(res, content):
+        for r, c in zip(res, content, strict=False):
             r["raw_content"] = c
     return [
         {
@@ -213,7 +216,7 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
 def serper_search(
     query: str,
     *,
-    type: Literal["news", "search", "places", "images"] = "search",
+    search_type: Literal["news", "search", "places", "images"] = "search",
     days: int = 0,
     max_results: int = 3,
     scrape: bool = False,
@@ -223,8 +226,11 @@ def serper_search(
 
     Args:
         query (str): The search query to execute.
-        type (Literal["news", "search", "places", "images"], optional): Type of search
-        days (int, optional): Number of days to search back. Must be >= 0. Defaults to 0 meaning all time.
+        search_type (Literal["news", "search", "places", "images"], optional): Type of search.
+            Defaults to "search".
+        days (int, optional): Number of days to search back. Must be >= 0. Defaults to 0 meaning all
+            time. Serper/Google only buckets freshness, so this maps to the nearest ``tbs`` bucket:
+            1 -> past day, 2-7 -> past week, 8-30 -> past month, >30 -> past year.
         max_results (int, optional): Maximum number of results to return. Defaults to 3.
         scrape (bool, optional): Whether to scrape the search result urls. Defaults to False.
             When True, each result URL is subject to the public-http(s) SSRF guard enforced
@@ -242,14 +248,27 @@ def serper_search(
         from langchain_community.utilities import GoogleSerperAPIWrapper
     except ImportError as e:  # pragma: no cover - exercised only without the extra
         raise ImportError("Serper (Google) search requires: pip install 'par_ai_core[search]'") from e
-    search = GoogleSerperAPIWrapper(type=type)
+    # ``days`` was previously validated then ignored. Serper/Google don't accept
+    # an arbitrary day count, so map it to the closest freshness bucket (QA-010).
+    tbs: str | None
+    if days == 0:
+        tbs = None
+    elif days == 1:
+        tbs = "qdr:d"
+    elif days <= 7:
+        tbs = "qdr:w"
+    elif days <= 30:
+        tbs = "qdr:m"
+    else:
+        tbs = "qdr:y"
+    search = GoogleSerperAPIWrapper(type=search_type, tbs=tbs)
     res = search.results(query)
-    results_list = res.get(type, [])[:max_results]
+    results_list = res.get(search_type, [])[:max_results]
 
     if scrape:
         urls = [r["link"] for r in results_list]
         content = fetch_url_and_convert_to_markdown(urls, include_images=include_images)
-        for r, c in zip(results_list, content):
+        for r, c in zip(results_list, content, strict=False):
             r["raw_content"] = c
 
     return [
@@ -398,7 +417,10 @@ def youtube_get_comments(youtube, video_id: str, max_results: int = 10) -> list[
                 request = youtube.commentThreads().list_next(previous_request=request, previous_response=response)
             else:
                 request = None
-        except Exception:
+        except Exception as e:
+            # Was a bare ``except: break`` that silently truncated comment
+            # fetching on any API error; log so the truncation is visible (QA-006).
+            logger.warning("YouTube comment fetch stopped early for video %s: %s", video_id, e)
             break
 
     return comments
@@ -410,7 +432,7 @@ def youtube_get_transcript(video_id: str, languages: list[str] | None = None) ->
         from youtube_transcript_api import YouTubeTranscriptApi
     except ImportError as e:  # pragma: no cover - exercised only without the extra
         raise ImportError("YouTube transcript fetch requires: pip install 'par_ai_core[search]'") from e
-    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])  # type: ignore
+    transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])  # type: ignore[reportAttributeAccessIssue]
     transcript_text = " ".join([item["text"] for item in transcript_list])
     return transcript_text.replace("\n", " ")
 
@@ -487,7 +509,9 @@ def youtube_search(
             + f"Description: {item['snippet']['description']}"
         )
         if max_comments > 0:
-            comments = youtube_get_comments(youtube, video_id)
+            # Pass max_comments through so the requested count is actually
+            # fetched (was hardcoded to the default 10) (QA-011).
+            comments = youtube_get_comments(youtube, video_id, max_results=max_comments)
         else:
             comments = []
 

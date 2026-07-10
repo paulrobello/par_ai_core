@@ -60,6 +60,9 @@ def get_random_user_agent() -> str:
     elif browser == "Edge":
         version = f"Edg/{edge_version}"
     else:  # Chrome
-        version = f"Chrome/{chrome_version} Mobile Safari/{webkit_version}"
+        # Desktop Chrome uses the plain ``Safari/<webkit>`` token (the
+        # ``Mobile Safari`` token is for mobile UAs and produced an inconsistent
+        # desktop fingerprint) (QA-021).
+        version = f"Chrome/{chrome_version} Safari/{webkit_version}"
 
     return f"Mozilla/5.0 ({os.split('; ')[0]}; {platform}){webkit}{gecko} {version}"

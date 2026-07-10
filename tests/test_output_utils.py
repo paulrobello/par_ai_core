@@ -181,3 +181,21 @@ def test_display_formatted_output(format_type: DisplayOutputFormat, content: str
         assert len(mock_console.printed) == 1
         if expected_type is not str:
             assert isinstance(mock_console.printed[0], expected_type)
+
+
+def test_display_formatted_output_empty_csv_does_not_raise() -> None:
+    """QA-012: empty CSV must not raise StopIteration (inline path did)."""
+    mock_console = MockConsole()
+    # Should not raise; delegates to csv_to_table which handles empty gracefully.
+    display_formatted_output("", DisplayOutputFormat.CSV, mock_console)
+    assert len(mock_console.printed) == 1
+    assert isinstance(mock_console.printed[0], Table)
+
+
+def test_display_formatted_output_ragged_csv_does_not_raise() -> None:
+    """QA-012: ragged CSV rows must not raise (inline path Rich-errored)."""
+    mock_console = MockConsole()
+    ragged = "a,b,c\n1,2\n3,4,5,6"
+    display_formatted_output(ragged, DisplayOutputFormat.CSV, mock_console)
+    assert len(mock_console.printed) == 1
+    assert isinstance(mock_console.printed[0], Table)

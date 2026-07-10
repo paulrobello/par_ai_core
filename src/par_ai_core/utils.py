@@ -57,7 +57,10 @@ from par_ai_core.par_logging import console_err
 
 logger = logging.getLogger(__name__)
 
-DECIMAL_PRECESSION = 5
+DECIMAL_PRECISION = 5
+# Backward-compatible alias for the original (misspelled) name. Will be removed
+# in a future release (QA-018).
+DECIMAL_PRECESSION = DECIMAL_PRECISION
 
 
 def is_url(url: str) -> bool:
@@ -264,11 +267,12 @@ def to_class_case(snake_str: str) -> str:
 
 
 def get_files(path: str | Path | os.PathLike[str], ext: str = "") -> list[str]:
-    """Get list of files in a directory, optionally filtered by extension.
+    """Get list of files in a directory, optionally excluding by extension.
 
     Args:
         path: Directory path to search
-        ext: File extension to filter by. If empty, returns all files. Defaults to "".
+        ext: File extension to exclude. Files whose name ends with this suffix are
+            omitted from the result. If empty, returns all files. Defaults to "".
 
     Returns:
         list[str]: Alphabetically sorted list of filenames in the directory,
@@ -361,12 +365,12 @@ def has_value(v: Any, search: str, depth: int = 0) -> bool:
         bool: True if the search value is found, False otherwise.
 
     Notes:
-        - Searches dictionaries recursively up to depth of 4
-        - For integers, trims .00 from search string before comparing
+        - Searches dictionaries recursively up to 4 levels deep
+        - For integers, trims .00 suffix from search string before comparing
         - For floats, truncates to length of search string before comparing
         - For strings, checks if they start or end with search value (case-insensitive)
     """
-    # don't go more than 3 levels deep
+    # don't go more than 4 levels deep
     if depth > 4:
         return False
     # if is a dict, search all dict values recursively
@@ -379,9 +383,11 @@ def has_value(v: Any, search: str, depth: int = 0) -> bool:
         for li in v:
             if has_value(li, search, depth + 1):
                 return True
-    # if is an int, trim off .00 for search if it exists then compare
+    # if is an int, strip a literal ".00" suffix from search then compare.
+    # ``rstrip`` strips a character set, not a suffix, so ``"100".rstrip(".00")``
+    # wrongly produced ``"1"`` (QA-007).
     if isinstance(v, int):
-        search = search.rstrip(".00")
+        search = search.removesuffix(".00")
         if str(v) == search:
             return True
     # if is a float, truncate string version of float to same size as search
@@ -407,7 +413,7 @@ def is_zero(val: Any) -> bool:
         Returns False for None values.
 
     Notes:
-        - For Decimal, rounds to DECIMAL_PRECESSION before comparing
+        - For Decimal, rounds to DECIMAL_PRECISION before comparing
         - For float, uses math.isclose() with relative tolerance of 1e-05
         - For int, uses exact comparison
     """
@@ -415,7 +421,7 @@ def is_zero(val: Any) -> bool:
         return False
     t = type(val)
     if t is Decimal:
-        return val.quantize(Decimal(f"1e-{DECIMAL_PRECESSION}")).is_zero()
+        return val.quantize(Decimal(f"1e-{DECIMAL_PRECISION}")).is_zero()
     if t is float:
         return math.isclose(round(val, 5), 0, rel_tol=1e-05)
     if t is int:
@@ -474,26 +480,16 @@ def parse_csv_text(csv_data: StringIO, has_header: bool = True) -> list[dict]:
     try:
         if has_header:
             reader = csv.DictReader(csv_data, strict=True)
-            try:
-                rows = []
-                for row in reader:
-                    rows.append(row)
-                return rows
-            except Exception as e:
-                raise csv.Error(f"Error parsing CSV data: {str(e)}")
-        else:
-            reader = csv.reader(csv_data, strict=True)
-            try:
-                rows = list(reader)
-                if not rows:
-                    return []
-                # Use column indices as keys when no header
-                headers = [str(i) for i in range(len(rows[0]))]
-                return [dict(zip(headers, row)) for row in rows]
-            except Exception as e:
-                raise csv.Error(f"Error parsing CSV data: {str(e)}")
+            return list(reader)
+        reader = csv.reader(csv_data, strict=True)
+        rows = list(reader)
+        if not rows:
+            return []
+        # Use column indices as keys when no header
+        headers = [str(i) for i in range(len(rows[0]))]
+        return [dict(zip(headers, row, strict=False)) for row in rows]
     except Exception as e:
-        raise csv.Error(f"Error parsing CSV data: {str(e)}")
+        raise csv.Error(f"Error parsing CSV data: {str(e)}") from e
 
 
 def read_text_file_to_stringio(file_path: str, encoding: str = "utf-8") -> StringIO:
@@ -609,7 +605,7 @@ def catch_to_logger(logger: object, re_throw: bool = False) -> Generator[None, N
         yield
     except Exception as e:
         if logger and hasattr(logger, "exception"):
-            logger.exception(e)  # type: ignore
+            logger.exception(e)  # type: ignore[reportAttributeAccessIssue]
             if re_throw:
                 raise e
         else:
@@ -843,16 +839,9 @@ def get_file_list_for_context(file_patterns: list[str | Path]) -> list[Path]:
     """
     files = []
     for pattern in file_patterns:
-        try:
-            if isinstance(pattern, Path):
-                pattern = pattern.as_posix()
-            if sys.version_info >= (3, 11):  # noqa: UP036
-                files += glob.glob(pattern, recursive=True, include_hidden=False)
-            else:
-                # Python 3.10 doesn't have include_hidden parameter
-                files += glob.glob(pattern, recursive=True)  # noqa: UP036
-        except Exception:
-            raise
+        if isinstance(pattern, Path):
+            pattern = pattern.as_posix()
+        files += glob.glob(pattern, recursive=True, include_hidden=False)
     result = []
     for file in files:
         f = Path(file)

@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
+import logging
 import os
 import socket
 import threading
@@ -48,6 +49,8 @@ from rich.repr import rich_repr
 
 from par_ai_core.par_logging import console_err
 from par_ai_core.user_agents import get_random_user_agent
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # Playwright is an optional backend (install with ``par_ai_core[web]``).
@@ -184,7 +187,6 @@ def get_html_element(element: str, soup: BeautifulSoup) -> str:
     if result:
         return result.text
 
-    # print(f"No element ${element} found.")
     return ""
 
 
@@ -240,6 +242,7 @@ def fetch_url(
     verbose: bool = False,
     ignore_ssl: bool = False,
     console: Console | None = None,
+    raise_on_error: bool = False,
 ) -> list[str]:
     """
     Fetch the contents of a webpage using either Playwright or Selenium.
@@ -260,6 +263,9 @@ def fetch_url(
             validation and must never be combined with ``http_credentials`` (credentials would be
             exposed to a man-in-the-middle). A visible warning is emitted whenever this is set.
         console (Console | None): The console to use for output. Defaults to console_err.
+        raise_on_error (bool): When True, re-raise fetch exceptions instead of returning a list of
+            empty strings. Defaults to False (preserve the silent-fallback behavior callers rely on;
+            the failure is logged at warning level either way).
 
     Returns:
         list[str]: A list of HTML contents of the fetched webpages.
@@ -326,6 +332,9 @@ def fetch_url(
             if not console:
                 console = console_err
             console.print(f"[bold red]Error fetching URL: {str(e)}[/bold red]")
+        logger.warning("fetch_url failed for %s: %s", urls, e)
+        if raise_on_error:
+            raise
         return [""] * (len(urls) if isinstance(urls, list) else 1)
 
 
@@ -364,8 +373,6 @@ async def fetch_url_playwright(
     Returns:
         list[str]: A list of HTML contents of the fetched webpages.
     """
-    # from playwright.async_api import async_playwright
-
     if isinstance(urls, str):
         urls = [urls]
 
@@ -387,7 +394,9 @@ async def fetch_url_playwright(
 
             if wait_type == ScraperWaitType.PAUSE:
                 console.print("[yellow]Press Enter to continue...[/yellow]")
-                input()
+                # input() blocks the event loop and every parallel fetch with it;
+                # offload the blocking call to a worker thread.
+                await asyncio.to_thread(input)
             elif wait_type == ScraperWaitType.SLEEP:
                 if verbose:
                     console.print(f"[yellow]Waiting {sleep_time} seconds...[/yellow]")
@@ -409,8 +418,17 @@ async def fetch_url_playwright(
             elif wait_type == ScraperWaitType.TEXT:
                 if wait_selector:
                     if verbose:
-                        console.print(f"[yellow]Waiting for selector {wait_selector}...[/yellow]")
-                    await page.locator("body").wait_for_text(wait_selector, timeout=timeout * 1000)
+                        console.print(f"[yellow]Waiting for text {wait_selector}...[/yellow]")
+                    # ``Locator.wait_for_text`` does not exist in Playwright's
+                    # Python API; calling it raised AttributeError which was
+                    # swallowed by the broad except below, so TEXT wait silently
+                    # returned empty content. ``wait_for_function`` with an arg
+                    # is the supported polling primitive (QA-001).
+                    await page.wait_for_function(
+                        "text => document.body && document.body.innerText.includes(text)",
+                        arg=wait_selector,
+                        timeout=timeout * 1000,
+                    )
                 else:
                     if verbose:
                         console.print(
@@ -543,9 +561,13 @@ def fetch_url_selenium(
                     if wait_type == ScraperWaitType.PAUSE:
                         console.print("[yellow]Press Enter to continue...[/yellow]")
                         input()
-                    elif wait_type == ScraperWaitType.SLEEP and sleep_time > 0:
-                        pass
-                        # time.sleep(sleep_time)
+                    elif wait_type == ScraperWaitType.SLEEP:
+                        # The actual sleep (was a commented-out no-op while two
+                        # unconditional sleeps ran for every wait type below).
+                        if sleep_time > 0:
+                            if verbose:
+                                console.print(f"[bold yellow]Sleeping for {sleep_time} seconds...[/bold yellow]")
+                            time.sleep(sleep_time)
                     elif wait_type == ScraperWaitType.IDLE:
                         time.sleep(1)
                     elif wait_type == ScraperWaitType.SELECTOR:
@@ -556,16 +578,14 @@ def fetch_url_selenium(
                         if wait_selector:
                             wait = WebDriverWait(driver, 10)
                             wait.until(EC.text_to_be_present_in_element((By.TAG_NAME, "body"), wait_selector))
-                    time.sleep(1)  # Wait a bit for any dynamic content to load
+                    # ScraperWaitType.NONE falls through with no waiting, so a
+                    # "no wait" request no longer sleeps at all (QA-003).
                     if verbose:
                         console.print(
                             "[bold green]Page loaded. Scrolling and waiting for dynamic content...[/bold green]"
                         )
-                        console.print(f"[bold yellow]Sleeping for {sleep_time} seconds...[/bold yellow]")
-                    # Scroll to the bottom of the page
+                    # Scroll to the bottom of the page to trigger lazy-loaded content
                     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-                    time.sleep(sleep_time)  # Sleep for the specified time
 
                     results[index] = driver.page_source
                 except Exception as e:
@@ -656,12 +676,12 @@ def html_to_markdown(
         # Convert relative links to fully qualified URLs
         for tag in soup.find_all(True):
             for attribute in url_attributes:
-                if tag.has_attr(attribute):  # type: ignore
-                    attr_value = tag[attribute]  # type: ignore
-                    if attr_value.startswith("//"):  # type: ignore
-                        tag[attribute] = f"https:{attr_value}"  # type: ignore
-                    elif url and not attr_value.startswith(("http://", "https://")):  # type: ignore
-                        tag[attribute] = urljoin(url, attr_value)  # type: ignore
+                if tag.has_attr(attribute):
+                    attr_value = tag[attribute]
+                    if attr_value.startswith("//"):  # type: ignore[reportAttributeAccessIssue]
+                        tag[attribute] = f"https:{attr_value}"
+                    elif url and not attr_value.startswith(("http://", "https://")):  # type: ignore[reportAttributeAccessIssue]
+                        tag[attribute] = urljoin(url, attr_value)  # type: ignore[reportArgumentType]
 
     metadata = {
         "source": url,
@@ -669,10 +689,10 @@ def html_to_markdown(
         "tags": (" ".join(tags)).strip(),
     }
     for m in soup.find_all("meta"):
-        n = m.get("name", "").strip()  # type: ignore
+        n = m.get("name", "").strip()  # type: ignore[reportAttributeAccessIssue,reportOptionalMemberAccess]
         if not n:
             continue
-        v = m.get("content", "").strip()  # type: ignore
+        v = m.get("content", "").strip()  # type: ignore[reportAttributeAccessIssue,reportOptionalMemberAccess]
         if not v:
             continue
         if n in meta:
@@ -708,11 +728,16 @@ def html_to_markdown(
         hr.insert_before(soup.new_string("\n"))
         hr.insert_after(soup.new_string("\n"))
 
-    html_content = str(soup)
-
     ### code blocks
-    html_content = html_content.replace("<pre", "```<pre")
-    html_content = html_content.replace("</pre>", "</pre>```")
+    # Wrap each <pre> block in markdown fenced-code markers. Doing this on the
+    # parsed tree (not via ``str(soup).replace("<pre", ...)``) avoids corrupting
+    # any literal ``<pre`` text that html2text would otherwise emit verbatim and
+    # handles arbitrary attributes on the tag (QA-024).
+    for pre in soup.find_all("pre"):
+        pre.insert_before(soup.new_string("\n```\n"))
+        pre.insert_after(soup.new_string("\n```\n"))
+
+    html_content = str(soup)
 
     ### convert to markdown
     converter = html2text.HTML2Text()
@@ -805,7 +830,7 @@ def fetch_url_and_convert_to_markdown(
         ignore_ssl=ignore_ssl,
         console=console,
     )
-    sources = list(zip(urls, pages))
+    sources = list(zip(urls, pages, strict=False))
     if verbose:
         console.print("[bold green]Converting fetched content to markdown...[/bold green]")
     results: list[str] = []

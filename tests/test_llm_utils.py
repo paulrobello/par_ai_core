@@ -252,9 +252,10 @@ def test_get_model_context_size_unknown_model():
 @patch("par_ai_core.llm_utils.get_model_metadata")
 def test_get_model_context_size_from_metadata(mock_get_metadata):
     """Test context size retrieval from model metadata."""
-    mock_model_info = MagicMock()
-    mock_model_info.max_input_tokens = 16000
-    mock_get_metadata.return_value = mock_model_info
+    # litellm's ModelInfo is a TypedDict (plain dict at runtime); the original
+    # getattr-on-dict bug was hidden because this test used an attribute mock.
+    # A real dict reproduces the production data shape (QA-002).
+    mock_get_metadata.return_value = {"max_input_tokens": 16000}
 
     result = _get_model_context_size("custom-model")
     assert result == 16000
@@ -267,6 +268,25 @@ def test_get_model_context_size_metadata_exception(mock_get_metadata):
 
     result = _get_model_context_size("unknown-model")
     assert result == 8192
+
+
+@pytest.mark.parametrize(
+    "field,value,expected",
+    [
+        ("max_input_tokens", 128000, 128000),
+        ("max_tokens", 32768, 32768),
+        ("context_length", 4096, 4096),
+    ],
+)
+@patch("par_ai_core.llm_utils.get_model_metadata")
+def test_get_model_context_size_dict_access(mock_get_metadata, field, value, expected):
+    """QA-002: context size is read via dict access from a real ModelInfo dict.
+
+    Each alternate field name is honored; the old ``getattr`` path returned None
+    for all of them (TypedDict is a dict at runtime) and fell back to 8192.
+    """
+    mock_get_metadata.return_value = {field: value}
+    assert _get_model_context_size("custom-model") == expected
 
 
 def test_estimate_tokens_gpt_model():

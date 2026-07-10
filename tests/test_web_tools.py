@@ -126,11 +126,11 @@ def test_fetch_url_and_convert_to_markdown_parameters(monkeypatch):
 
     # Mock fetch_url to raise an exception
     def mock_fetch(*args, **kwargs):
-        raise Exception("Mock fetch error")
+        raise RuntimeError("Mock fetch error")
 
     monkeypatch.setattr("par_ai_core.web_tools.fetch_url", mock_fetch)
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError, match="Mock fetch error"):
         fetch_url_and_convert_to_markdown(
             url,
             include_links=True,
@@ -602,7 +602,7 @@ async def test_fetch_url_playwright_wait_types():
         assert result[0] == "<html><body>Test content</body></html>"
 
         # Test TEXT wait type with empty selector.
-        mock_page.locator = MagicMock()
+        mock_page.wait_for_function = AsyncMock(return_value=None)
         result = await fetch_url_playwright(
             "https://example.com",
             wait_type=ScraperWaitType.TEXT,
@@ -611,12 +611,14 @@ async def test_fetch_url_playwright_wait_types():
             verbose=True,
             console=mock_console,
         )
-        mock_page.locator.assert_not_called()
+        mock_page.wait_for_function.assert_not_called()
         assert result[0] == "<html><body>Test content</body></html>"
 
-        # Test TEXT wait type with non-empty selector.
-        mock_page.locator = MagicMock(return_value=AsyncMock())
-        mock_page.locator.return_value.wait_for_text = AsyncMock()
+        # Test TEXT wait type with non-empty selector. This must call the real
+        # ``Page.wait_for_function`` primitive; the old code called a nonexistent
+        # ``Locator.wait_for_text`` whose AttributeError was silently swallowed,
+        # so TEXT wait always returned empty content (QA-001).
+        mock_page.wait_for_function.reset_mock()
         wait_selector = "Expected Text"
         page_content = f"<html><body>Test content {wait_selector}</body></html>"
         mock_page.content = AsyncMock(return_value=page_content)
@@ -631,8 +633,11 @@ async def test_fetch_url_playwright_wait_types():
         )
 
         mock_page.goto.assert_called_with("https://example.com", timeout=5000)
-        mock_page.locator.assert_called_with("body")
-        mock_page.locator.return_value.wait_for_text.assert_called_with("Expected Text", timeout=5000)
+        mock_page.wait_for_function.assert_called_with(
+            "text => document.body && document.body.innerText.includes(text)",
+            arg=wait_selector,
+            timeout=5000,
+        )
 
         # Retrieve all the printed messages.
         printed_messages = [call.args[0] for call in mock_console.print.call_args_list]
@@ -704,6 +709,125 @@ def test_fetch_url_selenium_wait_types():
         )
         mock_wait.until.assert_called()
         assert result[0] == "<html><body>Test content</body></html>"
+
+
+def test_fetch_url_selenium_none_wait_skips_sleep():
+    """QA-003: NONE and SLEEP with sleep_time=0 must not call time.sleep at all."""
+    mock_driver = MagicMock()
+    mock_driver.page_source = "<html><body>Test content</body></html>"
+    mock_console = MagicMock()
+
+    with (
+        patch("selenium.webdriver.Chrome", return_value=mock_driver),
+        patch("time.sleep") as mock_sleep,
+    ):
+        # NONE wait: no sleep whatsoever.
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type=ScraperWaitType.NONE,
+            sleep_time=5,
+            console=mock_console,
+        )
+        mock_sleep.assert_not_called()
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # SLEEP with sleep_time=0: also no sleep.
+        mock_sleep.reset_mock()
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type=ScraperWaitType.SLEEP,
+            sleep_time=0,
+            console=mock_console,
+        )
+        mock_sleep.assert_not_called()
+        assert result[0] == "<html><body>Test content</body></html>"
+
+        # SLEEP with sleep_time=3 sleeps exactly once for 3 seconds (was a no-op
+        # branch plus two unconditional sleeps before QA-003).
+        mock_sleep.reset_mock()
+        result = fetch_url(
+            "https://example.com",
+            fetch_using="selenium",
+            wait_type=ScraperWaitType.SLEEP,
+            sleep_time=3,
+            console=mock_console,
+        )
+        mock_sleep.assert_called_once_with(3)
+
+
+@pytest.mark.asyncio
+async def test_fetch_url_playwright_text_wait_uses_real_api():
+    """QA-001: TEXT wait must call the real ``Page.wait_for_function``.
+
+    A spec-constrained page mock (built from ``playwright.async_api.Page``) only
+    allows real Page methods. The old code called ``Locator.wait_for_text`` (which
+    does not exist), so its AttributeError was swallowed and TEXT wait returned
+    empty content. This test would fail against the old code: ``wait_for_text``
+    is not a Page method, and the result would be ``""`` not the page content.
+    """
+    from playwright.async_api import Page
+
+    # Page has wait_for_function but NOT wait_for_text (lock the API constraint).
+    assert hasattr(Page, "wait_for_function")
+    assert not hasattr(Page, "wait_for_text")
+
+    mock_page = AsyncMock(spec=Page)
+    mock_page.content = AsyncMock(return_value="<html><body>Expected Text</body></html>")
+    mock_page.goto = AsyncMock()
+
+    mock_context = AsyncMock()
+    mock_context.new_page.return_value = mock_page
+    mock_browser = AsyncMock()
+    mock_browser.new_context.return_value = mock_context
+    mock_browser.close = AsyncMock()
+    mock_playwright = AsyncMock()
+    mock_playwright.chromium.launch = AsyncMock(return_value=mock_browser)
+
+    class MockAsyncPlaywright:
+        async def __aenter__(self):
+            return mock_playwright
+
+        async def __aexit__(self, exc_type, exc, tb):
+            pass
+
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
+        result = await fetch_url_playwright(
+            "https://example.com",
+            wait_type=ScraperWaitType.TEXT,
+            wait_selector="Expected Text",
+            timeout=5,
+        )
+
+    # The real primitive was invoked with the text as its arg.
+    mock_page.wait_for_function.assert_called_once()
+    called_kwargs = mock_page.wait_for_function.call_args.kwargs
+    assert called_kwargs["arg"] == "Expected Text"
+    assert called_kwargs["timeout"] == 5000
+    # And the content was returned (old code returned "" here).
+    assert result[0] == "<html><body>Expected Text</body></html>"
+
+
+def test_fetch_url_raise_on_error():
+    """QA-006: ``raise_on_error=True`` re-raises instead of returning empty strings."""
+    with patch("par_ai_core.web_tools.fetch_url_playwright", side_effect=RuntimeError("boom")):
+        # Default: silent fallback.
+        result = fetch_url("https://example.com", fetch_using="playwright")
+        assert result == [""]
+
+        # Opt-in: re-raise.
+        with pytest.raises(RuntimeError, match="boom"):
+            fetch_url("https://example.com", fetch_using="playwright", raise_on_error=True)
+
+
+def test_html_to_markdown_literal_pre_in_text_not_corrupted():
+    """QA-024: a literal ``<pre`` in element text must not be turned into a code fence."""
+    html = "<html><body><p>The token &lt;pre means preformatted</p></body></html>"
+    markdown = html_to_markdown(html, include_links=False, include_images=False)
+    # The escaped &lt;pre should not become a ``` fence marker.
+    assert "```" not in markdown
+    assert "<pre means preformatted" in markdown
 
 
 @pytest.mark.asyncio

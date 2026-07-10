@@ -204,6 +204,13 @@ def test_has_value():
     assert has_value(num_dict, "3.14")
     assert has_value(num_dict, "42.00")  # Test .00 stripping for ints
 
+    # QA-007: ``rstrip(".00")`` strips a character set, not a suffix, so values
+    # ending in 0 (e.g. 100) were corrupted: ``"100".rstrip(".00")`` -> ``"1"``,
+    # making has_value(100,"100") False and has_value(1,"100") True.
+    assert has_value(100, "100") is True
+    assert has_value(1, "100") is False
+    assert has_value(100, "100.00") is True
+
 
 def test_is_zero():
     """Test is_zero function."""

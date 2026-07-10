@@ -219,15 +219,20 @@ class LlmConfig:
             LlmConfig: A new instance initialized with the provided data
 
         Raises:
-            ValueError: If the class_name in the data doesn't match 'LlmConfig'
+            ValueError: If the class_name in the data doesn't match 'LlmConfig', or if
+                the required ``provider`` field is missing.
         """
         if "class_name" in data and data["class_name"] != "LlmConfig":
             raise ValueError(f"Invalid config class: {data['class_name']}")
         class_fields = {f.name for f in fields(cls)}
         allowed_data = {k: v for k, v in data.items() if k in class_fields}
+        if "provider" not in allowed_data:
+            raise ValueError("Config data is missing required field 'provider'")
         if not isinstance(allowed_data["provider"], LlmProvider):
             allowed_data["provider"] = provider_name_to_enum(allowed_data["provider"])
-        if not isinstance(allowed_data["mode"], LlmMode):
+        # ``mode`` has a dataclass default; only coerce when present so a partial
+        # dict (no "mode") still constructs successfully (QA-005).
+        if "mode" in allowed_data and not isinstance(allowed_data["mode"], LlmMode):
             allowed_data["mode"] = LlmMode(allowed_data["mode"])
 
         return LlmConfig(**allowed_data)
@@ -396,7 +401,7 @@ class LlmConfig:
                     timeout=self.timeout,
                     top_p=self.top_p,
                     seed=self.seed,
-                    max_tokens=self.max_output_tokens,  # type: ignore
+                    max_tokens=self.max_output_tokens,  # type: ignore[reportCallIssue]
                     disable_streaming=not self.streaming,
                     reasoning_effort=self.reasoning_effort,
                 )
@@ -442,7 +447,7 @@ class LlmConfig:
                     timeout=self.timeout,
                     top_p=self.top_p,
                     seed=self.seed,
-                    max_tokens=self.max_output_tokens,  # type: ignore
+                    max_tokens=self.max_output_tokens,  # type: ignore[reportCallIssue]
                     disable_streaming=not self.streaming,
                     reasoning_effort=self.reasoning_effort,
                 )
@@ -475,14 +480,14 @@ class LlmConfig:
 
             return ChatLiteLLM(
                 model=self.model_name,
-                extra_body=self.extra_body,  # type: ignore
+                extra_body=self.extra_body,  # type: ignore[reportCallIssue]
                 temperature=self.temperature,
-                stream_usage=True,  # type: ignore
+                stream_usage=True,  # type: ignore[reportCallIssue]
                 streaming=self.streaming,
-                base_url=self.base_url,  # type: ignore
-                timeout=self.timeout,  # type: ignore
+                base_url=self.base_url,  # type: ignore[reportCallIssue]
+                timeout=self.timeout,  # type: ignore[reportCallIssue]
                 top_p=self.top_p,
-                seed=self.seed,  # type: ignore
+                seed=self.seed,  # type: ignore[reportCallIssue]
                 max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
             )
@@ -511,7 +516,7 @@ class LlmConfig:
                 streaming=self.streaming,
                 max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
-            )  # type: ignore
+            )
         if self.mode == LlmMode.EMBEDDINGS:
             raise ValueError(f"{self.provider.value} provider does not support mode {self.mode.value}")
 
@@ -540,7 +545,7 @@ class LlmConfig:
                 max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
                 extra_body=self.extra_body,
-            )  # type: ignore
+            )
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
@@ -577,7 +582,7 @@ class LlmConfig:
                 timeout=self.timeout,
                 top_p=self.top_p,
                 seed=self.seed,
-                max_tokens=self.max_output_tokens,  # type: ignore
+                max_tokens=self.max_output_tokens,  # type: ignore[reportCallIssue]
                 disable_streaming=not self.streaming,
                 reasoning_effort=self.reasoning_effort,
             )
@@ -607,7 +612,7 @@ class LlmConfig:
                 max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
                 extra_body=self.extra_body,
-            )  # type: ignore
+            )
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
@@ -636,8 +641,8 @@ class LlmConfig:
                 # now ``max_output_tokens`` (previously conflated with ``num_ctx``).
                 if not self.max_output_tokens:
                     self.max_output_tokens = self.reasoning_budget * 2
-            return ChatAnthropic(
-                model=self.model_name,  # type: ignore
+            return ChatAnthropic(  # type: ignore[reportCallIssue]
+                model=self.model_name,  # type: ignore[reportCallIssue]
                 temperature=self.temperature if not self.reasoning_budget else 1,
                 streaming=self.streaming,
                 timeout=self.timeout,
@@ -646,7 +651,7 @@ class LlmConfig:
                 max_tokens_to_sample=self.max_output_tokens or 2048,
                 disable_streaming=not self.streaming,
                 thinking={"type": "enabled", "budget_tokens": self.reasoning_budget} if self.reasoning_budget else None,
-            )  # type: ignore
+            )
 
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
 
@@ -752,7 +757,7 @@ class LlmConfig:
             return ChatBedrockConverse(
                 client=bedrock_client,
                 model=self.model_name,
-                endpoint_url=self.base_url,  # type: ignore
+                endpoint_url=self.base_url,  # type: ignore[reportCallIssue]
                 temperature=self.temperature,
                 max_tokens=self.max_output_tokens or None,
                 top_p=self.top_p,
@@ -788,7 +793,7 @@ class LlmConfig:
             from langchain_mistralai import ChatMistralAI
 
             return ChatMistralAI(
-                model=self.model_name,  # type: ignore
+                model=self.model_name,  # type: ignore[reportCallIssue]
                 temperature=self.temperature,
                 timeout=self.timeout if self.timeout is not None else 10,
                 top_p=self.top_p if self.top_p is not None else 1,
@@ -858,7 +863,7 @@ class LlmConfig:
     def build_llm_model(self) -> BaseLanguageModel:
         """Build the LLM model."""
         cfg = self.clone()
-        if cfg.model_name.startswith("o1") or cfg.model_name.startswith("o3") or cfg.model_name.startswith("gpt-5."):
+        if _is_reasoning_model(cfg.model_name):
             cfg.temperature = 1
         else:
             cfg.reasoning_effort = None
@@ -873,7 +878,7 @@ class LlmConfig:
     def build_chat_model(self) -> BaseChatModel:
         """Build the chat model."""
         cfg = self.clone()
-        if cfg.model_name.startswith("o1") or cfg.model_name.startswith("o3") or cfg.model_name.startswith("gpt-5."):
+        if _is_reasoning_model(cfg.model_name):
             cfg.temperature = 1
             cfg.streaming = False
         else:
@@ -973,6 +978,19 @@ _ENV_NUMERIC_FIELDS: tuple[tuple[str, str, type], ...] = (
     ("TFS_Z", "tfs_z", float),
     ("TOP_P", "top_p", float),
 )
+
+# Prefixes of OpenAI reasoning models that take ``reasoning_effort`` and require
+# ``temperature=1``. The inline ``startswith`` chain was duplicated across
+# ``build_llm_model`` and ``build_chat_model`` and missed ``gpt-5``/``gpt-5-mini``
+# (no dot) and ``o4-mini``; ``provider_light_models`` defaults to ``gpt-5-mini``,
+# which the old check wrongly excluded (QA-009).
+_REASONING_MODEL_PREFIXES: tuple[str, ...] = ("o1", "o3", "o4", "gpt-5")
+
+
+def _is_reasoning_model(model_name: str) -> bool:
+    """Return True if ``model_name`` is an OpenAI reasoning-family model."""
+    name = model_name.lower()
+    return any(name.startswith(prefix) for prefix in _REASONING_MODEL_PREFIXES)
 
 
 class LlmRunManager:

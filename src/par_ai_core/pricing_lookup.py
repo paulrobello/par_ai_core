@@ -26,6 +26,7 @@ especially when working with multiple AI providers and models.
 
 from __future__ import annotations
 
+import logging
 from enum import StrEnum
 from typing import TYPE_CHECKING, Literal
 
@@ -36,6 +37,8 @@ from rich.pretty import Pretty
 from par_ai_core.llm_config import LlmConfig
 from par_ai_core.llm_providers import LlmProvider
 from par_ai_core.par_logging import console_err
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # litellm is an optional backend (install with ``par_ai_core[pricing]``).
@@ -156,7 +159,7 @@ def get_model_mode(
                 return "embedding"
             return "chat"
         metadata = get_model_metadata(provider.value.lower(), model_name)
-        return metadata.get("mode") or "unknown"  # type: ignore
+        return metadata.get("mode") or "unknown"  # type: ignore[reportReturnType]
     except Exception:
         return "unknown"
 
@@ -202,7 +205,10 @@ def get_api_call_cost(
             model_name = f"deepseek/{model_name}"
         get_model_info = _import_get_model_info()
         model_info = get_model_info(model=model_name)
-    except Exception:
+    except Exception as e:
+        # Log once per call so cost under-reporting is at least visible. The
+        # default behavior (return 0) is preserved (QA-006).
+        logger.warning("Could not look up pricing for model %r: %s", model_name, e)
         return 0
 
     total_cost = (
@@ -232,17 +238,22 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
         usage_metadata: Dictionary to accumulate usage statistics
     """
     if isinstance(response, dict):
-        usage_metadata["input_tokens"] += response.get("prompt_tokens", 0)
-        usage_metadata["output_tokens"] += response.get("completion_tokens", 0)
-
-        usage_metadata["input_tokens"] += response.get("input_tokens", 0)
-        usage_metadata["output_tokens"] += response.get("output_tokens", 0)
-        usage_metadata["total_tokens"] += response.get("input_tokens", 0) + response.get("output_tokens", 0)
+        # Normalize the two token-naming conventions providers use so each token
+        # is accumulated exactly once. ``prompt_tokens``/``completion_tokens``
+        # alias ``input_tokens``/``output_tokens``; the previous code added both
+        # (double-counting when a payload carried both) and derived
+        # ``total_tokens`` from only one pair (QA-015). ``or`` (not ``+``) picks
+        # the populated convention.
+        input_tokens = response.get("input_tokens") or response.get("prompt_tokens") or 0
+        output_tokens = response.get("output_tokens") or response.get("completion_tokens") or 0
+        usage_metadata["input_tokens"] += input_tokens
+        usage_metadata["output_tokens"] += output_tokens
+        usage_metadata["total_tokens"] += input_tokens + output_tokens
         usage_metadata["cache_write"] += response.get("cache_creation_input_tokens", 0)
         usage_metadata["cache_read"] += response.get("cache_read_input_tokens", 0)
         return
-    if hasattr(response, "usage_metadata") and response.usage_metadata is not None:  # type: ignore
-        for key, value in response.usage_metadata.items():  # type: ignore
+    if hasattr(response, "usage_metadata") and response.usage_metadata is not None:  # type: ignore[reportAttributeAccessIssue]
+        for key, value in response.usage_metadata.items():  # type: ignore[reportAttributeAccessIssue]
             if key in usage_metadata:
                 usage_metadata[key] += value
             if key == "input_token_details":
@@ -253,13 +264,13 @@ def accumulate_cost(response: object | dict, usage_metadata: dict[str, int | flo
         return
     if (
         hasattr(response, "response_metadata")
-        and response.response_metadata is not None  # type: ignore
-        and "token_usage" in response.response_metadata  # type: ignore
+        and response.response_metadata is not None  # type: ignore[reportAttributeAccessIssue]
+        and "token_usage" in response.response_metadata  # type: ignore[reportAttributeAccessIssue]
     ):
-        if not isinstance(response.response_metadata["token_usage"], dict):  # type: ignore
-            response.response_metadata["token_usage"] = response.response_metadata["token_usage"].__dict__  # type: ignore
+        if not isinstance(response.response_metadata["token_usage"], dict):  # type: ignore[reportAttributeAccessIssue]
+            response.response_metadata["token_usage"] = response.response_metadata["token_usage"].__dict__  # type: ignore[reportAttributeAccessIssue]
 
-        for key, value in response.response_metadata["token_usage"].items():  # type: ignore
+        for key, value in response.response_metadata["token_usage"].items():  # type: ignore[reportAttributeAccessIssue]
             if key in usage_metadata:
                 usage_metadata[key] += value
             if key == "prompt_tokens":
@@ -290,7 +301,7 @@ def show_llm_cost(
         console = console_err
     grand_total: float = 0.0
     if show_pricing == PricingDisplay.PRICE:
-        for m, u in usage_metadata.items():
+        for _, u in usage_metadata.items():
             if "total_cost" in u:
                 grand_total += u["total_cost"]
     else:

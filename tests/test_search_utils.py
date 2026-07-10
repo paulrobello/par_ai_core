@@ -154,7 +154,7 @@ def test_serper_search(mock_serper):
     }
     mock_serper.return_value.results.return_value = mock_news_results
 
-    results = serper_search("test query", type="news", days=7, max_results=1)
+    results = serper_search("test query", search_type="news", days=7, max_results=1)
     assert len(results) == 1
     assert results[0]["title"] == "News Title"
     assert results[0]["content"] == "News snippet"
@@ -453,3 +453,47 @@ def test_reddit_search(mock_reddit):
         assert results[0]["title"] == "Test Title"
         assert results[0]["url"] == "https://example.com"
         assert results[0]["content"] == "Test content"
+
+
+@patch("langchain_community.utilities.GoogleSerperAPIWrapper")
+def test_serper_search_wires_days_to_tbs(mock_serper):
+    """QA-010: ``days`` must drive Serper's ``tbs`` freshness filter (was ignored)."""
+    mock_serper.return_value.results.return_value = {"search": []}
+
+    serper_search("test query", days=7, max_results=1)
+    assert mock_serper.call_args.kwargs.get("tbs") == "qdr:w"
+
+    serper_search("test query", days=1, max_results=1)
+    assert mock_serper.call_args.kwargs.get("tbs") == "qdr:d"
+
+    serper_search("test query", days=0, max_results=1)
+    assert mock_serper.call_args.kwargs.get("tbs") is None
+
+    # search_type is forwarded as the wrapper's ``type`` argument.
+    serper_search("test query", search_type="news", max_results=1)
+    assert mock_serper.call_args.kwargs.get("type") == "news"
+
+
+def test_youtube_search_passes_max_comments(monkeypatch):
+    """QA-011: youtube_search must forward max_comments to youtube_get_comments."""
+    built = MagicMock()
+    monkeypatch.setattr("googleapiclient.discovery.build", built, raising=False)
+    mock_response = {
+        "items": [
+            {
+                "id": {"videoId": "vid1"},
+                "snippet": {
+                    "title": "T",
+                    "publishedAt": "2024-01-01T00:00:00Z",
+                    "channelId": "c",
+                    "description": "d",
+                },
+            }
+        ]
+    }
+    built.return_value.search().list().execute.return_value = mock_response
+
+    with patch("par_ai_core.search_utils.youtube_get_comments", return_value=[]) as mock_comments:
+        youtube_search("test query", max_results=1, max_comments=50)
+        mock_comments.assert_called_once()
+        assert mock_comments.call_args.kwargs.get("max_results") == 50

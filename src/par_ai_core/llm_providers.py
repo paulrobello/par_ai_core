@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
@@ -58,7 +58,7 @@ class LangChainConfig:
     api_key: str = ""
 
 
-class LlmProvider(str, Enum):
+class LlmProvider(StrEnum):
     """Enumeration of supported LLM providers.
 
     Supported providers:

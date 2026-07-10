@@ -145,14 +145,16 @@ def _get_model_context_size(model_name: str) -> int:
     try:
         # Try to get model metadata from pricing lookup
         model_info = get_model_metadata("", model_name)
-        # Try different fields that might contain context size
-        context_size = (
-            getattr(model_info, "max_input_tokens", None)
-            or getattr(model_info, "max_tokens", None)
-            or getattr(model_info, "context_length", None)
-        )
-        if context_size:
-            return int(context_size)
+        # ``get_model_metadata`` returns litellm's ``ModelInfo``, a TypedDict
+        # (plain dict at runtime), so ``getattr`` always returned None and every
+        # model silently fell back to 8192 — over-chunking modern long-context
+        # models. Use dict access (QA-002).
+        if model_info:
+            context_size = (
+                model_info.get("max_input_tokens") or model_info.get("max_tokens") or model_info.get("context_length")
+            )
+            if context_size:
+                return int(context_size)
     except Exception:
         pass
 

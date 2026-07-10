@@ -198,6 +198,28 @@ def test_accumulate_cost_dict():
     assert usage["cache_read"] == 20
 
 
+def test_accumulate_cost_dict_both_conventions_no_double_count():
+    """QA-015: a payload carrying both naming conventions must not double-count.
+
+    Some providers send ``prompt_tokens``/``completion_tokens`` AND
+    ``input_tokens``/``output_tokens`` with the same value. The old code added
+    both pairs, so each token was counted twice.
+    """
+    usage = mk_usage_metadata()
+    response = {
+        "prompt_tokens": 100,
+        "completion_tokens": 50,
+        "input_tokens": 100,
+        "output_tokens": 50,
+    }
+
+    accumulate_cost(response, usage)
+
+    assert usage["input_tokens"] == 100
+    assert usage["output_tokens"] == 50
+    assert usage["total_tokens"] == 150
+
+
 class MockResponse:
     """Mock response object for testing."""
 

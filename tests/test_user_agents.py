@@ -119,3 +119,17 @@ def test_user_agent_components_consistency(user_agent: str) -> None:
     elif "Chrome" in user_agent:
         assert "AppleWebKit" in user_agent
         assert "Safari/" in user_agent
+
+
+def test_desktop_chrome_user_agent_has_no_mobile_token() -> None:
+    """QA-021: desktop Chrome UAs must not carry the ``Mobile Safari`` token.
+
+    The OS list only contains desktop platforms (Windows/Mac), so a Chrome UA
+    with ``Mobile Safari`` was an inconsistent desktop fingerprint.
+    """
+    # Sample a healthy number of agents; every Chrome one must omit "Mobile".
+    for _ in range(50):
+        agent = get_random_user_agent()
+        if "Chrome/" in agent:
+            assert "Mobile Safari" not in agent, f"Desktop Chrome UA has Mobile token: {agent}"
+            assert "Safari/" in agent

@@ -183,15 +183,13 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
                 if isinstance(generation, ChatGeneration):
                     if "model_name" in generation.message.response_metadata:
                         model_name = generation.message.response_metadata["model_name"]
-                        # console.print(f"Overriding model_name from message.response_metadata with: {model_name}")
                     else:
                         model_name = llm_config.model_name
-                        # console.print(f"using default model_name: {model_name}")
 
                     usage_metadata = self._get_usage_metadata(llm_config.provider, model_name)
 
                     if hasattr(generation.message, "tool_calls"):
-                        usage_metadata["tool_call_count"] += len(generation.message.tool_calls)  # type: ignore
+                        usage_metadata["tool_call_count"] += len(generation.message.tool_calls)  # type: ignore[reportAttributeAccessIssue]
 
                     # Handle token usage from additional_kwargs
                     if "token_usage" in generation.message.additional_kwargs:

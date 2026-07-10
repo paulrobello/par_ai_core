@@ -242,14 +242,8 @@ def display_formatted_output(content: str, display_format: DisplayOutputFormat, 
     elif display_format == DisplayOutputFormat.MD:
         console.print(Markdown(content))
     elif display_format == DisplayOutputFormat.CSV:
-        # Convert CSV to rich Table
-        table = Table(title="CSV Data")
-        csv_reader = csv.reader(io.StringIO(content))
-        headers = next(csv_reader)
-        for header in headers:
-            table.add_column(header, style="cyan")
-        for row in csv_reader:
-            table.add_row(*row)
-        console.print(table)
+        # ``csv_to_table`` already handles empty CSV (without raising
+        # StopIteration) and ragged rows gracefully (QA-012 / ARC-022).
+        console.print(csv_to_table(content))
     elif display_format == DisplayOutputFormat.JSON:
         console.print(Syntax(content, "json"))

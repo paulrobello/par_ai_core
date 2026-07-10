@@ -39,16 +39,16 @@ class UnsupportedImageTypeError(ValueError):
     """Unsupported image type error."""
 
 
-def b64_encode_image(image_path: bytes) -> str:
+def b64_encode_image(image_bytes: bytes) -> str:
     """Encode an image as base64.
 
     Args:
-        image_path: Raw bytes of the image to encode
+        image_bytes: Raw bytes of the image to encode
 
     Returns:
         Base64 encoded string representation of the image
     """
-    return base64.b64encode(image_path).decode("utf-8")
+    return base64.b64encode(image_bytes).decode("utf-8")
 
 
 def try_get_image_type(image_path: str | Path) -> Literal["jpeg", "png", "gif"]:

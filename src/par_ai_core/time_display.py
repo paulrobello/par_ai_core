@@ -18,13 +18,7 @@ parts of the par_ai_core project.
 
 from __future__ import annotations
 
-import sys
-from datetime import datetime, timezone, tzinfo
-
-if sys.version_info >= (3, 11):
-    from datetime import UTC
-else:
-    UTC = timezone.utc
+from datetime import UTC, datetime, tzinfo
 
 
 def format_datetime(dt: datetime | None, fmt: str = "%Y-%m-%d %H:%M:%S") -> str:

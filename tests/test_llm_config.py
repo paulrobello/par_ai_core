@@ -303,6 +303,48 @@ def test_llm_config_o1_model_adjustments() -> None:
         assert config.streaming is True
 
 
+def test_llm_config_from_json_missing_provider_raises() -> None:
+    """QA-005: a partial dict without ``provider`` raises a documented ValueError."""
+    with pytest.raises(ValueError, match="missing required field 'provider'"):
+        LlmConfig.from_json({"model_name": "gpt-4"})
+
+
+def test_llm_config_from_json_without_mode_uses_default() -> None:
+    """QA-005: omitting ``mode`` lets the dataclass default apply (was a KeyError)."""
+    config = LlmConfig.from_json({"provider": "OpenAI", "model_name": "gpt-4"})
+    assert config.provider == LlmProvider.OPENAI
+    assert config.model_name == "gpt-4"
+    # mode has a dataclass default and should not be required.
+    assert config.mode == LlmMode.CHAT
+
+
+@pytest.mark.parametrize(
+    "model_name,expected",
+    [
+        ("o1", True),
+        ("o1-mini", True),
+        ("o3", True),
+        ("o3-mini", True),
+        ("o4-mini", True),
+        ("gpt-5", True),
+        ("gpt-5-mini", True),
+        ("gpt-5.1", True),
+        ("gpt-4o", False),
+        ("gpt-4-turbo", False),
+        ("claude-3-sonnet", False),
+    ],
+)
+def test_is_reasoning_model(model_name: str, expected: bool) -> None:
+    """QA-009: single helper recognizes the full reasoning-model family.
+
+    The old inline ``startswith("o1")/("o3")/("gpt-5.")`` chain missed
+    ``gpt-5``, ``gpt-5-mini`` (no dot) and ``o4-mini``.
+    """
+    from par_ai_core.llm_config import _is_reasoning_model
+
+    assert _is_reasoning_model(model_name) is expected
+
+
 def test_llm_config_bedrock_setup() -> None:
     """Test Bedrock LLM configuration setup."""
     config = LlmConfig(provider=LlmProvider.BEDROCK, model_name="test-model", timeout=30, user_agent_appid="test-app")
