@@ -97,6 +97,7 @@ class LlmConfig:
         top_p: Top-P (nucleus) sampling parameter
         seed: Random seed for reproducibility
         env_prefix: Environment variable prefix
+        safety_settings: Optional Google Gemini safety settings override
     """
 
     provider: LlmProvider
@@ -171,6 +172,10 @@ class LlmConfig:
     """OpenAI thinking model reasoning effort. Env: ``PARAI_REASONING_EFFORT``"""
     reasoning_budget: int | None = None
     """Reasoning token budget for Anthropic. Env: ``PARAI_REASONING_BUDGET``"""
+    safety_settings: dict | None = None
+    """Optional Google Gemini safety settings (e.g. ``{HarmCategory: HarmBlockThreshold}``).
+    When ``None`` (default) the provider's standard safety thresholds apply. Pass an explicit
+    mapping only when you need to override the defaults (e.g. BLOCK_NONE for trusted inputs)."""
 
     def to_json(self) -> dict:
         """Converts the configuration to a JSON-serializable dictionary.
@@ -206,6 +211,7 @@ class LlmConfig:
             "extra_body": self.extra_body,
             "reasoning_effort": self.reasoning_effort,
             "reasoning_budget": self.reasoning_budget,
+            "safety_settings": self.safety_settings,
         }
 
     @classmethod
@@ -264,6 +270,7 @@ class LlmConfig:
             extra_body=self.extra_body,
             reasoning_effort=self.reasoning_effort,
             reasoning_budget=self.reasoning_budget,
+            safety_settings=self.safety_settings,
         )
 
     def gen_runnable_config(self) -> RunnableConfig:
@@ -668,46 +675,43 @@ class LlmConfig:
         Handles ``LlmProvider.GEMINI``. Supports BASE
         (``GoogleGenerativeAI``), CHAT (``ChatGoogleGenerativeAI``),
         and EMBEDDINGS (``GoogleGenerativeAIEmbeddings``). Reads
-        ``GOOGLE_API_KEY`` env var. Disables all harm-category safety
-        settings by default.
+        ``GOOGLE_API_KEY`` env var. Safety settings default to the
+        provider's standard thresholds; pass ``safety_settings`` on the
+        config to override (e.g. BLOCK_NONE for trusted inputs only).
         """
 
         if self.provider != LlmProvider.GEMINI:
             raise ValueError(f"LLM provider is '{self.provider.value}' but GOOGLE requested.")
 
         if self.mode == LlmMode.BASE:
-            from langchain_google_genai import (
-                GoogleGenerativeAI,
-                HarmBlockThreshold,
-                HarmCategory,
-            )
+            from langchain_google_genai import GoogleGenerativeAI
 
-            return GoogleGenerativeAI(
-                model=self.model_name,
-                temperature=self.temperature,
-                timeout=self.timeout,
-                top_k=self.top_k,
-                top_p=self.top_p,
-                max_tokens=self.num_ctx,
-                safety_settings={HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE},
-            )
+            kwargs: dict[str, Any] = {
+                "model": self.model_name,
+                "temperature": self.temperature,
+                "timeout": self.timeout,
+                "top_k": self.top_k,
+                "top_p": self.top_p,
+                "max_tokens": self.num_ctx,
+            }
+            if self.safety_settings is not None:
+                kwargs["safety_settings"] = self.safety_settings
+            return GoogleGenerativeAI(**kwargs)
         if self.mode == LlmMode.CHAT:
-            from langchain_google_genai import (
-                ChatGoogleGenerativeAI,
-                HarmBlockThreshold,
-                HarmCategory,
-            )
+            from langchain_google_genai import ChatGoogleGenerativeAI
 
-            return ChatGoogleGenerativeAI(
-                model=self.model_name,
-                temperature=self.temperature,
-                timeout=self.timeout,
-                top_k=self.top_k,
-                top_p=self.top_p,
-                max_tokens=self.num_ctx,
-                safety_settings={HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE},
-                disable_streaming=not self.streaming,
-            )
+            kwargs = {
+                "model": self.model_name,
+                "temperature": self.temperature,
+                "timeout": self.timeout,
+                "top_k": self.top_k,
+                "top_p": self.top_p,
+                "max_tokens": self.num_ctx,
+                "disable_streaming": not self.streaming,
+            }
+            if self.safety_settings is not None:
+                kwargs["safety_settings"] = self.safety_settings
+            return ChatGoogleGenerativeAI(**kwargs)
         if self.mode == LlmMode.EMBEDDINGS:
             from langchain_google_genai import (
                 GoogleGenerativeAIEmbeddings,

@@ -164,6 +164,13 @@ def id_generator(size: int = 6, chars: str = string.ascii_uppercase + string.dig
 
     Returns:
         str: The generated random string
+
+    Note:
+        Not cryptographically secure. This uses the non-security ``random``
+        module and is intended only for non-security purposes such as
+        user-agent jitter. Do NOT use this for session IDs, nonces, API tokens,
+        or any other security-sensitive identifier; use ``secrets.choice``
+        instead.
     """
     return "".join(random.choice(chars) for _ in range(size))
 
@@ -521,7 +528,7 @@ def md5_hash(data: str) -> str:
     warnings.warn(
         "md5_hash uses a cryptographically broken algorithm. Use sha256_hash instead.", DeprecationWarning, stacklevel=2
     )
-    md5 = hashlib.md5(data.encode("utf-8"))
+    md5 = hashlib.md5(data.encode("utf-8"), usedforsecurity=False)
     return md5.hexdigest()
 
 
@@ -544,7 +551,7 @@ def sha1_hash(data: str) -> str:
         DeprecationWarning,
         stacklevel=2,
     )
-    sha1 = hashlib.sha1(data.encode("utf-8"))
+    sha1 = hashlib.sha1(data.encode("utf-8"), usedforsecurity=False)
     return sha1.hexdigest()
 
 

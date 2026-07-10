@@ -164,7 +164,8 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
         max_results (int, optional): Maximum number of results to return.
             Defaults to 3.
         scrape (bool, optional): Whether to scrape the content of the search result
-            URLs. Defaults to False.
+            URLs. Defaults to False. When True, each result URL is subject to the
+            public-http(s) SSRF guard enforced by ``fetch_url``; non-public URLs are rejected.
 
     Returns:
         list[dict[str, Any]]: List of search results, where each dict contains:
@@ -225,6 +226,8 @@ def serper_search(
         days (int, optional): Number of days to search back. Must be >= 0. Defaults to 0 meaning all time.
         max_results (int, optional): Maximum number of results to return. Defaults to 3.
         scrape (bool, optional): Whether to scrape the search result urls. Defaults to False.
+            When True, each result URL is subject to the public-http(s) SSRF guard enforced
+            by ``fetch_url``; non-public URLs are rejected.
 
     Returns:
         list[dict[str, Any]]: List of search results.

@@ -73,8 +73,35 @@ def test_get_html_element():
 
 def test_fetch_url_invalid_url():
     """Test fetch_url with invalid URLs."""
-    with pytest.raises(ValueError, match="All URLs must be absolute URLs with a scheme"):
+    # No scheme (also rejected by the SSRF guard).
+    with pytest.raises(ValueError, match="unsafe or non-public URL"):
         fetch_url("example.com")
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:///etc/passwd",
+        "http://169.254.169.254/latest/meta-data/",
+        "http://localhost:8080/admin",
+        "http://127.0.0.1/",
+        "chrome://settings",
+    ],
+)
+def test_fetch_url_ssrf_guard(url):
+    """SSRF/local-file guard rejects non-public or non-http(s) URLs (SEC-001)."""
+    with pytest.raises(ValueError, match="unsafe or non-public URL"):
+        fetch_url(url)
+
+
+def test_fetch_url_ignore_ssl_with_credentials_refused():
+    """ignore_ssl=True combined with http_credentials must raise (SEC-002)."""
+    with pytest.raises(ValueError, match="credentials"):
+        fetch_url(
+            "https://example.com",
+            ignore_ssl=True,
+            http_credentials={"username": "user", "password": "pass"},
+        )
 
 
 @pytest.mark.parametrize("fetch_using", ["playwright", "selenium"])

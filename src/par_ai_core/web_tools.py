@@ -31,7 +31,9 @@ conjunction with other AI and web scraping related tasks.
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import os
+import socket
 import threading
 import time
 from queue import Queue
@@ -99,6 +101,12 @@ def inject_credentials(url: str, username: str, password: str) -> str:
 
     Returns:
         str: The URL with the injected credentials.
+
+    Warning:
+        Credentials embedded in the URL netloc can leak into logs, browser history,
+        and HTTP ``Referer`` headers. Prefer passing ``http_credentials`` to the
+        Playwright browser context (which does not place credentials in the URL) over
+        this helper. Never log the returned value; log the original URL instead.
     """
     parsed_url = urlparse(url)
     encoded_username = quote(username)
@@ -174,6 +182,43 @@ def get_html_element(element: str, soup: BeautifulSoup) -> str:
     return ""
 
 
+_ALLOWED_URL_SCHEMES = frozenset({"http", "https"})
+
+
+def is_safe_public_url(url: str) -> bool:
+    """Return True only for http/https URLs whose host resolves to public IP addresses.
+
+    Blocks ``file://``, ``chrome://``, and other non-http(s) schemes, and rejects hosts
+    that resolve to private, loopback, link-local, reserved, or multicast ranges. This
+    mitigates SSRF and local-file disclosure (CWE-918) when URLs may originate from
+    model-generated or user input.
+
+    Note:
+        This narrows but does not fully close the DNS-rebinding window. Callers handling
+        untrusted URLs should additionally pin the resolved address and reject redirects
+        to private IPs. The check performs a live DNS resolution, so it requires network
+        access for hostname URLs (literal-IP URLs need no resolution).
+
+    Args:
+        url: The URL to check.
+
+    Returns:
+        True if the URL uses http/https and resolves only to public IPs; False otherwise.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in _ALLOWED_URL_SCHEMES or not parsed.hostname:
+        return False
+    try:
+        infos = socket.getaddrinfo(parsed.hostname, None)
+    except socket.gaierror:
+        return False
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            return False
+    return True
+
+
 def fetch_url(
     urls: str | list[str],
     *,
@@ -201,20 +246,42 @@ def fetch_url(
         timeout (int): The number of seconds to wait for a response.
         proxy_config (ProxySettings | None): Proxy configuration. Defaults to None.
         http_credentials (HttpCredentials | None): HTTP credentials for authentication. Defaults to None.
-        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.IDLE.
+        wait_type (ScraperWaitType, optional): The type of wait to use. Defaults to ScraperWaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless (bool): Whether to run the browser in headless mode.
         verbose (bool): Whether to print verbose output.
-        ignore_ssl (bool): Whether to ignore SSL errors.
+        ignore_ssl (bool): Whether to ignore SSL errors. ``ignore_ssl=True`` disables certificate
+            validation and must never be combined with ``http_credentials`` (credentials would be
+            exposed to a man-in-the-middle). A visible warning is emitted whenever this is set.
         console (Console | None): The console to use for output. Defaults to console_err.
 
     Returns:
         list[str]: A list of HTML contents of the fetched webpages.
+
+    Raises:
+        ValueError: If any URL is not a public http(s) URL (SSRF/local-file guard), or if
+            ``ignore_ssl=True`` is combined with ``http_credentials``.
     """
     if isinstance(urls, str):
         urls = [urls]
-    if not all(urlparse(url).scheme for url in urls):
-        raise ValueError("All URLs must be absolute URLs with a scheme (e.g. http:// or https://)")
+    bad = [u for u in urls if not is_safe_public_url(u)]
+    if bad:
+        raise ValueError(
+            f"Refusing to fetch unsafe or non-public URL(s): {bad}. "
+            "Only public http(s) URLs are allowed (SSRF/local-file protection)."
+        )
+    if ignore_ssl:
+        if not console:
+            console = console_err
+        console.print(
+            "[bold yellow]WARNING: TLS certificate validation is disabled (ignore_ssl=True). "
+            "Do not use with untrusted networks or credentials.[/bold yellow]"
+        )
+        if http_credentials:
+            raise ValueError(
+                "Refusing to inject HTTP credentials while ignore_ssl=True "
+                "(credentials would be exposed to a man-in-the-middle)."
+            )
     try:
         if fetch_using == "playwright":
             return asyncio.run(
@@ -283,7 +350,8 @@ async def fetch_url_playwright(
         wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless (bool): Whether to run the browser in headless mode.
-        ignore_ssl (bool): Whether to ignore SSL errors.
+        ignore_ssl (bool): Whether to ignore SSL errors. ``ignore_ssl=True`` disables certificate
+            validation and must never be combined with ``http_credentials``.
         verbose (bool): Whether to print verbose output.
         console (Console | None): The console to use for output. Defaults to console_err.
 
@@ -396,7 +464,8 @@ def fetch_url_selenium(
         wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless: Whether to run the browser in headless mode
-        ignore_ssl: Whether to ignore SSL errors
+        ignore_ssl: Whether to ignore SSL errors. ``ignore_ssl=True`` disables certificate
+            validation and must never be combined with ``http_credentials``.
         verbose: Whether to print verbose output
         console: The console to use for printing verbose output
 
@@ -449,9 +518,10 @@ def fetch_url_selenium(
 
             while not queue.empty():
                 index, url = queue.get()
+                original_url = url
                 try:
                     if verbose:
-                        console.print(f"[bold blue]Selenium fetching content from {url}...[/bold blue]")
+                        console.print(f"[bold blue]Selenium fetching content from {original_url}...[/bold blue]")
 
                     if http_credentials and "username" in http_credentials and "password" in http_credentials:
                         url = inject_credentials(url, http_credentials["username"], http_credentials["password"])
@@ -487,7 +557,7 @@ def fetch_url_selenium(
                     results[index] = driver.page_source
                 except Exception as e:
                     if verbose:
-                        console.print(f"[bold red]Error fetching content from {url}: {str(e)}[/bold red]")
+                        console.print(f"[bold red]Error fetching content from {original_url}: {str(e)}[/bold red]")
                     results[index] = ""
                 finally:
                     queue.task_done()
