@@ -157,7 +157,6 @@ include = [
     "src/par_ai_core",
     "LICENSE",
     "README.md",
-    "extraction_prompt.md",
     "pyproject.toml",
 ]
 exclude = [

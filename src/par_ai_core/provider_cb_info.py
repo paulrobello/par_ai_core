@@ -87,6 +87,17 @@ class ParAICallbackHandler(BaseCallbackHandler, Serializable):
         verbose: bool = False,
         console: Console | None = None,
     ) -> None:
+        """Initialize the callback handler.
+
+        Args:
+            llm_config: Optional ``LlmConfig`` for the LLM being monitored. Defaults to None.
+            show_prompts: Whether to display input prompts. Defaults to False.
+            show_end: Whether to display completion information. Defaults to False.
+            show_tool_calls: Whether to display tool call information. Defaults to False.
+            verbose: Whether to display verbose output. Defaults to False.
+            console: Rich console to use for output. Defaults to the shared
+                ``console_err`` instance when None.
+        """
         super().__init__()
         self._lock = threading.Lock()
         self._usage_metadata = {}

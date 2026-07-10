@@ -42,21 +42,47 @@ from par_ai_core.pricing_lookup import get_model_metadata
 def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
     """
     Create instance of LlmConfig from environment variables.
-    The following environment variables are used:
+    The following environment variables are used (``{prefix}`` defaults to ``PARAI``):
 
-    - {prefix}_AI_PROVIDER (required)
-    - {prefix}_MODEL (optional - defaults to provider default)
-    - {prefix}_AI_BASE_URL (optional - defaults to provider default)
-    - {prefix}_TEMPERATURE (optional - defaults to 0.8)
-    - {prefix}_USER_AGENT_APPID (optional)
-    - {prefix}_STREAMING (optional - defaults to false)
-    - {prefix}_MAX_CONTEXT_SIZE (optional - defaults to provider default)
+    Required:
+    - {prefix}_AI_PROVIDER (e.g. ``OpenAI``, ``Anthropic``)
+
+    Optional - model/endpoint selection:
+    - {prefix}_MODEL (defaults to the provider's default model)
+    - {prefix}_AI_BASE_URL (defaults to the provider's default base URL)
+
+    Optional - sampling/output control:
+    - {prefix}_TEMPERATURE (float, defaults to 0.8)
+    - {prefix}_STREAMING (``"true"``/``"false"``, defaults to false)
+    - {prefix}_MAX_OUTPUT_TOKENS (int) — output token cap for OpenAI/Anthropic/etc.
+    - {prefix}_NUM_CTX (int) — Ollama context-window size only (see ARC-006)
+    - {prefix}_NUM_PREDICT (int)
+    - {prefix}_SEED (int)
+    - {prefix}_TOP_K (int)
+    - {prefix}_TOP_P (float)
+    - {prefix}_TFS_Z (float)
+    - {prefix}_REPEAT_LAST_N (int)
+    - {prefix}_REPEAT_PENALTY (float)
+    - {prefix}_MIROSTAT (int)
+    - {prefix}_MIROSTAT_ETA (float)
+    - {prefix}_MIROSTAT_TAU (float)
+
+    Optional - request behavior:
+    - {prefix}_TIMEOUT (int, seconds)
+    - {prefix}_USER_AGENT_APPID (string added to the User-Agent header)
+    - {prefix}_REASONING_EFFORT (``"low"``/``"medium"``/``"high"``; OpenAI thinking models)
+    - {prefix}_REASONING_BUDGET (int; Anthropic reasoning token budget)
 
     Args:
         prefix: Prefix to use for environment variables (default: "PARAI")
 
     Returns:
         LlmConfig
+
+    Raises:
+        ValueError: If ``{prefix}_AI_PROVIDER`` is unset or not a valid provider,
+            if the provider's API key is missing, or if ``{prefix}_REASONING_EFFORT``
+            is not one of ``low``/``medium``/``high``.
     """
     prefix = prefix.strip("_")
     ai_provider_name = os.environ.get(f"{prefix}_AI_PROVIDER")

@@ -1,9 +1,10 @@
 # Par AI Core
 
 [![PyPI](https://img.shields.io/pypi/v/par_ai_core)](https://pypi.org/project/par_ai_core/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/par_ai_core.svg)](https://pypi.org/project/par_ai_core/)  
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/par_ai_core.svg)](https://pypi.org/project/par_ai_core/)
+[![Build](https://github.com/paulrobello/par_ai_core/actions/workflows/build.yml/badge.svg)](https://github.com/paulrobello/par_ai_core/actions/workflows/build.yml)
 ![Runs on Linux | MacOS | Windows](https://img.shields.io/badge/runs%20on-Linux%20%7C%20MacOS%20%7C%20Windows-blue)
-![Arch x86-63 | ARM | AppleSilicon](https://img.shields.io/badge/arch-x86--64%20%7C%20ARM%20%7C%20AppleSilicon-blue)
+![Arch x86-64 | ARM | AppleSilicon](https://img.shields.io/badge/arch-x86--64%20%7C%20ARM%20%7C%20AppleSilicon-blue)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/par_ai_core)
 
 
@@ -43,9 +44,9 @@ for my AI projects, encapsulating common functionalities and best practices for 
 ## Prerequisites
 
 - Python 3.11 or higher
-- UV package manager
 - API keys for chosen AI provider (except for Ollama and LlamaCpp)
-    - See (Environment Variables)[#environment-variables] below for provider-specific variables
+    - See [Environment Variables](#environment-variables) below for provider-specific variables
+- (Contributors) UV package manager for development — see [Contributing](#contributing)
 
 ## Features
 
@@ -57,15 +58,49 @@ for my AI projects, encapsulating common functionalities and best practices for 
 * **Tool Call Handling:** Support for handling tool calls within LLM interactions.
 
 ## Documentation
-[Library Documentation](https://htmlpreview.github.io/?https://github.com/paulrobello/par_ai_core/blob/main/src/par_ai_core/docs/index.html)
+
+- [Architecture Overview](docs/architecture.md) — module structure and dependencies
+- [Operations Guide](docs/operations.md) — deployment, driver setup, cloud configuration
+- API reference: regenerate the HTML reference locally with `make docs` (output is written to `./docs/build/` and is not shipped in the package)
 
 ## Installation
+
+Install the core package with pip:
+
+```shell
+pip install par_ai_core
+```
+
+Or with uv:
+
 ```shell
 uv add par_ai_core
 ```
 
-## Update
+PAR AI Core uses optional extras so you only install the backends you use. Install a single backend, a feature group, or everything:
+
 ```shell
+pip install "par_ai_core[openai]"     # one provider backend
+pip install "par_ai_core[anthropic]"
+pip install "par_ai_core[web]"        # Playwright/Selenium web scraping
+pip install "par_ai_core[search]"     # Tavily, Brave, Serper, Google CSE, Reddit, YouTube
+pip install "par_ai_core[pricing]"    # LiteLLM cost tracking
+pip install "par_ai_core[all]"        # every backend and feature group
+```
+
+A feature whose backend is not installed raises an `ImportError` naming the extra to install.
+
+> **Note:** Web scraping (`fetch_url` with Playwright) requires a browser binary. After installing the `[web]` (or `[all]`) extra, run the following once:
+>
+> ```shell
+> playwright install chromium
+> ```
+
+## Update
+
+```shell
+pip install par_ai_core -U
+# or
 uv add par_ai_core -U
 ```
 
@@ -84,29 +119,27 @@ MISTRAL_API_KEY=
 GITHUB_TOKEN=
 OPENROUTER_API_KEY=
 DEEPSEEK_API_KEY=
+AZURE_OPENAI_API_KEY=
 # Used by Bedrock
 AWS_PROFILE=
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
-AZURE_OPENAI_API_KEY=
+# Local providers (optional)
+OLLAMA_HOST=
 
 # Search
 GOOGLE_CSE_ID=
 GOOGLE_CSE_API_KEY=
 SERPER_API_KEY=
-SERPER_API_KEY_GOOGLE=
 TAVILY_API_KEY=
 JINA_API_KEY=
 BRAVE_API_KEY=
 REDDIT_CLIENT_ID=
 REDDIT_CLIENT_SECRET=
+REDDIT_USERNAME=
+REDDIT_PASSWORD=
 
-# Misc API
-WEATHERAPI_KEY=
-GITHUB_PERSONAL_ACCESS_TOKEN=
-
-
-### Tracing (optional)
+# Tracing (optional)
 LANGCHAIN_TRACING_V2=false
 LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
 LANGCHAIN_API_KEY=
@@ -121,7 +154,8 @@ PARAI_TIMEOUT=
 PARAI_STREAMING=
 PARAI_USER_AGENT_APPID=
 PARAI_NUM_CTX=
-PARAI_NUM_REDICT=
+PARAI_MAX_OUTPUT_TOKENS=
+PARAI_NUM_PREDICT=
 PARAI_REPEAT_LAST_N=
 PARAI_REPEAT_PENALTY=
 PARAI_MIROSTAT=
@@ -147,8 +181,10 @@ PARAI_LOG_LEVEL=
 * MISTRAL_API_KEY is required for Mistral. Get a free key from https://console.mistral.ai/
 * OPENROUTER_API_KEY is required for OpenRouter. Get a key from https://openrouter.ai/
 * DEEPSEEK_API_KEY is required for Deepseek. Get a key from https://platform.deepseek.com/
+* AZURE_OPENAI_API_KEY is required for Azure OpenAI.
 * AWS_PROFILE or AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are used for Bedrock authentication. The environment must
   already be authenticated with AWS.
+* OLLAMA_HOST optionally points at an Ollama server (defaults to http://localhost:11434).
 * No key required to use with Ollama, LlamaCpp, LiteLLM.
 
 ### Open AI Compatible Providers
@@ -160,36 +196,35 @@ If a specify provider is not listed but has an OpenAI compatible endpoint you ca
 
 ### Search
 
-* TAVILY_API_KEY is required for Tavily AI search. Get a free key from https://tavily.com/. Tavily is much better than
+* TAVILY_API_KEY is required for Tavily AI search. Get a free key from https://tavily.com/
 * JINA_API_KEY is required for Jina search. Get a free key from https://jina.ai
 * BRAVE_API_KEY is required for Brave search. Get a free key from https://brave.com/search/api/
-* SERPER_API_KEY is required for Serper search. Get a free key from https://serper.dev
-* SERPER_API_KEY_GOOGLE is required for Google Serper search. Get a free key from https://serpapi.com/
-* GOOGLE_CSE_ID and GOOGLE_CSE_API_KEY are required for Google search.
+* SERPER_API_KEY is required for Serper (Google) search. Get a free key from https://serper.dev
+* GOOGLE_CSE_ID and GOOGLE_CSE_API_KEY are required for Google Custom Search.
 * REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET are needed for Reddit search. Get a free key
   from https://www.reddit.com/prefs/apps/
+* REDDIT_USERNAME and REDDIT_PASSWORD are optional; provide them to authenticate for
+  Reddit search with a higher rate limit.
 
-### Misc API
+### Tracing
 
-* GITHUB_PERSONAL_ACCESS_TOKEN is required for GitHub related tools. Get a free key
-  from https://github.com/settings/tokens
-* WEATHERAPI_KEY is required for weather. Get a free key from https://www.weatherapi.com/
 * LANGCHAIN_API_KEY is required for Langchain / Langsmith tracing. Get a free key
   from https://smith.langchain.com/settings
 
 ### PARAI Related
-* PARAI_AI_PROVIDER is one of Ollama|OpenAI|Groq|XAI|Anthropic|Gemini|Bedrock|Github|LlamaCpp|OpenRouter|LiteLLM
+* PARAI_AI_PROVIDER is one of Ollama|LlamaCpp|OpenRouter|OpenAI|Gemini|Github|XAI|Anthropic|Groq|Mistral|Deepseek|LiteLLM|Bedrock|Azure
 * PARAI_MODEL is the model to use with the selected provider
 * PARAI_AI_BASE_URL can be used to override the base url used to call a provider
 * PARAI_TEMPERATURE sets model temperature. Range depends on provider usually 0.0 to 1.0
 * PARAI_TIMEOUT length of time to wait in seconds for ai response
 * PARAI_STREAMING enables or disables streaming responses (true/false)
 * PARAI_USER_AGENT_APPID sets an app identifier added to the User-Agent header for API requests
-* PARAI_NUM_CTX sets the context window size. Max size varies by model
+* PARAI_NUM_CTX sets the Ollama context window size (Ollama only; deprecated for other providers). Max size varies by model
+* PARAI_MAX_OUTPUT_TOKENS sets the output token cap (``max_tokens``) for OpenAI, Anthropic, Groq, XAI, OpenRouter, Deepseek, Gemini, Bedrock, Mistral, LiteLLM, and Azure
 * PARAI_REASONING_EFFORT sets reasoning effort for OpenAI thinking models (low/medium/high)
 * PARAI_REASONING_BUDGET sets the reasoning token budget for Anthropic models
 * PARAI_LOG_LEVEL sets the logging level (DEBUG/INFO/WARNING/ERROR)
-* Other PARAI related params (NUM_PREDICT, REPEAT_LAST_N, REPEAT_PENALTY, MIROSTAT*, TFS_Z, TOP_K, TOP_P, SEED) are to tweak model responses; not all are supported by all providers
+* Other PARAI related params (NUM_PREDICT, REPEAT_LAST_N, REPEAT_PENALTY, MIROSTAT, MIROSTAT_ETA, MIROSTAT_TAU, TFS_Z, TOP_K, TOP_P, SEED) are to tweak model responses; not all are supported by all providers
 
 
 
@@ -265,102 +300,17 @@ if __name__ == "__main__":
 ```
 
 ## What's New
+- Version 0.5.8:
+  - Updated all dependencies to latest versions (langchain, langgraph, openai, litellm, etc.)
+  - Migrated `ChatLiteLLM` to the standalone `langchain-litellm` package
 - Version 0.5.7:
-  - Updated all dependencies to latest versions (langchain, langgraph, openai, litellm, pydantic, etc.)
+  - Updated all dependencies to latest versions
   - Refreshed pricing-lookup tests to current LiteLLM model database
   - Resolved all pyright type errors in test suite
 - Version 0.5.6:
   - Post-audit release with all 72 audit issues resolved
-- Version 0.5.5:
-  - **Fix:** Made `ParAICallbackHandler` hashable to prevent LangChain callback merge errors
-- Version 0.5.4:
-  - Updated default OpenAI model from gpt-5 to gpt-5.1
-  - Updated LiteLLM default model from gpt-5 to gpt-5.1
-  - Updated vision model from gpt-5 to gpt-5.1
-- Version 0.4.3:
-  - **Python 3.14 Support:** Added support for Python 3.14 while maintaining compatibility with Python 3.11-3.13
-  - **Dropped Python 3.10:** Minimum required Python version is now 3.11
-  - **Removed Unused Dependencies:** Removed langchain-chroma and langchain-qdrant (not used in codebase)
-  - **Updated Development Tools:** Ruff and Pyright now target Python 3.14
-  - **CI/CD Updates:** GitHub Actions workflows updated to test against Python 3.11-3.14
-  - Updated dependencies and ensured Python 3.14 compatibility
-- Version 0.4.2:
-  - Updated dependencies
-- Version 0.4.1:
-  - **Dependency Fix:** Fixed compatibility issue between litellm and openai libraries by constraining openai to <1.100.0 to maintain compatibility with litellm 1.75.x
-- Version 0.4.0:
-  - **Python 3.10-3.13 Support:** Full compatibility across Python versions with 3.12 as the development target
-  - **Optimized Configuration:** Standardized Python version targeting across all development tools (ruff, pyright, pre-commit)
-  - **Enhanced CI/CD Pipeline:** Automated workflow chain: Build → TestPyPI → GitHub Release → PyPI
-  - **Improved .gitignore:** Comprehensive, well-organized patterns for modern Python development with AI tools
-  - **Enhanced Makefile:** Fixed lint target to include tests, corrected package commands, improved dependency management
-  - **Code Quality Improvements:** Fixed all linting and type checking errors, updated deprecated patterns
-  - **Test Reliability:** Updated test mocks and model references for better compatibility
-- Version 0.3.2:
-  - Improved test coverage to 93%
-  - Fixed nest_asyncio safety handling
-- Version 0.3.1:
-  - Update dependencies
-- Version 0.3.0:
-  - Added support for Azure OpenAI
-- Version 0.2.0:
-  - Support for basic auth in ollama base urls
-- Version 0.1.25:
-  - Suppress pricing not found warning
-- Version 0.1.24:
-  - Changed default fetch wait from idle to sleep
-- Version 0.1.23:
-  - Fix issue caused by providing reasoning effort to models that don't support it
-- Version 0.1.22:
-  - Fix some asyncio issues with web fetch utils
-- Version 0.1.21:
-  - Added config options for OpenAI reasoning effort, and Anthropic reasoning token budget
-  - Fix o3 error when temperature is set
-- Version 0.1.20:
-  - Added parallel fetch support for fetch_url related utils
-- Version 0.1.19:
-  - Added proxy config, http auth support for fetch_url related utils
-- Version 0.1.18:
-  - Updated web scraping utils
-- Version 0.1.17:
-  - Use LiteLLM for pricing data
-  - BREAKING CHANGE: Provider Google is now Gemini
-- Version 0.1.16:
-  - Add more default base urls for providers
-- Version 0.1.15:
-  - Added support for Deepseek and LiteLLM
-  - Added Mistral pricing
-  - Better fuzzy model matching for price lookup
-- Version 0.1.14:
-  - Added o3-mini pricing
-  - Now gets actual model used from OpenRouter
-  - Fixed some other pricing issues
-  - Fixed open router default model name
-- Version 0.1.13:
-  - Added support for supplying extra body params to OpenAI compatible providers like OpenRouter
-  - Better handling of model names for pricing lookup
-- Version 0.1.12:
-  - Added support for OpenRouter
-- Version 0.1.11:
-  - Updated some utility functions
-  - Fixed dotenv loading issue
-  - Updated pricing for o1 and Deepseek R1
-- Version 0.1.10:
-  - Add format param to LlmConfig for Ollama output format
-  - Fixed bug with util function has_stdin_content
-- Version 0.1.9:
-  - Added Mistral support
-  - Fix dotenv loading bug
-- Version 0.1.8:
-  - Added time display utils
-  - Made LlmConfig.from_json more robust
-- Version 0.1.7:
-  - Fix documentation issues
-- Version 0.1.6:
-  - Pricing for Deepseek
-  - Updated Docs
-- Version 0.1.5:
-  - Initial release
+
+See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
 ## Contributing
 

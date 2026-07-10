@@ -362,7 +362,7 @@ async def fetch_url_playwright(
         timeout (int): The number of seconds to wait for a response.
         proxy_config (ProxySettings | None): Proxy configuration. Defaults to None.
         http_credentials (HttpCredentials | None): HTTP credentials for authentication. Defaults to None.
-        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
+        wait_type (ScraperWaitType, optional): The type of wait to use. Defaults to ScraperWaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless (bool): Whether to run the browser in headless mode.
         ignore_ssl (bool): Whether to ignore SSL errors. ``ignore_ssl=True`` disables certificate
@@ -492,7 +492,7 @@ def fetch_url_selenium(
         timeout: The number of seconds to wait for a response
         proxy_config (ProxySettings, optional): Proxy configuration. Defaults to None.
         http_credentials (HttpCredentials, optional): HTTP credentials for authentication. Defaults to None.
-        wait_type (WaitType, optional): The type of wait to use. Defaults to WaitType.SLEEP.
+        wait_type (ScraperWaitType, optional): The type of wait to use. Defaults to ScraperWaitType.SLEEP.
         wait_selector (str, optional): The CSS selector to wait for. Defaults to None.
         headless: Whether to run the browser in headless mode
         ignore_ssl: Whether to ignore SSL errors. ``ignore_ssl=True`` disables certificate

@@ -4,52 +4,45 @@ This document describes the module structure and dependencies of PAR AI Core.
 
 ## Module Dependency Diagram
 
-```
-                    ┌──────────────────┐
-                    │   __init__.py    │
-                    │ (version, config)│
-                    └────────┬─────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-     ┌────────▼───────┐ ┌───▼────────┐ ┌──▼──────────┐
-     │  llm_config.py │ │ llm_utils  │ │ par_logging  │
-     │ (LlmConfig,    │ │ (env-based │ │ (Rich        │
-     │  LlmRunManager)│ │  config,   │ │  console)    │
-     └───┬────┬───────┘ │  tokens)   │ └──────────────┘
-         │    │         └────────────┘
-         │    │
-    ┌────▼──┐ ├──────────────────────────┐
-    │llm_   │ │                          │
-    │provid-│ │  ┌───────────────────┐   │
-    │ers.py │ │  │provider_cb_info.py│   │
-    │(enums,│ │  │(callback handler, │   │
-    │ keys) │ │  │ cost tracking)    │   │
-    └───────┘ │  └────────┬──────────┘   │
-              │           │              │
-              │  ┌────────▼──────────┐   │
-              │  │pricing_lookup.py  │   │
-              │  │(LiteLLM pricing)  │   │
-              │  └───────────────────┘   │
-              │                          │
-    ┌─────────▼────────┐  ┌──────────────▼───┐
-    │   web_tools.py   │  │  search_utils.py │
-    │(Playwright,      │  │(Tavily, Jina,    │
-    │ Selenium, fetch) │  │ Brave, Serper,   │
-    └──────────────────┘  │ Reddit, YouTube) │
-                          └──────────────────┘
+The diagram below shows how the public modules depend on each other. Core configuration and provider logic sit at the center; web/search and utility modules build on top.
 
-    ┌──────────────┐  ┌────────────────┐  ┌──────────────┐
-    │output_utils  │  │    utils.py    │  │llm_image_    │
-    │(JSON, CSV,   │  │(hashing, shell,│  │utils.py      │
-    │ Markdown,    │  │ file context)  │  │(vision model │
-    │ tables)      │  └────────────────┘  │ encoding)    │
-    └──────────────┘                      └──────────────┘
+```mermaid
+graph TD
+    Init["__init__.py<br/>(version, opt-in helpers)"]
+    Config["llm_config.py<br/>(LlmConfig, LlmRunManager)"]
+    Providers["llm_providers.py<br/>(enums, key names)"]
+    Utils["llm_utils.py<br/>(env config, tokens)"]
+    Logging["par_logging.py<br/>(Rich console)"]
+    Callbacks["provider_cb_info.py<br/>(callback handler, cost)"]
+    Pricing["pricing_lookup.py<br/>(LiteLLM pricing)"]
+    WebTools["web_tools.py<br/>(Playwright, Selenium, fetch)"]
+    Search["search_utils.py<br/>(Tavily, Jina, Brave, Serper, Reddit, YouTube)"]
+    Output["output_utils.py<br/>(JSON, CSV, Markdown, tables)"]
+    GeneralUtils["utils.py<br/>(hashing, shell, file context)"]
+    ImageUtils["llm_image_utils.py<br/>(vision model encoding)"]
+    TimeDisplay["time_display.py<br/>(time formatting)"]
+    UserAgents["user_agents.py<br/>(random UA generation)"]
 
-    ┌──────────────┐  ┌────────────────┐
-    │time_display  │  │ user_agents.py │
-    │(formatting)  │  │(random UA gen) │
-    └──────────────┘  └────────────────┘
+    Init --> Config
+    Init --> Utils
+    Init --> Logging
+    Config --> Providers
+    Config --> Callbacks
+    Utils --> Config
+    Callbacks --> Pricing
+    WebTools --> GeneralUtils
+    Search --> WebTools
+
+    class Init core
+    class Config,Providers,Utils core
+    class Logging,Callbacks,Pricing services
+    class WebTools,Search web
+    class Output,GeneralUtils,ImageUtils,TimeDisplay,UserAgents util
+
+    classDef core fill:#1b5e20,stroke:#4caf50,stroke-width:2px,color:#ffffff
+    classDef services fill:#0d47a1,stroke:#2196f3,stroke-width:2px,color:#ffffff
+    classDef web fill:#e65100,stroke:#ff9800,stroke-width:2px,color:#ffffff
+    classDef util fill:#37474f,stroke:#78909c,stroke-width:2px,color:#ffffff
 ```
 
 ## Module Descriptions
@@ -58,7 +51,7 @@ This document describes the module structure and dependencies of PAR AI Core.
 
 | Module | Description |
 |--------|-------------|
-| `__init__.py` | Package initialization, version string, opt-in helpers (`apply_nest_asyncio`, `configure_user_agent`) |
+| `__init__.py` | Package initialization, version string, opt-in helpers (`init_logging`, `apply_nest_asyncio`, `configure_user_agent`) |
 | `llm_config.py` | `LlmConfig` dataclass for model configuration and `LlmRunManager` for tracking active model instances. Contains provider-specific builder methods that construct LangChain model objects |
 | `llm_providers.py` | `LlmProvider` enum, default model mappings, API key environment variable names, and key-checking utilities |
 | `llm_utils.py` | Environment-based config loading (`llm_config_from_env`), token estimation, and text chunking |
@@ -83,7 +76,7 @@ This document describes the module structure and dependencies of PAR AI Core.
 | Module | Description |
 |--------|-------------|
 | `output_utils.py` | Formatted output display: JSON (syntax-highlighted), CSV (Rich tables), Markdown, and plain text |
-| `par_logging.py` | Rich console setup for stdout and stderr logging |
+| `par_logging.py` | Rich console instances for stdout/stderr output and the opt-in `init_logging()` helper. Attaches a `NullHandler` to the `par_ai` logger on import; it no longer mutates global logging or `sys.excepthook` (call `init_logging()` to opt in) |
 | `utils.py` | General utilities: hashing (SHA-256, MD5, SHA-1), shell command execution, file context gathering, stdin detection |
 | `time_display.py` | Time formatting and display utilities with Python 3.10+ compatibility |
 | `user_agents.py` | Random browser user-agent string generation for web requests |

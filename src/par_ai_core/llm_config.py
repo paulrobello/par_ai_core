@@ -82,6 +82,7 @@ class LlmConfig:
     Attributes:
         provider: AI Provider to use (e.g., OpenAI, Anthropic, etc.)
         model_name: Name of the specific model to use
+        fallback_models: Optional list of models to try if the primary fails (OpenRouter only)
         temperature: Controls randomness in responses (0.0-1.0)
         mode: Operating mode (Base, Chat, or Embeddings)
         streaming: Whether to stream responses or return complete
@@ -89,7 +90,9 @@ class LlmConfig:
         timeout: Request timeout in seconds
         user_agent_appid: Custom app ID for API requests
         class_name: Class identifier for serialization
-        num_ctx: Context window size for token generation
+        num_ctx: Ollama context-window size only; deprecated for non-Ollama providers
+            (use ``max_output_tokens`` instead; emits ``DeprecationWarning`` at build time)
+        max_output_tokens: Output token cap for OpenAI/Anthropic/etc. (``max_tokens``)
         num_predict: Maximum tokens to generate
         repeat_last_n: Window size for repetition checking
         repeat_penalty: Penalty factor for repeated content
@@ -101,6 +104,10 @@ class LlmConfig:
         top_p: Top-P (nucleus) sampling parameter
         seed: Random seed for reproducibility
         env_prefix: Environment variable prefix
+        format: Ollama output format (``""`` or ``"json"``)
+        extra_body: Extra body parameters for OpenAI-compatible providers
+        reasoning_effort: OpenAI thinking-model reasoning effort (low/medium/high)
+        reasoning_budget: Anthropic reasoning token budget
         safety_settings: Optional Google Gemini safety settings override
     """
 

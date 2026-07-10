@@ -61,17 +61,21 @@ class LangChainConfig:
 class LlmProvider(StrEnum):
     """Enumeration of supported LLM providers.
 
-    Supported providers:
-        OLLAMA: Local Ollama instance
-        LLAMACPP: Local LlamaCpp instance
-        OPENAI: OpenAI API
-        GEMINI: Google AI (Gemini) API
-        GITHUB: GitHub Copilot API
-        XAI: X.AI (formerly Twitter) API
-        ANTHROPIC: Anthropic Claude API
-        GROQ: Groq API
-        MISTRAL: Mistral AI API
-        BEDROCK: AWS Bedrock API
+    Supported providers (14 members):
+        OLLAMA: Local Ollama instance (no API key; uses ``OLLAMA_HOST``)
+        LLAMACPP: Local LlamaCpp instance (no API key)
+        OPENROUTER: OpenRouter aggregator API (``OPENROUTER_API_KEY``)
+        OPENAI: OpenAI API (``OPENAI_API_KEY``)
+        GEMINI: Google AI (Gemini) API (``GOOGLE_API_KEY``)
+        GITHUB: GitHub Models API (``GITHUB_TOKEN``)
+        XAI: xAI (Grok) API (``XAI_API_KEY``)
+        ANTHROPIC: Anthropic Claude API (``ANTHROPIC_API_KEY``)
+        GROQ: Groq API (``GROQ_API_KEY``)
+        MISTRAL: Mistral AI API (``MISTRAL_API_KEY``)
+        DEEPSEEK: Deepseek API (``DEEPSEEK_API_KEY``)
+        LITELLM: LiteLLM proxy (no API key; target varies)
+        BEDROCK: AWS Bedrock API (``AWS_PROFILE`` / ``AWS_ACCESS_KEY_ID``)
+        AZURE: Azure OpenAI API (``AZURE_OPENAI_API_KEY``)
     """
 
     OLLAMA = "Ollama"
