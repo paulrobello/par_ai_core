@@ -9,6 +9,22 @@ Release dates are derived from the corresponding git tag timestamps.
 
 ## [Unreleased]
 
+Comprehensive audit remediation — 77 of 78 issues resolved (1 backlog refactor,
+ARC-008, deferred). See `AUDIT-REMEDIATION.md` for the full per-issue record.
+
+### Added
+- **Opt-in `par_ai_core.init_logging()` (ARC-002):** restores the Rich console
+  handlers and tracebacks that previously ran at import time.
+- **`LlmConfig.max_output_tokens` (ARC-006):** the output-token cap for non-Ollama
+  providers, wired to `PARAI_MAX_OUTPUT_TOKENS`.
+- **`LlmConfig.safety_settings` (SEC-003):** optional Gemini safety-setting
+  override (default `None` = provider-standard thresholds).
+- **`SearchResult` model (ARC-014):** typed, dict-compatible return type for all
+  search functions (see Changed).
+- **`fetch_url(raise_on_error=...)` (QA-006):** escape hatch to surface fetch
+  errors instead of swallowing them.
+- **Standard Makefile targets `build` and `fmt` (ARC-024).**
+
 ### Changed
 - **Lean core with optional extras (ARC-001):** the package now installs only the
   core by default. Install backends individually (`pip install "par_ai_core[openai]"`,
@@ -47,6 +63,29 @@ Release dates are derived from the corresponding git tag timestamps.
   but is deprecated in favor of `summarizer`. The `fetch_url_and_convert_to_markdown`
   import is now lazy inside `brave_search`/`serper_search`, removing the top-level
   `web_tools` dependency from `search_utils`.
+- **LLM correlation no longer hijacks `llm.name` (ARC-010):** `build_chat_model`/
+  `build_llm_model` no longer overwrite the model's `name` with the config_id UUID.
+  Correlation (cost tracking, run config) flows exclusively through `RunnableConfig`
+  metadata + tags, which were already in place. Code that read `llm.name` expecting
+  the config_id should read the `config_id=` tag or `metadata["config_id"]` instead.
+- **`utils.py` is now a package (ARC-013):** the 931-line module is split into a
+  `utils/` package of 10 cohesive submodules. `__init__.py` re-exports all 49 public
+  names, so `from par_ai_core.utils import X` is unchanged. `markdownify` was dropped;
+  `html2text` is now the single HTML→Markdown converter (`md()` reimplemented on it,
+  LLM-facing output preserved).
+- **Lazy `litellm` + data-driven zero-cost pricing (ARC-012):** `litellm` is imported
+  at call time in the pricing layer (faster cold imports). The hardcoded zero-cost
+  list is reduced to genuinely-local `[OLLAMA, LLAMACPP]` — Groq and GitHub Models
+  are now priced from litellm data.
+- **`serper_search` parameter rename (QA-010):** the `type` parameter is now
+  `search_type` (no longer shadows the builtin); `days` is wired into a Serper
+  freshness filter.
+- **`fetch_url_and_convert_to_markdown` forwards fetcher params (ARC-021):** proxy,
+  credentials, wait type, headless, ignore_ssl, and max_parallel are now passed
+  through to the underlying fetcher.
+- **`OLLAMA_HOST` read at build time (ARC-023):** read fresh per build, so a
+  post-import `.env` load is honored.
+- **Stdlib `enum.StrEnum` (ARC-018):** the `strenum` backport is dropped.
 
 ### Security
 - **`fetch_url` rejects unsafe URLs (SEC-001):** only public `http(s)` URLs are
@@ -59,11 +98,48 @@ Release dates are derived from the corresponding git tag timestamps.
 - **Gemini no longer forces `BLOCK_NONE` (SEC-003):** `LlmConfig.safety_settings`
   (default `None`) lets the provider's standard safety thresholds apply; pass an
   explicit mapping only to override.
+- **FIPS-safe weak-hash helpers (SEC-006):** `md5_hash`/`sha1_hash` use
+  `usedforsecurity=False`; deprecation warnings preserved.
+- **Selenium credential-injection logging (SEC-008):** the worker logs the
+  pre-injection URL; `inject_credentials` docstring warns of netloc leakage and
+  prefers Playwright `http_credentials`.
+- **Pinned CI actions (SEC-009):** third-party GitHub Actions in the publish/release
+  workflows are pinned to verified commit SHAs.
 
 ### Fixed
 - **Playwright TEXT wait (QA-001):** `ScraperWaitType.TEXT` now uses
   `page.wait_for_function(...)` (the previous `wait_for_text` method did not exist),
   so text-based waits work.
+- **LiteLLM context-size lookup (QA-002):** `getattr` on a TypedDict (always `None`)
+  replaced with dict access — restores correct context sizes for modern 128k–2M
+  models.
+- **LiteLLM env configuration (ARC-005):** LiteLLM can now be configured from the
+  environment (previously raised an empty-variable-name `ValueError`).
+- **Exception-safe cost callback (ARC-004):** `parai_callback_var` resets and prints
+  cost even when the wrapped block raises.
+- **Selenium wait semantics (QA-003):** `SLEEP` now sleeps; trailing unconditional
+  sleeps removed; `NONE` skips all sleeps.
+- **`LlmConfig.from_json` errors (QA-005):** raises a clear `ValueError` naming the
+  missing field instead of a bare `KeyError`; `mode` defaults when absent.
+- **`has_value` suffix stripping (QA-007):** `rstrip(".00")` (a char set) →
+  `removesuffix(".00")`.
+- **Reasoning-model detection (QA-009):** consolidated into one helper with an
+  explicit prefix tuple (now catches `gpt-5`/`gpt-5-mini`/`o4-mini`).
+- **`youtube_search` max comments (QA-011):** forwards `max_results=max_comments`.
+- **CSV rendering (QA-012):** `display_formatted_output` reuses `csv_to_table` (no
+  more `StopIteration` on empty input / Rich error on ragged rows).
+- **Cost double-counting (QA-015):** `accumulate_cost` normalizes the payload to one
+  convention before accumulating.
+- **Blocking `input()` in async (QA-017):** replaced with
+  `await asyncio.to_thread(input)`.
+- **Desktop Chrome user agent (QA-021):** no longer includes the "Mobile Safari"
+  token.
+
+### Removed
+- `markdownify` dependency (ARC-013) — `html2text` is the single converter.
+- `strenum` backport dependency (ARC-018) — stdlib `enum.StrEnum` instead.
+- Generated HTML/PNG documentation from the wheel (ARC-015) — `make docs` writes to
+  the gitignored `./docs/build/` directory.
 
 ## [0.5.8] - 2026-06-22
 
