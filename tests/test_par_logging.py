@@ -1,7 +1,6 @@
 """Tests for par_logging module."""
 
 import logging
-from unittest.mock import patch
 
 import pytest
 from rich.console import Console
@@ -40,25 +39,74 @@ def test_log_level_mapping():
     ],
 )
 def test_log_level_configuration(monkeypatch, env_level, expected_level):
-    """Test log level is properly configured from environment variable."""
+    """Test init_logging resolves the level from PARAI_LOG_LEVEL at call time.
+
+    Prior to v0.5.9 this module configured the root logger at import time via
+    ``logging.basicConfig``. That global side effect was removed (ARC-002);
+    level resolution now happens inside the opt-in ``init_logging()`` instead.
+    """
+    import sys
+
+    from par_ai_core.par_logging import init_logging
+
     if env_level is None:
         monkeypatch.delenv("PARAI_LOG_LEVEL", raising=False)
     else:
         monkeypatch.setenv("PARAI_LOG_LEVEL", env_level)
 
-    # Mock basicConfig before importing
-    with patch("logging.basicConfig") as mock_basic_config:
-        # Import the module to trigger configuration
-        import importlib
+    saved_level = log.level
+    saved_handlers = list(log.handlers)
+    saved_excepthook = sys.excepthook
+    try:
+        init_logging()  # reads PARAI_LOG_LEVEL at call time
+        assert log.level == expected_level
+    finally:
+        log.setLevel(saved_level)
+        log.handlers = saved_handlers
+        sys.excepthook = saved_excepthook
 
-        import par_ai_core.par_logging
 
-        importlib.reload(par_ai_core.par_logging)
+def test_init_logging_does_not_touch_root_logger(monkeypatch):
+    """init_logging must configure only the par_ai logger, never the root logger."""
+    import sys
 
-        # Verify basicConfig was called with expected level
-        mock_basic_config.assert_called_once()
-        call_args = mock_basic_config.call_args[1]
-        assert call_args["level"] == expected_level
+    from par_ai_core.par_logging import init_logging
+
+    monkeypatch.setenv("PARAI_LOG_LEVEL", "INFO")
+    root = logging.getLogger()
+    saved_root_handlers = list(root.handlers)
+    saved_level = log.level
+    saved_handlers = list(log.handlers)
+    saved_excepthook = sys.excepthook
+    try:
+        init_logging("INFO")
+        # Root logger handlers are unchanged.
+        assert root.handlers == saved_root_handlers
+        # The par_ai logger has the rich handler and does not propagate.
+        assert log.level == logging.INFO
+        assert log.propagate is False
+        assert any(isinstance(h, logging.Handler) and not isinstance(h, logging.NullHandler) for h in log.handlers)
+    finally:
+        log.setLevel(saved_level)
+        log.handlers = saved_handlers
+        log.propagate = False
+        sys.excepthook = saved_excepthook
+
+
+def test_import_does_not_reconfigure_root_logger_or_excepthook():
+    """Importing par_ai_core must not mutate the root logger or sys.excepthook."""
+    import importlib
+    import sys
+
+    root = logging.getLogger()
+    saved_root_handlers = list(root.handlers)
+    saved_excepthook = sys.excepthook
+    try:
+        importlib.reload(__import__("par_ai_core.par_logging", fromlist=["log"]))
+        assert logging.getLogger().handlers == saved_root_handlers
+        assert sys.excepthook is saved_excepthook
+    finally:
+        sys.excepthook = saved_excepthook
 
 
 def test_logger_name():

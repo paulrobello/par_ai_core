@@ -24,10 +24,10 @@ This module is essential for tracking and managing costs in AI-powered applicati
 especially when working with multiple AI providers and models.
 """
 
-from typing import Literal
+from __future__ import annotations
 
-from litellm.types.utils import ModelInfo
-from litellm.utils import get_model_info
+from typing import TYPE_CHECKING, Literal
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
@@ -36,6 +36,29 @@ from strenum import StrEnum
 from par_ai_core.llm_config import LlmConfig
 from par_ai_core.llm_providers import LlmProvider
 from par_ai_core.par_logging import console_err
+
+if TYPE_CHECKING:
+    # litellm is an optional backend (install with ``par_ai_core[pricing]``).
+    # It is imported lazily inside the functions that use it so that merely
+    # importing this module (and ``llm_utils``, which imports ``get_model_metadata``)
+    # does not pull in the heavy litellm package.
+    from litellm.types.utils import ModelInfo
+
+
+def _import_get_model_info():
+    """Import litellm's ``get_model_info`` lazily with an actionable error.
+
+    Raises:
+        ImportError: if litellm is not installed, pointing the user at the
+            ``par_ai_core[pricing]`` extra.
+    """
+    try:
+        from litellm.utils import get_model_info
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError(
+            "LiteLLM pricing lookup requires the litellm package: pip install 'par_ai_core[pricing]'"
+        ) from e
+    return get_model_info
 
 
 class PricingDisplay(StrEnum):
@@ -111,7 +134,7 @@ def get_model_metadata(provider_name: str, model_name: str) -> ModelInfo:
         ModelInfo: Model metadata
     """
     model_name = get_api_cost_model_name(provider_name=provider_name, model_name=model_name)
-    return get_model_info(model=model_name)
+    return _import_get_model_info()(model=model_name)
 
 
 def get_model_mode(
@@ -173,6 +196,7 @@ def get_api_call_cost(
     try:
         if "deepseek" in model_name and "deepseek/" not in model_name:
             model_name = f"deepseek/{model_name}"
+        get_model_info = _import_get_model_info()
         model_info = get_model_info(model=model_name)
     except Exception:
         return 0

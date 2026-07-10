@@ -44,7 +44,7 @@ def test_youtube_search_days_validation(days):
         with pytest.raises(ValueError, match="days parameter must be >= 0"):
             youtube_search("test query", days=days)
     else:
-        with patch("par_ai_core.search_utils.build") as mock_build:
+        with patch("googleapiclient.discovery.build") as mock_build:
             mock_youtube = MagicMock()
             mock_build.return_value = mock_youtube
             mock_youtube.search().list().execute.return_value = {"items": []}
@@ -63,7 +63,7 @@ def test_youtube_search_days_validation(days):
                 assert expected_date.strftime("%Y-%m-%dT%H:%M:%SZ") in call_kwargs["publishedAfter"]
 
 
-@patch("par_ai_core.search_utils.TavilyClient")
+@patch("tavily.TavilyClient")
 def test_tavily_search(mock_tavily):
     """Test Tavily search functionality."""
     mock_results = [
@@ -86,7 +86,7 @@ def test_tavily_search(mock_tavily):
     )
 
 
-@patch("par_ai_core.search_utils.BraveSearchWrapper")
+@patch("langchain_community.utilities.brave_search.BraveSearchWrapper")
 def test_brave_search(mock_brave):
     """Test Brave search functionality."""
     mock_results = [
@@ -121,7 +121,7 @@ def test_brave_search(mock_brave):
             brave_search("test query", days=-1)
 
 
-@patch("par_ai_core.search_utils.GoogleSerperAPIWrapper")
+@patch("langchain_community.utilities.GoogleSerperAPIWrapper")
 def test_serper_search(mock_serper):
     """Test Google Serper search functionality."""
     # Test organic search
@@ -172,7 +172,7 @@ def test_serper_search(mock_serper):
         serper_search("test query", days=-1)
 
 
-@patch("par_ai_core.search_utils.YouTubeTranscriptApi")
+@patch("youtube_transcript_api.YouTubeTranscriptApi")
 def test_youtube_get_transcript(mock_transcript_api):
     """Test fetching YouTube video transcripts."""
     # Mock transcript data
@@ -184,7 +184,7 @@ def test_youtube_get_transcript(mock_transcript_api):
     mock_transcript_api.get_transcript.assert_called_once_with("test_video_id", languages=["en"])
 
 
-@patch("par_ai_core.search_utils.build")
+@patch("googleapiclient.discovery.build")
 def test_youtube_get_comments(mock_build):
     """Test fetching YouTube video comments."""
     mock_youtube = MagicMock()
@@ -287,7 +287,7 @@ def test_jina_search_error(mock_get):
         jina_search("test query")
 
 
-@patch("par_ai_core.search_utils.build")
+@patch("googleapiclient.discovery.build")
 def test_youtube_search_with_transcript_and_summary(mock_build):
     """Test YouTube search with transcript and summary functionality."""
     mock_youtube = MagicMock()
@@ -329,7 +329,7 @@ def test_youtube_search_with_transcript_and_summary(mock_build):
         assert results[0]["raw_content"] == "Test transcript"
 
 
-@patch("par_ai_core.search_utils.build")
+@patch("googleapiclient.discovery.build")
 def test_youtube_search_with_comments(mock_build):
     """Test YouTube search with comments functionality."""
     mock_youtube = MagicMock()
@@ -359,7 +359,7 @@ def test_youtube_search_with_comments(mock_build):
         assert "Comment 2" in results[0]["content"]
 
 
-@patch("par_ai_core.search_utils.YouTubeTranscriptApi")
+@patch("youtube_transcript_api.YouTubeTranscriptApi")
 def test_youtube_get_transcript_error(mock_transcript_api):
     """Test YouTube transcript fetching error handling."""
     mock_transcript_api.get_transcript.side_effect = Exception("Transcript error")
@@ -368,7 +368,7 @@ def test_youtube_get_transcript_error(mock_transcript_api):
         youtube_get_transcript("test_video_id")
 
 
-@patch("par_ai_core.search_utils.praw.Reddit")
+@patch("praw.Reddit")
 def test_reddit_search_subreddit_fallback(mock_reddit):
     """Test Reddit search with subreddit fallback."""
     mock_subreddit = MagicMock()
@@ -424,7 +424,7 @@ def test_reddit_search_subreddit_fallback(mock_reddit):
         assert "Unknown" in results[0]["raw_content"]
 
 
-@patch("par_ai_core.search_utils.praw.Reddit")
+@patch("praw.Reddit")
 def test_reddit_search(mock_reddit):
     """Test Reddit search functionality."""
     mock_submission = MagicMock()

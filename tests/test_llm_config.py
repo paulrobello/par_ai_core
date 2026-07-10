@@ -893,7 +893,9 @@ def test_invalid_mode_for_various_providers() -> None:
 def test_mistral_provider_dispatch() -> None:
     """Test Mistral provider dispatch."""
     config = LlmConfig(provider=LlmProvider.MISTRAL, model_name="mistral-7b", mode=LlmMode.CHAT)
-    with patch.object(config, "_build_mistral_llm") as mock_mistral:
+    # Registry-based dispatch resolves the builder by name on the (copied)
+    # config, so patch the class-level builder method.
+    with patch.object(LlmConfig, "_build_mistral_llm") as mock_mistral:
         mock_mistral.return_value = MagicMock(spec=BaseChatModel)
         config._build_llm()
         mock_mistral.assert_called_once()
@@ -904,7 +906,7 @@ def test_deepseek_setup() -> None:
     config = LlmConfig(provider=LlmProvider.DEEPSEEK, model_name="deepseek-chat", mode=LlmMode.CHAT)
 
     # Test that the provider dispatch works
-    with patch.object(config, "_build_deepseek_llm") as mock_deepseek:
+    with patch.object(LlmConfig, "_build_deepseek_llm") as mock_deepseek:
         mock_deepseek.return_value = MagicMock(spec=BaseChatModel)
         config._build_llm()
         mock_deepseek.assert_called_once()

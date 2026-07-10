@@ -111,7 +111,7 @@ def test_fetch_url_parameters(fetch_using, monkeypatch):
 
     # Mock the browser functions to raise exceptions
     if fetch_using == "playwright":
-        monkeypatch.setattr("par_ai_core.web_tools.async_playwright", lambda: exec('raise Exception("No playwright")'))
+        monkeypatch.setattr("playwright.async_api.async_playwright", lambda: exec('raise Exception("No playwright")'))
     else:
         monkeypatch.setattr("selenium.webdriver.Chrome", lambda *args, **kwargs: exec('raise Exception("No selenium")'))
 
@@ -217,7 +217,7 @@ def test_fetch_url_playwright_success(monkeypatch) -> None:
             pass
 
     # Define a mock async playwright context manager
-    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
         # Call the function under test.
         result = fetch_url(["https://example.com"], fetch_using="playwright", verbose=False)
 
@@ -261,7 +261,7 @@ async def test_fetch_url_playwright_direct_success(monkeypatch) -> None:
             pass
 
     # Patch the async_playwright context manager with our mock.
-    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
         result = await fetch_url_playwright("https://example.com", verbose=False)
         assert result[0] == "<html><body>Test content</body></html>"
 
@@ -443,7 +443,7 @@ def test_playwright_browser_cleanup():
             pass
 
     # Patch async_playwright to return our async context manager.
-    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
         # Assuming fetch_url synchronously runs the async fetch logic (e.g., via asyncio.run)
         fetch_url("https://example.com", fetch_using="playwright")
 
@@ -453,7 +453,7 @@ def test_playwright_browser_cleanup():
 
 def test_playwright_launch_error():
     """Test handling of playwright launch errors."""
-    with patch("par_ai_core.web_tools.async_playwright", side_effect=Exception("Failed to launch")):
+    with patch("playwright.async_api.async_playwright", side_effect=Exception("Failed to launch")):
         result = fetch_url("https://example.com", fetch_using="playwright", verbose=True)
         assert result == [""]
 
@@ -499,7 +499,7 @@ async def test_fetch_url_playwright_verbose_error():
             pass
 
     # Patch the async_playwright in the module where fetch_url_playwright is imported.
-    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
         # Await the asynchronous function
         result = await fetch_url_playwright("https://example.com", verbose=True, console=mock_console)
 
@@ -552,7 +552,7 @@ async def test_fetch_url_playwright_wait_types():
             pass
 
     # Patch the async_playwright symbol in our module.
-    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
         # Test SLEEP wait type
         result = await fetch_url_playwright(
             "https://example.com",
@@ -742,7 +742,7 @@ async def test_fetch_url_playwright_verbose():
         async def __aexit__(self, exc_type, exc, tb):
             pass
 
-    with patch("par_ai_core.web_tools.async_playwright", return_value=MockAsyncPlaywright()):
+    with patch("playwright.async_api.async_playwright", return_value=MockAsyncPlaywright()):
         result = await fetch_url_playwright("https://example.com", verbose=True, console=mock_console)
 
         # Verify console output messages

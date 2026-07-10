@@ -50,16 +50,9 @@ from typing import Any, Literal
 from urllib.parse import quote
 
 import orjson as json
-import praw
-import praw.models
 import requests
-from googleapiclient.discovery import build
-from langchain_community.utilities import GoogleSerperAPIWrapper
-from langchain_community.utilities.brave_search import BraveSearchWrapper
 from langchain_core.language_models import BaseChatModel
 from pydantic import SecretStr
-from tavily import TavilyClient
-from youtube_transcript_api import YouTubeTranscriptApi  # type: ignore
 
 from par_ai_core.llm_utils import summarize_content
 from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
@@ -99,6 +92,10 @@ def tavily_search(
     Raises:
         TavilyError: If the Tavily API request fails or returns an error response.
     """
+    try:
+        from tavily import TavilyClient
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError("Tavily search requires: pip install 'par_ai_core[search]'") from e
     tavily_client = TavilyClient()
     return tavily_client.search(
         query, max_results=max_results, topic=topic, days=days, include_raw_content=include_raw_content
@@ -188,6 +185,10 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
     brave_api_key = os.environ.get("BRAVE_API_KEY")
     if not brave_api_key:
         raise ValueError("BRAVE_API_KEY environment variable is not set")
+    try:
+        from langchain_community.utilities.brave_search import BraveSearchWrapper
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError("Brave search requires: pip install 'par_ai_core[search]'") from e
     wrapper = BraveSearchWrapper(
         api_key=SecretStr(brave_api_key),
         search_kwargs={"count": max_results, "summary": True, "freshness": date_range},
@@ -237,6 +238,10 @@ def serper_search(
     """
     if days < 0:
         raise ValueError("days parameter must be >= 0")
+    try:
+        from langchain_community.utilities import GoogleSerperAPIWrapper
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError("Serper (Google) search requires: pip install 'par_ai_core[search]'") from e
     search = GoogleSerperAPIWrapper(type=type)
     res = search.results(query)
     results_list = res.get(type, [])[:max_results]
@@ -286,6 +291,11 @@ def reddit_search(
     Note:
         If the specified subreddit is not found, falls back to searching 'all'.
     """
+    try:
+        import praw
+        import praw.models
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError("Reddit search requires: pip install 'par_ai_core[search]'") from e
     reddit = praw.Reddit(
         client_id=os.environ.get("REDDIT_CLIENT_ID"),
         client_secret=os.environ.get("REDDIT_CLIENT_SECRET"),
@@ -396,6 +406,10 @@ def youtube_get_comments(youtube, video_id: str, max_results: int = 10) -> list[
 
 def youtube_get_transcript(video_id: str, languages: list[str] | None = None) -> str:
     """Fetch transcript for a YouTube video."""
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError("YouTube transcript fetch requires: pip install 'par_ai_core[search]'") from e
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])  # type: ignore
     transcript_text = " ".join([item["text"] for item in transcript_list])
     return transcript_text.replace("\n", " ")
@@ -443,6 +457,10 @@ def youtube_search(
     if days < 0:
         raise ValueError("days parameter must be >= 0")
     api_key = os.environ.get("GOOGLE_API_KEY")
+    try:
+        from googleapiclient.discovery import build
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError("YouTube search requires: pip install 'par_ai_core[search]'") from e
     youtube = build("youtube", "v3", developerKey=api_key)
 
     start_date = date.today() - timedelta(days=days)

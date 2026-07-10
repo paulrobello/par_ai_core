@@ -7,12 +7,12 @@ Created by Paul Robello probello@gmail.com.
 from __future__ import annotations
 
 import os
-import warnings
 
-from langchain_core._api import LangChainBetaWarning  # type: ignore
-
-warnings.filterwarnings("ignore", category=LangChainBetaWarning, module=r"par_ai_core\..*")
-warnings.filterwarnings("ignore", category=DeprecationWarning, module=r"par_ai_core\..*")
+# NOTE: This library intentionally performs NO global side effects at import
+# time. It does not reconfigure the root logger, replace sys.excepthook, or
+# install global warnings filters. Consumers that want the rich logging
+# handler, rich tracebacks, and par_ai_core warning suppression should call
+# ``init_logging()`` from par_ai_core.par_logging (see ARC-002 / QA-013).
 
 
 __author__ = "Paul Robello"
@@ -69,6 +69,22 @@ def configure_user_agent(user_agent: str | None = None) -> None:
     os.environ["USER_AGENT"] = user_agent or f"{__application_title__} {__version__}"
 
 
+def init_logging(level: str | int | None = None) -> None:
+    """Install the rich console handler, rich tracebacks, and warning filters.
+
+    Thin re-export of :func:`par_ai_core.par_logging.init_logging`. Call once
+    from your application entrypoint if you want rich-formatted logs and
+    tracebacks. This is opt-in; importing ``par_ai_core`` does not configure
+    logging globally.
+
+    Args:
+        level: Logging level (string, int, or None to read ``PARAI_LOG_LEVEL``).
+    """
+    from par_ai_core.par_logging import init_logging as _init_logging
+
+    _init_logging(level)
+
+
 __all__: list[str] = [
     "__author__",
     "__credits__",
@@ -80,4 +96,5 @@ __all__: list[str] = [
     "__application_title__",
     "apply_nest_asyncio",
     "configure_user_agent",
+    "init_logging",
 ]

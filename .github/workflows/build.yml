@@ -186,15 +186,12 @@ jobs:
           else
             echo "TAG_EXISTS=true" >> $GITHUB_ENV
           fi
-      - name: Delete existing tag locally and remotely
+      - name: Skip if tag already exists
         if: env.TAG_EXISTS == 'true'
-        env:
-          VERSION: ${{ env.VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git tag -d "v$VERSION"
-          git push --delete origin "v$VERSION"
-      - name: Create new tag
+          echo "Tag v${VERSION} already exists; leaving it untouched (immutable release tags)."
+      - name: Create and push new tag
+        if: env.TAG_EXISTS != 'true'
         env:
           VERSION: ${{ env.VERSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -37,11 +37,10 @@ import socket
 import threading
 import time
 from queue import Queue
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 from bs4 import BeautifulSoup
-from playwright.async_api import HttpCredentials, ProxySettings, async_playwright
 from pydantic import BaseModel
 from rich.console import Console
 from rich.repr import rich_repr
@@ -49,6 +48,13 @@ from strenum import StrEnum
 
 from par_ai_core.par_logging import console_err
 from par_ai_core.user_agents import get_random_user_agent
+
+if TYPE_CHECKING:
+    # Playwright is an optional backend (install with ``par_ai_core[web]``).
+    # These are type-only imports; annotations are stringified via
+    # ``from __future__ import annotations``. The runtime ``async_playwright``
+    # entry point is imported lazily inside ``fetch_url_playwright``.
+    from playwright.async_api import HttpCredentials, ProxySettings
 
 
 class ScraperChoice(StrEnum):
@@ -421,6 +427,13 @@ async def fetch_url_playwright(
             return ""
         finally:
             await context.close()
+
+    try:
+        from playwright.async_api import async_playwright
+    except ImportError as e:  # pragma: no cover - exercised only without the extra
+        raise ImportError(
+            "Playwright-based fetching requires the playwright package: pip install 'par_ai_core[web]'"
+        ) from e
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(proxy=proxy_config, headless=headless)

@@ -22,12 +22,13 @@ from __future__ import annotations
 
 import os
 import re
+from typing import Any
 
 import tiktoken
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from par_ai_core.llm_config import LlmConfig, ReasoningEffort, llm_run_manager
+from par_ai_core.llm_config import _ENV_NUMERIC_FIELDS, LlmConfig, ReasoningEffort, llm_run_manager
 from par_ai_core.llm_providers import LlmProvider, provider_base_urls, provider_default_models, provider_env_key_names
 from par_ai_core.pricing_lookup import get_model_metadata
 
@@ -76,39 +77,15 @@ def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
         if num_ctx < 0:
             num_ctx = 0
 
-    timeout = os.environ.get(f"{prefix}_TIMEOUT")
-    if timeout is not None:
-        timeout = int(timeout)
-    num_predict = os.environ.get(f"{prefix}_NUM_PREDICT")
-    if num_predict is not None:
-        num_predict = int(num_predict)
-    repeat_last_n = os.environ.get(f"{prefix}_REPEAT_LAST_N")
-    if repeat_last_n is not None:
-        repeat_last_n = int(repeat_last_n)
-    repeat_penalty = os.environ.get(f"{prefix}_REPEAT_PENALTY")
-    if repeat_penalty is not None:
-        repeat_penalty = float(repeat_penalty)
-    mirostat = os.environ.get(f"{prefix}_MIROSTAT")
-    if mirostat is not None:
-        mirostat = int(mirostat)
-    mirostat_eta = os.environ.get(f"{prefix}_MIROSTAT_ETA")
-    if mirostat_eta is not None:
-        mirostat_eta = float(mirostat_eta)
-    mirostat_tau = os.environ.get(f"{prefix}_MIROSTAT_TAU")
-    if mirostat_tau is not None:
-        mirostat_tau = float(mirostat_tau)
-    tfs_z = os.environ.get(f"{prefix}_TFS_Z")
-    if tfs_z is not None:
-        tfs_z = float(tfs_z)
-    top_k = os.environ.get(f"{prefix}_TOP_K")
-    if top_k is not None:
-        top_k = int(top_k)
-    top_p = os.environ.get(f"{prefix}_TOP_P")
-    if top_p is not None:
-        top_p = float(top_p)
-    seed = os.environ.get(f"{prefix}_SEED")
-    if seed is not None:
-        seed = int(seed)
+    # Uniform numeric fields (incl. TIMEOUT) are parsed from the shared
+    # _ENV_NUMERIC_FIELDS table so this stays in lock-step with
+    # LlmConfig.set_env (ARC-017). Typed as Any so the kwargs unpack matches
+    # each field's declared type.
+    env_numeric: dict[str, Any] = {}
+    for suffix, field_name, parser in _ENV_NUMERIC_FIELDS:
+        raw = os.environ.get(f"{prefix}_{suffix}")
+        if raw is not None:
+            env_numeric[field_name] = parser(raw)
 
     reasoning_effort = os.environ.get(f"{prefix}_REASONING_EFFORT")
     if reasoning_effort not in [None, "low", "medium", "high"]:
@@ -131,19 +108,9 @@ def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
         streaming=streaming,
         num_ctx=num_ctx,
         env_prefix=prefix,
-        timeout=timeout,
-        num_predict=num_predict,
-        repeat_last_n=repeat_last_n,
-        repeat_penalty=repeat_penalty,
-        mirostat=mirostat,
-        mirostat_eta=mirostat_eta,
-        mirostat_tau=mirostat_tau,
-        tfs_z=tfs_z,
-        top_k=top_k,
-        top_p=top_p,
-        seed=seed,
         reasoning_effort=reasoning_effort,
         reasoning_budget=reasoning_budget,
+        **env_numeric,
     )
 
 

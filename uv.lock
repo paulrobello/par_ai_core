@@ -1565,19 +1565,6 @@ wheels = [
 ]
 
 [[package]]
-name = "langchain-experimental"
-version = "0.4.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "langchain-community" },
-    { name = "langchain-core" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/1c/8240195c1b27f2c45b2ee93a07b2a5a466c92dec8881fc1213ec8e3cb6a8/langchain_experimental-0.4.2.tar.gz", hash = "sha256:1130fa7ecad5959e687295b2f7850ae3e5d8eeee6796bf9e99910806475d8acc", size = 172068, upload-time = "2026-05-22T20:38:42.184Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/ce/5c56f08407648ab897b119a4add46391560a144285cf89e060091bc793e9/langchain_experimental-0.4.2-py3-none-any.whl", hash = "sha256:fd98b9948cb6f991e0f632ea3d5fb839bcfe21e6d5a190a51126a76270a66d40", size = 211226, upload-time = "2026-05-22T20:38:40.678Z" },
-]
-
-[[package]]
 name = "langchain-google-community"
 version = "5.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2404,16 +2391,32 @@ name = "par-ai-core"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
+    { name = "langchain" },
+    { name = "langchain-core" },
+    { name = "langchain-text-splitters" },
+    { name = "langgraph" },
+    { name = "markdownify" },
+    { name = "nest-asyncio" },
+    { name = "orjson" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "python-dotenv" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "strenum" },
+    { name = "tiktoken" },
+]
+
+[package.optional-dependencies]
+all = [
     { name = "boto3" },
     { name = "botocore" },
+    { name = "google-api-python-client" },
     { name = "html2text" },
-    { name = "langchain" },
     { name = "langchain-anthropic" },
     { name = "langchain-aws" },
     { name = "langchain-community" },
-    { name = "langchain-core" },
     { name = "langchain-deepseek" },
-    { name = "langchain-experimental" },
     { name = "langchain-google-community" },
     { name = "langchain-google-genai" },
     { name = "langchain-groq" },
@@ -2421,32 +2424,84 @@ dependencies = [
     { name = "langchain-mistralai" },
     { name = "langchain-ollama" },
     { name = "langchain-openai" },
-    { name = "langchain-text-splitters" },
     { name = "langchain-xai" },
-    { name = "langgraph" },
     { name = "litellm" },
-    { name = "markdownify" },
-    { name = "nest-asyncio" },
     { name = "openai" },
-    { name = "orjson" },
     { name = "playwright" },
     { name = "praw" },
-    { name = "pydantic" },
-    { name = "pydantic-core" },
-    { name = "python-dotenv" },
-    { name = "requests" },
-    { name = "rich" },
     { name = "selenium" },
-    { name = "strenum" },
     { name = "tavily-python" },
-    { name = "tiktoken" },
     { name = "webdriver-manager" },
     { name = "youtube-transcript-api" },
+]
+anthropic = [
+    { name = "langchain-anthropic" },
+]
+azure = [
+    { name = "langchain-openai" },
+    { name = "openai" },
+]
+bedrock = [
+    { name = "boto3" },
+    { name = "botocore" },
+    { name = "langchain-aws" },
+]
+deepseek = [
+    { name = "langchain-deepseek" },
+]
+github = [
+    { name = "langchain-openai" },
+    { name = "openai" },
+]
+google = [
+    { name = "google-api-python-client" },
+    { name = "langchain-google-community" },
+    { name = "langchain-google-genai" },
+]
+groq = [
+    { name = "langchain-groq" },
+]
+litellm = [
+    { name = "langchain-litellm" },
+]
+mistral = [
+    { name = "langchain-mistralai" },
+]
+ollama = [
+    { name = "langchain-ollama" },
+]
+openai = [
+    { name = "langchain-openai" },
+    { name = "openai" },
+]
+openrouter = [
+    { name = "langchain-openai" },
+    { name = "openai" },
+]
+pricing = [
+    { name = "litellm" },
+]
+search = [
+    { name = "google-api-python-client" },
+    { name = "langchain-community" },
+    { name = "praw" },
+    { name = "tavily-python" },
+    { name = "youtube-transcript-api" },
+]
+web = [
+    { name = "html2text" },
+    { name = "playwright" },
+    { name = "selenium" },
+    { name = "webdriver-manager" },
+]
+xai = [
+    { name = "langchain-xai" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "hatchling" },
+    { name = "par-ai-core", extra = ["all"] },
     { name = "pdoc3" },
     { name = "pre-commit" },
     { name = "pyinstrument" },
@@ -2465,49 +2520,82 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.15.0" },
-    { name = "boto3", specifier = ">=1.43.35" },
-    { name = "botocore", specifier = ">=1.43.35" },
-    { name = "html2text", specifier = ">=2025.4.15" },
+    { name = "boto3", marker = "extra == 'all'", specifier = ">=1.43.35" },
+    { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.43.35" },
+    { name = "botocore", marker = "extra == 'all'", specifier = ">=1.43.35" },
+    { name = "botocore", marker = "extra == 'bedrock'", specifier = ">=1.43.35" },
+    { name = "google-api-python-client", marker = "extra == 'all'", specifier = ">=2.100.0" },
+    { name = "google-api-python-client", marker = "extra == 'google'", specifier = ">=2.100.0" },
+    { name = "google-api-python-client", marker = "extra == 'search'", specifier = ">=2.100.0" },
+    { name = "html2text", marker = "extra == 'all'", specifier = ">=2025.4.15" },
+    { name = "html2text", marker = "extra == 'web'", specifier = ">=2025.4.15" },
     { name = "langchain", specifier = ">=1.3.11" },
-    { name = "langchain-anthropic", specifier = ">=1.4.7" },
-    { name = "langchain-aws", specifier = ">=1.6.0" },
-    { name = "langchain-community", specifier = ">=0.4.2" },
+    { name = "langchain-anthropic", marker = "extra == 'all'", specifier = ">=1.4.7" },
+    { name = "langchain-anthropic", marker = "extra == 'anthropic'", specifier = ">=1.4.7" },
+    { name = "langchain-aws", marker = "extra == 'all'", specifier = ">=1.6.0" },
+    { name = "langchain-aws", marker = "extra == 'bedrock'", specifier = ">=1.6.0" },
+    { name = "langchain-community", marker = "extra == 'all'", specifier = ">=0.4.2" },
+    { name = "langchain-community", marker = "extra == 'search'", specifier = ">=0.4.2" },
     { name = "langchain-core", specifier = ">=1.4.8" },
-    { name = "langchain-deepseek", specifier = ">=1.1.0" },
-    { name = "langchain-experimental", specifier = ">=0.4.2" },
-    { name = "langchain-google-community", specifier = ">=5.0.0" },
-    { name = "langchain-google-genai", specifier = ">=4.2.5" },
-    { name = "langchain-groq", specifier = ">=1.1.3" },
-    { name = "langchain-litellm", specifier = ">=0.7.0" },
-    { name = "langchain-mistralai", specifier = ">=1.1.5" },
-    { name = "langchain-ollama", specifier = ">=1.1.0" },
-    { name = "langchain-openai", specifier = ">=1.3.3" },
+    { name = "langchain-deepseek", marker = "extra == 'all'", specifier = ">=1.1.0" },
+    { name = "langchain-deepseek", marker = "extra == 'deepseek'", specifier = ">=1.1.0" },
+    { name = "langchain-google-community", marker = "extra == 'all'", specifier = ">=5.0.0" },
+    { name = "langchain-google-community", marker = "extra == 'google'", specifier = ">=5.0.0" },
+    { name = "langchain-google-genai", marker = "extra == 'all'", specifier = ">=4.2.5" },
+    { name = "langchain-google-genai", marker = "extra == 'google'", specifier = ">=4.2.5" },
+    { name = "langchain-groq", marker = "extra == 'all'", specifier = ">=1.1.3" },
+    { name = "langchain-groq", marker = "extra == 'groq'", specifier = ">=1.1.3" },
+    { name = "langchain-litellm", marker = "extra == 'all'", specifier = ">=0.7.0" },
+    { name = "langchain-litellm", marker = "extra == 'litellm'", specifier = ">=0.7.0" },
+    { name = "langchain-mistralai", marker = "extra == 'all'", specifier = ">=1.1.5" },
+    { name = "langchain-mistralai", marker = "extra == 'mistral'", specifier = ">=1.1.5" },
+    { name = "langchain-ollama", marker = "extra == 'all'", specifier = ">=1.1.0" },
+    { name = "langchain-ollama", marker = "extra == 'ollama'", specifier = ">=1.1.0" },
+    { name = "langchain-openai", marker = "extra == 'all'", specifier = ">=1.3.3" },
+    { name = "langchain-openai", marker = "extra == 'azure'", specifier = ">=1.3.3" },
+    { name = "langchain-openai", marker = "extra == 'github'", specifier = ">=1.3.3" },
+    { name = "langchain-openai", marker = "extra == 'openai'", specifier = ">=1.3.3" },
+    { name = "langchain-openai", marker = "extra == 'openrouter'", specifier = ">=1.3.3" },
     { name = "langchain-text-splitters", specifier = ">=1.1.2" },
-    { name = "langchain-xai", specifier = ">=1.2.2" },
+    { name = "langchain-xai", marker = "extra == 'all'", specifier = ">=1.2.2" },
+    { name = "langchain-xai", marker = "extra == 'xai'", specifier = ">=1.2.2" },
     { name = "langgraph", specifier = ">=1.2.6" },
-    { name = "litellm", specifier = ">=1.89.3" },
+    { name = "litellm", marker = "extra == 'all'", specifier = ">=1.89.3" },
+    { name = "litellm", marker = "extra == 'pricing'", specifier = ">=1.89.3" },
     { name = "markdownify", specifier = ">=1.2.2" },
     { name = "nest-asyncio", specifier = ">=1.6.0" },
-    { name = "openai", specifier = ">=2.43.0" },
+    { name = "openai", marker = "extra == 'all'", specifier = ">=2.43.0" },
+    { name = "openai", marker = "extra == 'azure'", specifier = ">=2.43.0" },
+    { name = "openai", marker = "extra == 'github'", specifier = ">=2.43.0" },
+    { name = "openai", marker = "extra == 'openai'", specifier = ">=2.43.0" },
+    { name = "openai", marker = "extra == 'openrouter'", specifier = ">=2.43.0" },
     { name = "orjson", specifier = ">=3.11.9" },
-    { name = "playwright", specifier = ">=1.60.0" },
-    { name = "praw", specifier = ">=8.0.1" },
+    { name = "playwright", marker = "extra == 'all'", specifier = ">=1.60.0" },
+    { name = "playwright", marker = "extra == 'web'", specifier = ">=1.60.0" },
+    { name = "praw", marker = "extra == 'all'", specifier = ">=8.0.1" },
+    { name = "praw", marker = "extra == 'search'", specifier = ">=8.0.1" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pydantic-core", specifier = ">=2.46.4" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "rich", specifier = ">=15.0.0" },
-    { name = "selenium", specifier = ">=4.45.0" },
+    { name = "selenium", marker = "extra == 'all'", specifier = ">=4.45.0" },
+    { name = "selenium", marker = "extra == 'web'", specifier = ">=4.45.0" },
     { name = "strenum", specifier = ">=0.4.15" },
-    { name = "tavily-python", specifier = ">=0.7.26" },
+    { name = "tavily-python", marker = "extra == 'all'", specifier = ">=0.7.26" },
+    { name = "tavily-python", marker = "extra == 'search'", specifier = ">=0.7.26" },
     { name = "tiktoken", specifier = ">=0.13.0" },
-    { name = "webdriver-manager", specifier = ">=4.1.2" },
-    { name = "youtube-transcript-api", specifier = ">=1.2.4" },
+    { name = "webdriver-manager", marker = "extra == 'all'", specifier = ">=4.1.2" },
+    { name = "webdriver-manager", marker = "extra == 'web'", specifier = ">=4.1.2" },
+    { name = "youtube-transcript-api", marker = "extra == 'all'", specifier = ">=1.2.4" },
+    { name = "youtube-transcript-api", marker = "extra == 'search'", specifier = ">=1.2.4" },
 ]
+provides-extras = ["all", "anthropic", "azure", "bedrock", "deepseek", "github", "google", "groq", "litellm", "mistral", "ollama", "openai", "openrouter", "pricing", "search", "web", "xai"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "hatchling", specifier = ">=1.30.1" },
+    { name = "par-ai-core", extras = ["all"] },
     { name = "pdoc3", specifier = ">=0.11.6" },
     { name = "pre-commit", specifier = ">=4.6.0" },
     { name = "pyinstrument", specifier = ">=5.1.2" },

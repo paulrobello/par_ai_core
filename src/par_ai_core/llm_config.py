@@ -17,9 +17,12 @@ Classes:
 
 from __future__ import annotations
 
+import copy
+import dataclasses
 import os
 import threading
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, fields
 from typing import Any, Literal
 
@@ -184,34 +187,14 @@ class LlmConfig:
             dict: A dictionary containing all configuration parameters,
                 suitable for JSON serialization
         """
+        # ``dataclasses.asdict`` is the single source of truth for the field
+        # set: adding a field to the dataclass now flows through serialization
+        # automatically instead of requiring a hand-maintained entry here (was
+        # ARC-007/QA-008). Enum fields are preserved as enum objects exactly as
+        # the previous hand-listed dict did (callers and from_json rely on this).
         return {
             "class_name": self.__class__.__name__,
-            "provider": self.provider,
-            "model_name": self.model_name,
-            "fallback_models": self.fallback_models,
-            "mode": self.mode,
-            "temperature": self.temperature,
-            "streaming": self.streaming,
-            "base_url": self.base_url,
-            "timeout": self.timeout,
-            "user_agent_appid": self.user_agent_appid,
-            "num_ctx": self.num_ctx,
-            "num_predict": self.num_predict,
-            "repeat_last_n": self.repeat_last_n,
-            "repeat_penalty": self.repeat_penalty,
-            "mirostat": self.mirostat,
-            "mirostat_eta": self.mirostat_eta,
-            "mirostat_tau": self.mirostat_tau,
-            "tfs_z": self.tfs_z,
-            "top_k": self.top_k,
-            "top_p": self.top_p,
-            "seed": self.seed,
-            "env_prefix": self.env_prefix,
-            "format": self.format,
-            "extra_body": self.extra_body,
-            "reasoning_effort": self.reasoning_effort,
-            "reasoning_budget": self.reasoning_budget,
-            "safety_settings": self.safety_settings,
+            **dataclasses.asdict(self),
         }
 
     @classmethod
@@ -244,33 +227,15 @@ class LlmConfig:
         Returns:
             LlmConfig: A new instance with identical configuration parameters
         """
-        return LlmConfig(
-            provider=self.provider,
-            model_name=self.model_name,
-            fallback_models=self.fallback_models,
-            mode=self.mode,
-            temperature=self.temperature,
-            streaming=self.streaming,
-            base_url=self.base_url,
-            timeout=self.timeout,
-            user_agent_appid=self.user_agent_appid,
-            num_ctx=self.num_ctx,
-            num_predict=self.num_predict,
-            repeat_last_n=self.repeat_last_n,
-            repeat_penalty=self.repeat_penalty,
-            mirostat=self.mirostat,
-            mirostat_eta=self.mirostat_eta,
-            mirostat_tau=self.mirostat_tau,
-            tfs_z=self.tfs_z,
-            top_k=self.top_k,
-            top_p=self.top_p,
-            seed=self.seed,
-            env_prefix=self.env_prefix,
-            format=self.format,
-            extra_body=self.extra_body,
-            reasoning_effort=self.reasoning_effort,
-            reasoning_budget=self.reasoning_budget,
-            safety_settings=self.safety_settings,
+        # ``dataclasses.replace`` is the single source of truth for the field
+        # set (was ARC-007/QA-008). The mutable container fields are deep-copied
+        # explicitly so the clone is fully independent of the original
+        # (``replace`` only shallow-copies them).
+        return dataclasses.replace(
+            self,
+            fallback_models=copy.deepcopy(self.fallback_models),
+            extra_body=copy.deepcopy(self.extra_body),
+            safety_settings=copy.deepcopy(self.safety_settings),
         )
 
     def gen_runnable_config(self) -> RunnableConfig:
@@ -827,36 +792,30 @@ class LlmConfig:
     def _build_llm(self) -> BaseLanguageModel | BaseChatModel | Embeddings:
         """Build the LLM by dispatching to the provider-specific builder.
 
-        Sets ``base_url`` from provider defaults if not already set, then
-        delegates to the appropriate ``_build_<provider>_llm`` method.
+        Computes the effective ``base_url`` (provider default when unset) and
+        builds on a shallow copy so that provider builders which historically
+        mutated ``base_url``/``extra_body``/``num_ctx`` cannot corrupt this
+        config instance. ``_build_llm`` is therefore pure: it does not mutate
+        ``self`` regardless of whether the caller cloned first (was ARC-007).
+
+        Dispatch is table-driven via ``_PROVIDER_BUILDERS`` so adding a provider
+        means registering a builder rather than editing this if-chain.
         """
         if not isinstance(self.provider, LlmProvider):
             raise ValueError(f"Invalid LLM provider '{self.provider}'")
-        self.base_url = self.base_url or provider_base_urls.get(self.provider)
-        if self.provider == LlmProvider.OLLAMA:
-            return self._build_ollama_llm()
-        if self.provider in [LlmProvider.OPENAI, LlmProvider.AZURE, LlmProvider.GITHUB, LlmProvider.LLAMACPP]:
-            return self._build_openai_compat_llm()
-        if self.provider == LlmProvider.GROQ:
-            return self._build_groq_llm()
-        if self.provider == LlmProvider.DEEPSEEK:
-            return self._build_deepseek_llm()
-        if self.provider == LlmProvider.OPENROUTER:
-            return self._build_openrouter_llm()
-        if self.provider == LlmProvider.XAI:
-            return self._build_xai_llm()
-        if self.provider == LlmProvider.ANTHROPIC:
-            return self._build_anthropic_llm()
-        if self.provider == LlmProvider.GEMINI:
-            return self._build_google_llm()
-        if self.provider == LlmProvider.BEDROCK:
-            return self._build_bedrock_llm()
-        if self.provider == LlmProvider.MISTRAL:
-            return self._build_mistral_llm()
-        if self.provider == LlmProvider.LITELLM:
-            return self._build_litellm_llm()
-
-        raise ValueError(f"Invalid LLM provider '{self.provider.value}' or mode '{self.mode.value}'")
+        builder = _PROVIDER_BUILDERS.get(self.provider)
+        if builder is None:
+            raise ValueError(f"Invalid LLM provider '{self.provider.value}' or mode '{self.mode.value}'")
+        # Resolve the effective base_url and build on a shallow copy so ``self``
+        # is never mutated. Builders that historically reassigned
+        # ``base_url``/``extra_body``/``num_ctx`` now rebind fields on the copy,
+        # leaving the caller's config untouched (was ARC-007).
+        effective_base_url = self.base_url or provider_base_urls.get(self.provider)
+        cfg = dataclasses.replace(self, base_url=effective_base_url)
+        # Dispatch by name through the instance so tests/monkeypatches that
+        # replace the class-level builder method are honored (a captured
+        # function reference would bypass such patches).
+        return getattr(cfg, builder.__name__)()
 
     def build_llm_model(self) -> BaseLanguageModel:
         """Build the LLM model."""
@@ -915,34 +874,66 @@ class LlmConfig:
         os.environ[f"{self.env_prefix}_STREAMING"] = str(self.streaming)
         if self.num_ctx is not None:
             os.environ[f"{self.env_prefix}_NUM_CTX"] = str(self.num_ctx)
-        if self.num_predict is not None:
-            os.environ[f"{self.env_prefix}_NUM_PREDICT"] = str(self.num_predict)
-        if self.repeat_last_n is not None:
-            os.environ[f"{self.env_prefix}_REPEAT_LAST_N"] = str(self.repeat_last_n)
-        if self.repeat_penalty is not None:
-            os.environ[f"{self.env_prefix}_REPEAT_PENALTY"] = str(self.repeat_penalty)
-        if self.mirostat is not None:
-            os.environ[f"{self.env_prefix}_MIROSTAT"] = str(self.mirostat)
-        if self.mirostat_eta is not None:
-            os.environ[f"{self.env_prefix}_MIROSTAT_ETA"] = str(self.mirostat_eta)
-        if self.mirostat_tau is not None:
-            os.environ[f"{self.env_prefix}_MIROSTAT_TAU"] = str(self.mirostat_tau)
-        if self.tfs_z is not None:
-            os.environ[f"{self.env_prefix}_TFS_Z"] = str(self.tfs_z)
-        if self.top_k is not None:
-            os.environ[f"{self.env_prefix}_TOP_K"] = str(self.top_k)
-        if self.top_p is not None:
-            os.environ[f"{self.env_prefix}_TOP_P"] = str(self.top_p)
-        if self.seed is not None:
-            os.environ[f"{self.env_prefix}_SEED"] = str(self.seed)
-        if self.timeout is not None:
-            os.environ[f"{self.env_prefix}_TIMEOUT"] = str(self.timeout)
+        # Uniform numeric fields are driven from the shared _ENV_NUMERIC_FIELDS
+        # table so set_env and llm_config_from_env cannot drift (ARC-017).
+        for suffix, field_name, _ in _ENV_NUMERIC_FIELDS:
+            value = getattr(self, field_name)
+            if value is not None:
+                os.environ[f"{self.env_prefix}_{suffix}"] = str(value)
         if self.reasoning_effort is not None:
             os.environ[f"{self.env_prefix}_REASONING_EFFORT"] = str(self.reasoning_effort)
         if self.reasoning_budget is not None:
             os.environ[f"{self.env_prefix}_REASONING_BUDGET"] = str(self.reasoning_budget)
 
         return self
+
+
+# --- Builder registry (ARC-007) -------------------------------------------
+# Dispatch table from provider to its builder method. Adding a provider now
+# means registering a builder here rather than editing the ``_build_llm``
+# if-chain. ``LlmConfig._build_llm`` looks up the builder and invokes it on a
+# shallow copy of the config (so the builder cannot mutate the caller's config).
+_PROVIDER_BUILDERS: dict[LlmProvider, Callable[[LlmConfig], BaseLanguageModel | BaseChatModel | Embeddings]] = {
+    LlmProvider.OLLAMA: LlmConfig._build_ollama_llm,
+    LlmProvider.OPENAI: LlmConfig._build_openai_compat_llm,
+    LlmProvider.AZURE: LlmConfig._build_openai_compat_llm,
+    LlmProvider.GITHUB: LlmConfig._build_openai_compat_llm,
+    LlmProvider.LLAMACPP: LlmConfig._build_openai_compat_llm,
+    LlmProvider.GROQ: LlmConfig._build_groq_llm,
+    LlmProvider.DEEPSEEK: LlmConfig._build_deepseek_llm,
+    LlmProvider.OPENROUTER: LlmConfig._build_openrouter_llm,
+    LlmProvider.XAI: LlmConfig._build_xai_llm,
+    LlmProvider.ANTHROPIC: LlmConfig._build_anthropic_llm,
+    LlmProvider.GEMINI: LlmConfig._build_google_llm,
+    LlmProvider.BEDROCK: LlmConfig._build_bedrock_llm,
+    LlmProvider.MISTRAL: LlmConfig._build_mistral_llm,
+    LlmProvider.LITELLM: LlmConfig._build_litellm_llm,
+}
+
+# --- Table-driven env serialization (ARC-017) -----------------------------
+# ``(env suffix, field name, parser)`` for the numeric env-backed fields that
+# share uniform two-way semantics: parse from env when present (else leave
+# unset), and write to env only when the field is not None. This is the single
+# source of truth shared by ``LlmConfig.set_env`` and
+# ``llm_utils.llm_config_from_env``, so the two directions cannot drift.
+#
+# Fields with non-uniform semantics are intentionally excluded and handled
+# explicitly: provider/model/base_url/streaming/temperature (required, default,
+# or truthy-gated), num_ctx (>=0 clamp), reasoning_effort (validated enum), and
+# reasoning_budget (0 -> None coercion).
+_ENV_NUMERIC_FIELDS: tuple[tuple[str, str, type], ...] = (
+    ("NUM_PREDICT", "num_predict", int),
+    ("REPEAT_LAST_N", "repeat_last_n", int),
+    ("MIROSTAT", "mirostat", int),
+    ("TOP_K", "top_k", int),
+    ("SEED", "seed", int),
+    ("TIMEOUT", "timeout", int),
+    ("REPEAT_PENALTY", "repeat_penalty", float),
+    ("MIROSTAT_ETA", "mirostat_eta", float),
+    ("MIROSTAT_TAU", "mirostat_tau", float),
+    ("TFS_Z", "tfs_z", float),
+    ("TOP_P", "top_p", float),
+)
 
 
 class LlmRunManager:
