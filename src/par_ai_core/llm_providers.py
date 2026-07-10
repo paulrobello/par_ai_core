@@ -197,33 +197,44 @@ provider_env_key_names: dict[LlmProvider, str] = {
 
 
 def get_provider_name_fuzzy(provider: str) -> str:
-    """Get provider name using fuzzy matching.
+    """Get a provider name via deterministic case-insensitive matching.
 
-    Attempts to match a provider name string to a valid provider by checking for
-    exact matches and prefix matches. Case-insensitive matching is used.
+    Resolution order (case-insensitive):
+        1. Exact match on the provider value (e.g. ``"openai"`` -> ``"OpenAI"``).
+        2. Unique prefix match: if exactly one provider value starts with the
+           input, return it. If more than one matches, the input is ambiguous
+           and ``""`` is returned (e.g. ``"open"`` matches both ``"OpenAI"`` and
+           ``"OpenRouter"``).
 
     Args:
-        provider: String to match against provider names. Can be full name or prefix
-            (e.g. "openai" or "open" for OpenAI)
+        provider: String to match against provider names. Can be a full name or
+            an unambiguous prefix.
 
     Returns:
-        str: Matched provider name if found, empty string if no match found.
-            Returns exact provider name with proper casing if matched.
+        The matched provider name with proper casing, or ``""`` if there is no
+        match or the prefix is ambiguous.
 
     Examples:
         >>> get_provider_name_fuzzy("openai")
         'OpenAI'
         >>> get_provider_name_fuzzy("anth")
         'Anthropic'
+        >>> get_provider_name_fuzzy("open")
+        ''
         >>> get_provider_name_fuzzy("invalid")
         ''
     """
     provider = provider.lower()
+    # 1. Exact match wins immediately.
     for p in llm_provider_types:
         if p.value.lower() == provider:
             return p.value
-        if p.value.lower().startswith(provider):
-            return p.value
+    # 2. Unique prefix match; ambiguous prefixes return "" (was ARC-009 — the
+    #    previous loop returned the first enum-order prefix match, so
+    #    ``"open"`` resolved to ``"OpenRouter"`` depending on enum order).
+    prefix_matches = [p.value for p in llm_provider_types if p.value.lower().startswith(provider)]
+    if len(prefix_matches) == 1:
+        return prefix_matches[0]
     return ""
 
 

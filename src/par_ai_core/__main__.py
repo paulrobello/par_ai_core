@@ -1,4 +1,9 @@
-"""Basic LLM example using Par AI Core."""
+"""``par_ai_core`` console-script entry point.
+
+Invokes an OpenAI lightweight chat model on the prompt passed as the first
+command-line argument. Serves as both a minimal end-to-end usage example and
+the installed ``par_ai_core`` command (see ``[project.scripts]``).
+"""
 
 import sys
 

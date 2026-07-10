@@ -22,15 +22,16 @@ import dataclasses
 import os
 import threading
 import uuid
+import warnings
 from collections.abc import Callable
 from dataclasses import dataclass, fields
+from enum import StrEnum
 from typing import Any, Literal
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel, BaseLanguageModel
 from langchain_core.runnables import RunnableConfig
 from pydantic import SecretStr
-from strenum import StrEnum
 
 from par_ai_core.llm_providers import (
     OLLAMA_HOST,
@@ -126,7 +127,17 @@ class LlmConfig:
     """Used for serialization."""
     num_ctx: int | None = None
     """Sets the size of the context window used to generate the
-    next token. (Default: 2048) Env: ``PARAI_NUM_CTX``"""
+    next token. (Default: 2048) Env: ``PARAI_NUM_CTX``
+
+    Note: this is the Ollama context-window size. For the output token cap on
+    other providers (OpenAI/Anthropic/etc. ``max_tokens``) use
+    ``max_output_tokens``; setting ``num_ctx`` on a non-Ollama provider is
+    deprecated and emits a ``DeprecationWarning`` at build time."""
+    max_output_tokens: int | None = None
+    """Maximum number of output tokens for providers that expose a ``max_tokens``
+    cap (OpenAI, Anthropic ``max_tokens_to_sample``, Groq, XAI, OpenRouter,
+    Deepseek, Gemini, Bedrock, Mistral, LiteLLM, Azure). Distinct from
+    ``num_ctx`` (Ollama's context window). Env: ``PARAI_MAX_OUTPUT_TOKENS``"""
     num_predict: int | None = None
     """Maximum number of tokens to predict when generating text.
     (Default: 128, -1 = infinite generation, -2 = fill context) Env: ``PARAI_NUM_PREDICT``"""
@@ -269,7 +280,10 @@ class LlmConfig:
 
         from langchain_ollama import ChatOllama, OllamaEmbeddings, OllamaLLM
 
-        url = self.base_url or OLLAMA_HOST or provider_base_urls[self.provider]
+        # Read OLLAMA_HOST at use time so post-import load_dotenv() is honored
+        # (ARC-023). The module-level OLLAMA_HOST constant and the provider
+        # table entry (both import-time captures) remain as fallbacks.
+        url = self.base_url or os.environ.get("OLLAMA_HOST") or OLLAMA_HOST or provider_base_urls[self.provider]
         if not url:
             raise ValueError("Could not determine OLLAMA URL")
         clean_url, auth = extract_url_auth(url)
@@ -365,7 +379,7 @@ class LlmConfig:
                     frequency_penalty=self.repeat_penalty or 0,
                     top_p=self.top_p or 1,
                     seed=self.seed,
-                    max_tokens=self.num_ctx or -1,
+                    max_tokens=self.max_output_tokens or -1,
                 )
             if self.mode == LlmMode.CHAT:
                 from langchain_openai import AzureChatOpenAI
@@ -382,7 +396,7 @@ class LlmConfig:
                     timeout=self.timeout,
                     top_p=self.top_p,
                     seed=self.seed,
-                    max_tokens=self.num_ctx,  # type: ignore
+                    max_tokens=self.max_output_tokens,  # type: ignore
                     disable_streaming=not self.streaming,
                     reasoning_effort=self.reasoning_effort,
                 )
@@ -412,7 +426,7 @@ class LlmConfig:
                     frequency_penalty=self.repeat_penalty or 0,
                     top_p=self.top_p or 1,
                     seed=self.seed,
-                    max_tokens=self.num_ctx or -1,
+                    max_tokens=self.max_output_tokens or -1,
                 )
             if self.mode == LlmMode.CHAT:
                 from langchain_openai import ChatOpenAI
@@ -428,7 +442,7 @@ class LlmConfig:
                     timeout=self.timeout,
                     top_p=self.top_p,
                     seed=self.seed,
-                    max_tokens=self.num_ctx,  # type: ignore
+                    max_tokens=self.max_output_tokens,  # type: ignore
                     disable_streaming=not self.streaming,
                     reasoning_effort=self.reasoning_effort,
                 )
@@ -469,7 +483,7 @@ class LlmConfig:
                 timeout=self.timeout,  # type: ignore
                 top_p=self.top_p,
                 seed=self.seed,  # type: ignore
-                max_tokens=self.num_ctx,
+                max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
             )
         raise ValueError(f"Invalid LLM mode '{self.mode.value}'")
@@ -495,7 +509,7 @@ class LlmConfig:
                 base_url=self.base_url,
                 timeout=self.timeout,
                 streaming=self.streaming,
-                max_tokens=self.num_ctx,
+                max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
             )  # type: ignore
         if self.mode == LlmMode.EMBEDDINGS:
@@ -523,7 +537,7 @@ class LlmConfig:
                 temperature=self.temperature,
                 timeout=self.timeout,
                 streaming=self.streaming,
-                max_tokens=self.num_ctx,
+                max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
                 extra_body=self.extra_body,
             )  # type: ignore
@@ -563,7 +577,7 @@ class LlmConfig:
                 timeout=self.timeout,
                 top_p=self.top_p,
                 seed=self.seed,
-                max_tokens=self.num_ctx,  # type: ignore
+                max_tokens=self.max_output_tokens,  # type: ignore
                 disable_streaming=not self.streaming,
                 reasoning_effort=self.reasoning_effort,
             )
@@ -590,7 +604,7 @@ class LlmConfig:
                 temperature=self.temperature,
                 timeout=self.timeout,
                 streaming=self.streaming,
-                max_tokens=self.num_ctx,
+                max_tokens=self.max_output_tokens,
                 disable_streaming=not self.streaming,
                 extra_body=self.extra_body,
             )  # type: ignore
@@ -604,7 +618,7 @@ class LlmConfig:
         and EMBEDDINGS raise ``ValueError``). Reads ``ANTHROPIC_API_KEY``
         env var. Supports ``reasoning_budget`` for extended thinking
         (minimum 1024 tokens; forces temperature to 1 when enabled and
-        auto-sizes ``num_ctx`` to 2x the budget if not set).
+        auto-sizes ``max_output_tokens`` to 2x the budget if not set).
         """
         if self.provider != LlmProvider.ANTHROPIC:
             raise ValueError(f"LLM provider is '{self.provider.value}' but ANTHROPIC requested.")
@@ -618,8 +632,10 @@ class LlmConfig:
             if self.reasoning_budget:
                 if self.reasoning_budget < 1024:
                     raise ValueError("Reasoning budget must be at least 1024 tokens")
-                if not self.num_ctx:
-                    self.num_ctx = self.reasoning_budget * 2
+                # ARC-006: the reasoning budget sizes the *output* cap, which is
+                # now ``max_output_tokens`` (previously conflated with ``num_ctx``).
+                if not self.max_output_tokens:
+                    self.max_output_tokens = self.reasoning_budget * 2
             return ChatAnthropic(
                 model=self.model_name,  # type: ignore
                 temperature=self.temperature if not self.reasoning_budget else 1,
@@ -627,7 +643,7 @@ class LlmConfig:
                 timeout=self.timeout,
                 top_k=self.top_k,
                 top_p=self.top_p,
-                max_tokens_to_sample=self.num_ctx or 2048,
+                max_tokens_to_sample=self.max_output_tokens or 2048,
                 disable_streaming=not self.streaming,
                 thinking={"type": "enabled", "budget_tokens": self.reasoning_budget} if self.reasoning_budget else None,
             )  # type: ignore
@@ -657,7 +673,7 @@ class LlmConfig:
                 "timeout": self.timeout,
                 "top_k": self.top_k,
                 "top_p": self.top_p,
-                "max_tokens": self.num_ctx,
+                "max_tokens": self.max_output_tokens,
             }
             if self.safety_settings is not None:
                 kwargs["safety_settings"] = self.safety_settings
@@ -671,7 +687,7 @@ class LlmConfig:
                 "timeout": self.timeout,
                 "top_k": self.top_k,
                 "top_p": self.top_p,
-                "max_tokens": self.num_ctx,
+                "max_tokens": self.max_output_tokens,
                 "disable_streaming": not self.streaming,
             }
             if self.safety_settings is not None:
@@ -727,7 +743,7 @@ class LlmConfig:
                 model=self.model_name,
                 endpoint_url=self.base_url,
                 temperature=self.temperature,
-                max_tokens=self.num_ctx,
+                max_tokens=self.max_output_tokens,
                 streaming=self.streaming,
             )
         if self.mode == LlmMode.CHAT:
@@ -738,7 +754,7 @@ class LlmConfig:
                 model=self.model_name,
                 endpoint_url=self.base_url,  # type: ignore
                 temperature=self.temperature,
-                max_tokens=self.num_ctx or None,
+                max_tokens=self.max_output_tokens or None,
                 top_p=self.top_p,
                 disable_streaming=not self.streaming,
             )
@@ -776,7 +792,7 @@ class LlmConfig:
                 temperature=self.temperature,
                 timeout=self.timeout if self.timeout is not None else 10,
                 top_p=self.top_p if self.top_p is not None else 1,
-                max_tokens=self.num_ctx or None,
+                max_tokens=self.max_output_tokens or None,
                 disable_streaming=not self.streaming,
             )
         if self.mode == LlmMode.EMBEDDINGS:
@@ -810,8 +826,30 @@ class LlmConfig:
         # is never mutated. Builders that historically reassigned
         # ``base_url``/``extra_body``/``num_ctx`` now rebind fields on the copy,
         # leaving the caller's config untouched (was ARC-007).
-        effective_base_url = self.base_url or provider_base_urls.get(self.provider)
-        cfg = dataclasses.replace(self, base_url=effective_base_url)
+        #
+        # Ollama's base URL is resolved from OLLAMA_HOST at use time (ARC-023),
+        # so do not pre-fill it from the import-time provider table here — the
+        # ollama builder reads the env var fresh to honor ``load_dotenv()`` calls
+        # made after import (the common pattern in ``__main__.py``).
+        if self.provider == LlmProvider.OLLAMA:
+            effective_base_url = self.base_url
+        else:
+            effective_base_url = self.base_url or provider_base_urls.get(self.provider)
+        overrides: dict[str, Any] = {"base_url": effective_base_url}
+        # Deprecation shim (ARC-006): ``num_ctx`` historically doubled as the
+        # output token cap on non-Ollama providers. If a caller set ``num_ctx``
+        # on a non-Ollama provider without the new ``max_output_tokens``, carry
+        # the value across (with a warning) so existing configs keep working for
+        # one release. Ollama continues to use ``num_ctx`` as its context window.
+        if self.provider != LlmProvider.OLLAMA and self.max_output_tokens is None and self.num_ctx is not None:
+            warnings.warn(
+                "num_ctx is deprecated for the output token cap on non-Ollama providers; "
+                "use max_output_tokens instead. num_ctx now controls only Ollama's context window.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            overrides["max_output_tokens"] = self.num_ctx
+        cfg = dataclasses.replace(self, **overrides)
         # Dispatch by name through the instance so tests/monkeypatches that
         # replace the class-level builder method are honored (a captured
         # function reference would bypass such patches).
@@ -922,6 +960,7 @@ _PROVIDER_BUILDERS: dict[LlmProvider, Callable[[LlmConfig], BaseLanguageModel | 
 # or truthy-gated), num_ctx (>=0 clamp), reasoning_effort (validated enum), and
 # reasoning_budget (0 -> None coercion).
 _ENV_NUMERIC_FIELDS: tuple[tuple[str, str, type], ...] = (
+    ("MAX_OUTPUT_TOKENS", "max_output_tokens", int),
     ("NUM_PREDICT", "num_predict", int),
     ("REPEAT_LAST_N", "repeat_last_n", int),
     ("MIROSTAT", "mirostat", int),

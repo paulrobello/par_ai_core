@@ -631,6 +631,21 @@ def test_ollama_with_authentication() -> None:
         assert "auth" in call_args["client_kwargs"]
 
 
+def test_ollama_host_read_at_use_time() -> None:
+    """OLLAMA_HOST set after import is honored when building (ARC-023)."""
+    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test")
+
+    # Setting OLLAMA_HOST here (after the module was imported) must be picked up
+    # by the builder rather than the import-time capture.
+    with patch.dict(os.environ, {"OLLAMA_HOST": "http://my-ollama-host:11434"}):
+        with patch("langchain_ollama.ChatOllama") as mock_chat:
+            mock_instance = MagicMock(spec=BaseChatModel)
+            mock_chat.return_value = mock_instance
+            config.build_chat_model()
+
+            assert mock_chat.call_args[1]["base_url"] == "http://my-ollama-host:11434"
+
+
 def test_azure_openai_api_key_fallback() -> None:
     """Test Azure OpenAI API key fallback logic."""
     config = LlmConfig(provider=LlmProvider.AZURE, model_name="gpt-4", mode=LlmMode.CHAT)
@@ -693,6 +708,43 @@ def test_anthropic_reasoning_budget_validation() -> None:
         config.build_chat_model()
         call_args = mock_anthropic.call_args[1]
         assert call_args["thinking"]["budget_tokens"] == 2048
+
+
+def test_max_output_tokens_used_for_openai() -> None:
+    """OpenAI builder receives max_tokens from max_output_tokens, not num_ctx (ARC-006)."""
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4", max_output_tokens=512)
+
+    with patch("langchain_openai.ChatOpenAI") as mock_chat:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+        config.build_chat_model()
+        call_args = mock_chat.call_args[1]
+        assert call_args["max_tokens"] == 512
+
+
+def test_num_ctx_on_non_ollama_is_deprecated() -> None:
+    """num_ctx on a non-Ollama provider warns and is carried into max_output_tokens (ARC-006)."""
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4", num_ctx=256)
+
+    with patch("langchain_openai.ChatOpenAI") as mock_chat:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+        with pytest.warns(DeprecationWarning, match="max_output_tokens"):
+            config.build_chat_model()
+        # The deprecated num_ctx value is carried across to the output cap.
+        assert mock_chat.call_args[1]["max_tokens"] == 256
+
+
+def test_num_ctx_still_used_for_ollama_context_window() -> None:
+    """num_ctx still maps to Ollama's context window (ARC-006), no warning."""
+    config = LlmConfig(provider=LlmProvider.OLLAMA, model_name="test", num_ctx=4096)
+
+    with patch("langchain_ollama.ChatOllama") as mock_chat:
+        mock_instance = MagicMock(spec=BaseChatModel)
+        mock_chat.return_value = mock_instance
+        # Must not raise/warn: num_ctx is the correct field for Ollama.
+        config.build_chat_model()
+        assert mock_chat.call_args[1]["num_ctx"] == 4096
 
 
 def test_bedrock_base_and_embeddings_modes() -> None:

@@ -179,3 +179,19 @@ def test_repr():
     """Test string representation."""
     handler = ParAICallbackHandler()
     assert repr(handler) == "{}"
+
+
+def test_get_parai_callback_resets_on_exception():
+    """ContextVar resets and cost prints even when the with-block raises (ARC-004)."""
+    import pytest
+
+    from par_ai_core.provider_cb_info import parai_callback_var
+
+    config = LlmConfig(provider=LlmProvider.OPENAI, model_name="gpt-4")
+
+    # The handler must be reset to None even though the body raises.
+    with pytest.raises(RuntimeError, match="boom"):
+        with get_parai_callback(config, show_pricing=PricingDisplay.PRICE):
+            raise RuntimeError("boom")
+
+    assert parai_callback_var.get() is None

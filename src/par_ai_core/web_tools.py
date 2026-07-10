@@ -36,6 +36,7 @@ import os
 import socket
 import threading
 import time
+from enum import StrEnum
 from queue import Queue
 from typing import TYPE_CHECKING, Literal
 from urllib.parse import quote, urljoin, urlparse, urlunparse
@@ -44,7 +45,6 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from rich.console import Console
 from rich.repr import rich_repr
-from strenum import StrEnum
 
 from par_ai_core.par_logging import console_err
 from par_ai_core.user_agents import get_random_user_agent
@@ -732,6 +732,13 @@ def fetch_url_and_convert_to_markdown(
     urls: str | list[str],
     *,
     fetch_using: Literal["playwright", "selenium"] = "playwright",
+    max_parallel: int = 1,
+    proxy_config: ProxySettings | None = None,
+    http_credentials: HttpCredentials | None = None,
+    wait_type: ScraperWaitType = ScraperWaitType.SLEEP,
+    wait_selector: str | None = None,
+    headless: bool = True,
+    ignore_ssl: bool = False,
     include_links: bool = True,
     include_images: bool = False,
     include_metadata: bool = False,
@@ -745,9 +752,21 @@ def fetch_url_and_convert_to_markdown(
     """
     Fetch the contents of a webpage and convert it to markdown.
 
+    This is a thin facade over ``fetch_url`` followed by ``html_to_markdown``;
+    the fetch-related parameters mirror ``fetch_url`` and are forwarded as-is
+    (was ARC-021 — the facade previously dropped proxy/credentials/wait/headless/
+    ignore_ssl/max_parallel).
+
     Args:
         urls (Union[str, list[str]]): The URL(s) to fetch.
         fetch_using (Literal["playwright", "selenium"], optional): The method to use for fetching the content. Defaults to "playwright".
+        max_parallel (int): Maximum number of parallel requests. Defaults to 1.
+        proxy_config (ProxySettings | None): Proxy configuration. Defaults to None.
+        http_credentials (HttpCredentials | None): HTTP credentials for authentication. Defaults to None.
+        wait_type (ScraperWaitType): The type of wait to use. Defaults to ScraperWaitType.SLEEP.
+        wait_selector (str | None): CSS selector / text to wait for. Defaults to None.
+        headless (bool): Whether to run the browser headless. Defaults to True.
+        ignore_ssl (bool): Whether to ignore SSL errors. Defaults to False.
         include_links (bool, optional): Whether to include links in the markdown. Defaults to True.
         include_images (bool, optional): Whether to include images in the markdown. Defaults to False.
         include_metadata (bool, optional): Whether to include a metadata section in the markdown. Defaults to False.
@@ -771,7 +790,21 @@ def fetch_url_and_convert_to_markdown(
 
     if isinstance(urls, str):
         urls = [urls]
-    pages = fetch_url(urls, fetch_using=fetch_using, sleep_time=sleep_time, timeout=timeout, verbose=verbose)
+    pages = fetch_url(
+        urls,
+        fetch_using=fetch_using,
+        max_parallel=max_parallel,
+        sleep_time=sleep_time,
+        timeout=timeout,
+        proxy_config=proxy_config,
+        http_credentials=http_credentials,
+        wait_type=wait_type,
+        wait_selector=wait_selector,
+        headless=headless,
+        verbose=verbose,
+        ignore_ssl=ignore_ssl,
+        console=console,
+    )
     sources = list(zip(urls, pages))
     if verbose:
         console.print("[bold green]Converting fetched content to markdown...[/bold green]")

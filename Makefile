@@ -71,6 +71,10 @@ format:				# Reformat the code with ruff.
 	$(ruff) format src/$(lib)
 	$(ruff) format tests
 
+.PHONY: fmt
+fmt:				# Alias for format.
+	$(MAKE) format
+
 .PHONY: lint
 lint:				# Run ruff over the library
 	$(ruff) check src/$(lib) tests --fix
@@ -100,6 +104,10 @@ pre-commit-update:
 package:			# Package the library
 	$(build) -w
 
+.PHONY: build
+build:				# Alias for package (build the wheel).
+	$(MAKE) package
+
 .PHONY: spackage
 spackage:			# Create a source package for the library
 	$(build) -s
@@ -123,10 +131,8 @@ coverage:			# Generate coverage report and output xml report
 # Utility.
 
 .PHONY: docs
-docs:			# Generate html documentation
-	$(run) pdoc3 --html --force -o ./src/par_ai_core/html par_ai_core
-	rm -rf ./src/par_ai_core/docs/*
-	mv ./src/par_ai_core/html/par_ai_core/* ./src/par_ai_core/docs/
+docs:			# Generate html documentation (output goes to ./docs/build/, outside the package tree)
+	$(run) pdoc3 --html --force -o ./docs/build par_ai_core
 
 .PHONY: repl
 repl:				# Start a Python REPL

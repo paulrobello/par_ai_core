@@ -280,6 +280,12 @@ def get_parai_callback(
         console=console,
     )
     parai_callback_var.set(cb)
-    yield cb
-    show_llm_cost(cb.usage_metadata, show_pricing=show_pricing, console=console)
-    parai_callback_var.set(None)
+    try:
+        yield cb
+    finally:
+        # Reset the ContextVar and print the cost summary even when the ``with``
+        # block raises. Without this, an exception leaves the handler installed
+        # in the ContextVar (it keeps accumulating usage for later runs) and
+        # skips the cost summary exactly when debugging a failure (ARC-004).
+        show_llm_cost(cb.usage_metadata, show_pricing=show_pricing, console=console)
+        parai_callback_var.set(None)

@@ -29,7 +29,13 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from par_ai_core.llm_config import _ENV_NUMERIC_FIELDS, LlmConfig, ReasoningEffort, llm_run_manager
-from par_ai_core.llm_providers import LlmProvider, provider_base_urls, provider_default_models, provider_env_key_names
+from par_ai_core.llm_providers import (
+    LlmProvider,
+    is_provider_api_key_set,
+    provider_base_urls,
+    provider_default_models,
+    provider_env_key_names,
+)
 from par_ai_core.pricing_lookup import get_model_metadata
 
 
@@ -58,16 +64,28 @@ def llm_config_from_env(prefix: str = "PARAI") -> LlmConfig:
         raise ValueError(f"{prefix}_AI_PROVIDER environment variable not set.")
 
     ai_provider = LlmProvider(ai_provider_name)
-    if ai_provider not in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.BEDROCK]:
+    # Reuse the shared key check so this path cannot diverge from
+    # ``is_provider_api_key_set`` (ARC-005). The local exclusion list previously
+    # omitted LiteLLM (whose ``env_key_name`` is empty), producing a misleading
+    # ``ValueError: " environment variable not set."`` with an empty variable
+    # name. The shared helper treats an empty ``env_key_name`` as keyless.
+    # Bedrock is exempt because it can authenticate via several AWS env vars
+    # (AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_SESSION_TOKEN), not just the
+    # AWS_PROFILE entry that ``is_provider_api_key_set`` checks.
+    if ai_provider != LlmProvider.BEDROCK and not is_provider_api_key_set(ai_provider):
         key_name = provider_env_key_names[ai_provider]
-        if not os.environ.get(key_name):
-            raise ValueError(f"{key_name} environment variable not set.")
+        raise ValueError(f"{key_name} environment variable not set.")
 
     model_name = os.environ.get(f"{prefix}_MODEL") or provider_default_models[ai_provider]
     if not model_name:
         raise ValueError(f"{prefix}_MODEL environment variable not set.")
 
-    ai_base_url = os.environ.get(f"{prefix}_AI_BASE_URL") or provider_base_urls[ai_provider]
+    ai_base_url = os.environ.get(f"{prefix}_AI_BASE_URL")
+    if not ai_base_url and ai_provider != LlmProvider.OLLAMA:
+        ai_base_url = provider_base_urls[ai_provider]
+    # For OLLAMA, leave base_url unset when PARAI_AI_BASE_URL is not provided so
+    # the builder resolves OLLAMA_HOST at use time (ARC-023), honoring a
+    # post-import load_dotenv().
     temperature = float(os.environ.get(f"{prefix}_TEMPERATURE", "0.8"))
     user_agent_appid = os.environ.get(f"{prefix}_USER_AGENT_APPID")
     streaming = os.environ.get(f"{prefix}_STREAMING", "false") == "true"

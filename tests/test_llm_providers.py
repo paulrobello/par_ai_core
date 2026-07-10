@@ -43,6 +43,11 @@ def test_get_provider_name_fuzzy():
     assert get_provider_name_fuzzy("openr") == "OpenRouter"
     assert get_provider_name_fuzzy("anth") == "Anthropic"
 
+    # Ambiguous prefix returns "" (was ARC-009: previously returned the first
+    # enum-order match, e.g. "open" -> "OpenRouter").
+    assert get_provider_name_fuzzy("open") == ""
+    assert get_provider_name_fuzzy("o") == ""
+
     # No match
     assert get_provider_name_fuzzy("invalid") == ""
 

@@ -217,6 +217,14 @@ def test_llm_config_from_env_bedrock_no_key():
         assert config.provider == LlmProvider.BEDROCK
 
 
+def test_llm_config_from_env_litellm_no_empty_var_error():
+    """LiteLLM (empty env_key_name) must configure without an empty-variable-name ValueError (ARC-005)."""
+    with patch.dict(os.environ, {"PARAI_AI_PROVIDER": "LiteLLM", "PARAI_MODEL": "gpt-4o-mini"}, clear=True):
+        config = llm_config_from_env()
+        assert config.provider == LlmProvider.LITELLM
+        assert config.model_name == "gpt-4o-mini"
+
+
 def test_get_model_context_size_known_models():
     """Test context size retrieval for known models."""
     # Test that the function returns reasonable context sizes

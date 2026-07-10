@@ -26,12 +26,12 @@ especially when working with multiple AI providers and models.
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import TYPE_CHECKING, Literal
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
-from strenum import StrEnum
 
 from par_ai_core.llm_config import LlmConfig
 from par_ai_core.llm_providers import LlmProvider
@@ -185,7 +185,11 @@ def get_api_call_cost(
     Returns:
         Total cost in USD
     """
-    if llm_config.provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP, LlmProvider.GROQ, LlmProvider.GITHUB]:
+    if llm_config.provider in [LlmProvider.OLLAMA, LlmProvider.LLAMACPP]:
+        # Genuinely local backends with no per-token billing. Groq and GitHub
+        # Models previously sat in this list too, but both now have paid tiers,
+        # so their cost is derived from litellm's pricing data below instead of
+        # being hardcoded to zero (was ARC-012).
         return 0
     batch_multiplier = 0.5 if batch_pricing else 1
 

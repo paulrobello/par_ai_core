@@ -40,13 +40,13 @@ from __future__ import annotations
 
 import csv
 import io
+from enum import StrEnum
 from pathlib import Path
 
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.syntax import Syntax
 from rich.table import Table
-from strenum import StrEnum
 
 from par_ai_core.par_logging import console_err
 

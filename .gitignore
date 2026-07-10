@@ -77,6 +77,8 @@ cover/
 # Documentation
 .pdoc/
 src/par_ai_core/html/
+src/par_ai_core/docs/
+docs/build/
 
 # Profiling
 *.prof
