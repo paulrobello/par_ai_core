@@ -45,12 +45,12 @@ jobs:
         timeout-minutes: 15
 
       - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # release/v1 @ 2026-02-18
 
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@0.4.0
+        uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554  # 0.4.0 @ 2025-07-30
         with:
           args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} ${{ needs.setup.outputs.version }} has been published to PyPI.'
         continue-on-error: true

@@ -781,7 +781,13 @@ def all_subclasses(cls: type) -> set[type]:
 
 @contextmanager
 def suppress_output():
-    """Context manager to suppress stdout and stderr."""
+    """Context manager to suppress stdout and stderr.
+
+    Warning: this redirects stdout and stderr to devnull and will silently hide
+    errors, tracebacks, and prompts. Never wrap authentication, network fetch, or
+    other security-relevant code paths with it. Keep its scope narrow (e.g.,
+    quieting a noisy library banner) so real failures are not masked (CWE-778).
+    """
     with open(os.devnull, "w", encoding="utf-8") as devnull:
         old_stdout = sys.stdout
         old_stderr = sys.stderr
