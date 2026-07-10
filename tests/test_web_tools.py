@@ -160,7 +160,7 @@ def test_web_search_default_console():
         mock_search.return_value.results.return_value = [
             {"title": "Test", "link": "https://test.com", "snippet": "Test snippet"}
         ]
-        with patch("par_ai_core.web_tools.console_err") as mock_console:
+        with patch("par_ai_core.search_utils.console_err") as mock_console:
             # Set required env vars
             with patch.dict(
                 "os.environ",
@@ -171,11 +171,11 @@ def test_web_search_default_console():
                 # Verify console_err was used
                 mock_console.print.assert_called_once_with("[bold green]Web search:[bold yellow] test query")
 
-                # Verify search results
+                # Verify search results (web_search now returns SearchResult)
                 assert len(results) == 1
                 assert results[0].title == "Test"
-                assert results[0].link == "https://test.com"
-                assert results[0].snippet == "Test snippet"
+                assert results[0].url == "https://test.com"
+                assert results[0].content == "Test snippet"
 
 
 def test_fetch_url_playwright_success(monkeypatch) -> None:

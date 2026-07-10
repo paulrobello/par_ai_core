@@ -49,6 +49,7 @@ from rich.console import Console
 from rich.repr import rich_repr
 
 from par_ai_core.par_logging import console_err
+from par_ai_core.search_utils import web_search  # noqa: F401  # backward-compat re-export (ARC-014)
 from par_ai_core.user_agents import get_random_user_agent
 
 logger = logging.getLogger(__name__)
@@ -130,48 +131,17 @@ def inject_credentials(url: str, username: str, password: str) -> str:
 
 @rich_repr
 class GoogleSearchResult(BaseModel):
-    """Google search result."""
+    """Google search result.
+
+    .. deprecated::
+        Kept for backward compatibility. New code should use
+        :class:`par_ai_core.search_utils.SearchResult` instead, which uses
+        ``url``/``content`` field names aligned with the other search engines.
+    """
 
     title: str
     link: str
     snippet: str
-
-
-def web_search(
-    query: str, *, num_results: int = 3, verbose: bool = False, console: Console | None = None
-) -> list[GoogleSearchResult]:
-    """Perform a Google web search using the Google Custom Search API.
-
-    Args:
-        query: The search query to execute
-        num_results: Maximum number of results to return. Defaults to 3.
-        verbose: Whether to print verbose output. Defaults to False.
-        console: Console to use for output. Defaults to console_err.
-
-    Returns:
-        list[GoogleSearchResult]: List of search results containing title, link and snippet
-
-    Raises:
-        ValueError: If GOOGLE_CSE_ID or GOOGLE_CSE_API_KEY environment variables are not set
-    """
-    from langchain_google_community import GoogleSearchAPIWrapper
-
-    if verbose:
-        if not console:
-            console = console_err
-        console.print(f"[bold green]Web search:[bold yellow] {query}")
-
-    google_cse_id = os.environ.get("GOOGLE_CSE_ID")
-    google_api_key = os.environ.get("GOOGLE_CSE_API_KEY")
-
-    if not google_cse_id or not google_api_key:
-        raise ValueError("Missing required environment variables: GOOGLE_CSE_ID and GOOGLE_CSE_API_KEY must be set")
-
-    search = GoogleSearchAPIWrapper(
-        google_cse_id=google_cse_id,
-        google_api_key=google_api_key,
-    )
-    return [GoogleSearchResult(**result) for result in search.results(query, num_results=num_results)]
 
 
 def get_html_element(element: str, soup: BeautifulSoup) -> str:

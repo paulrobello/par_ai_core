@@ -33,8 +33,10 @@ Typical usage examples:
 5. Perform a Google search using Serper:
     results = serper_search("climate change", days=7, max_results=5)
 
-Each search function returns a list of dictionaries, where each dictionary represents
-a search result with standardized keys: 'title', 'url', 'content', and 'raw_content'.
+Each search function returns a list of :class:`SearchResult` objects, where each result
+has standardized fields: ``title``, ``url``, ``content``, and ``raw_content``.
+``SearchResult`` is dict-compatible, so ``result["title"]`` and ``dict(result)`` still
+work for callers that have not migrated to attribute access.
 
 Note: Proper API keys and environment variables must be set up for each search
 service before use. Refer to the individual function docstrings for specific
@@ -46,6 +48,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+from collections.abc import Callable, Iterator
 from datetime import date, timedelta
 from typing import Any, Literal
 from urllib.parse import quote
@@ -53,12 +56,95 @@ from urllib.parse import quote
 import orjson as json
 import requests
 from langchain_core.language_models import BaseChatModel
-from pydantic import SecretStr
+from pydantic import BaseModel, ConfigDict, SecretStr
+from rich.console import Console
 
-from par_ai_core.llm_utils import summarize_content
-from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
+from par_ai_core.par_logging import console_err
 
 logger = logging.getLogger(__name__)
+
+
+class SearchResult(BaseModel):
+    """Standardized search result across all search engines.
+
+    Dict-compatible: supports ``result["title"]``, ``result.get("url")``,
+    ``"title" in result``, ``dict(result)``, and iteration over field names,
+    so callers using dict-style access continue to work after the migration
+    from ``list[dict]`` to ``list[SearchResult]`` return types.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    title: str
+    url: str
+    content: str
+    raw_content: str = ""
+    score: float | None = None
+
+    def __getitem__(self, key: str) -> Any:
+        if key in type(self).model_fields:
+            return getattr(self, key)
+        raise KeyError(key)
+
+    def __contains__(self, key: object) -> bool:
+        return key in type(self).model_fields
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key in type(self).model_fields:
+            return getattr(self, key)
+        return default
+
+    def keys(self) -> tuple[str, ...]:
+        return tuple(type(self).model_fields)
+
+    def values(self) -> tuple[Any, ...]:
+        return tuple(getattr(self, k) for k in type(self).model_fields)
+
+    def items(self) -> tuple[tuple[str, Any], ...]:
+        return tuple((k, getattr(self, k)) for k in type(self).model_fields)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(type(self).model_fields)
+
+
+def web_search(
+    query: str, *, num_results: int = 3, verbose: bool = False, console: Console | None = None
+) -> list[SearchResult]:
+    """Perform a Google web search using the Google Custom Search API.
+
+    Args:
+        query: The search query to execute
+        num_results: Maximum number of results to return. Defaults to 3.
+        verbose: Whether to print verbose output. Defaults to False.
+        console: Console to use for output. Defaults to console_err.
+
+    Returns:
+        list[SearchResult]: List of search results.
+
+    Raises:
+        ValueError: If GOOGLE_CSE_ID or GOOGLE_CSE_API_KEY environment variables are not set
+    """
+    from langchain_google_community import GoogleSearchAPIWrapper
+
+    if verbose:
+        if not console:
+            console = console_err
+        console.print(f"[bold green]Web search:[bold yellow] {query}")
+
+    google_cse_id = os.environ.get("GOOGLE_CSE_ID")
+    google_api_key = os.environ.get("GOOGLE_CSE_API_KEY")
+
+    if not google_cse_id or not google_api_key:
+        raise ValueError("Missing required environment variables: GOOGLE_CSE_ID and GOOGLE_CSE_API_KEY must be set")
+
+    search = GoogleSearchAPIWrapper(
+        google_cse_id=google_cse_id,
+        google_api_key=google_api_key,
+    )
+    return [
+        SearchResult(title=result["title"], url=result["link"], content=result.get("snippet", ""))
+        for result in search.results(query, num_results=num_results)
+    ]
 
 
 def tavily_search(
@@ -68,7 +154,7 @@ def tavily_search(
     topic: Literal["general", "news"] = "general",
     days: int = 3,
     max_results: int = 3,
-) -> list[dict[str, Any]]:
+) -> list[SearchResult]:
     """Search the web using the Tavily API.
 
     Performs a web search using Tavily's AI-powered search engine. Can search for
@@ -86,11 +172,12 @@ def tavily_search(
             Defaults to 3.
 
     Returns:
-        list[dict[str, Any]]: List of search results, where each dict contains:
+        list[SearchResult]: List of search results, where each result contains:
             title (str): Title of the search result
             url (str): URL of the search result
             content (str): Snippet/summary of the content
             raw_content (str): Full content if available and requested
+            score (float | None): Relevance score if provided by Tavily
 
     Raises:
         TavilyError: If the Tavily API request fails or returns an error response.
@@ -100,12 +187,13 @@ def tavily_search(
     except ImportError as e:  # pragma: no cover - exercised only without the extra
         raise ImportError("Tavily search requires: pip install 'par_ai_core[search]'") from e
     tavily_client = TavilyClient()
-    return tavily_client.search(
+    raw_results = tavily_client.search(
         query, max_results=max_results, topic=topic, days=days, include_raw_content=include_raw_content
     )["results"]
+    return [SearchResult(**r) for r in raw_results]
 
 
-def jina_search(query: str, *, max_results: int = 3) -> list[dict[str, Any]]:
+def jina_search(query: str, *, max_results: int = 3) -> list[SearchResult]:
     """Search the web using the Jina AI search API.
 
     Performs a web search using Jina's neural search engine that combines
@@ -116,7 +204,7 @@ def jina_search(query: str, *, max_results: int = 3) -> list[dict[str, Any]]:
         max_results (int): Maximum number of results to return.
 
     Returns:
-        list[dict[str, Any]]: List of search results, where each dict contains:
+        list[SearchResult]: List of search results, where each result contains:
             title (str): Title of the search result
             url (str): URL of the search result
             content (str): Snippet/summary of the content
@@ -142,7 +230,7 @@ def jina_search(query: str, *, max_results: int = 3) -> list[dict[str, Any]]:
     if response.status_code == 200:
         res = response.json()
         return [
-            {"title": r["title"], "url": r["url"], "content": r["description"], "raw_content": r["content"]}
+            SearchResult(title=r["title"], url=r["url"], content=r["description"], raw_content=r["content"])
             for r in res["data"][:max_results]
             if "warning" not in r
         ]
@@ -151,7 +239,7 @@ def jina_search(query: str, *, max_results: int = 3) -> list[dict[str, Any]]:
     return []
 
 
-def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -> list[dict[str, Any]]:
+def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: bool = False) -> list[SearchResult]:
     """Search the web using the Brave Search API.
 
     Performs a web search using Brave's privacy-focused search engine. Can optionally
@@ -168,7 +256,7 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
             public-http(s) SSRF guard enforced by ``fetch_url``; non-public URLs are rejected.
 
     Returns:
-        list[dict[str, Any]]: List of search results, where each dict contains:
+        list[SearchResult]: List of search results, where each result contains:
             title (str): Title of the search result
             url (str): URL of the search result
             content (str): Snippet/summary of the content
@@ -198,17 +286,19 @@ def brave_search(query: str, *, days: int = 0, max_results: int = 3, scrape: boo
     )
     res = json.loads(wrapper.run(query))
     if scrape:
+        from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
+
         urls = [r["link"] for r in res[:max_results]]
         content = fetch_url_and_convert_to_markdown(urls)
         for r, c in zip(res, content, strict=False):
             r["raw_content"] = c
     return [
-        {
-            "title": r["title"],
-            "url": r["link"],
-            "content": r["snippet"],
-            "raw_content": r.get("raw_content", r["snippet"]),
-        }
+        SearchResult(
+            title=r["title"],
+            url=r["link"],
+            content=r["snippet"],
+            raw_content=r.get("raw_content", r["snippet"]),
+        )
         for r in res[:max_results]
     ]
 
@@ -221,7 +311,7 @@ def serper_search(
     max_results: int = 3,
     scrape: bool = False,
     include_images: bool = False,
-) -> list[dict[str, Any]]:
+) -> list[SearchResult]:
     """Search the web using Google Serper.
 
     Args:
@@ -237,7 +327,7 @@ def serper_search(
             by ``fetch_url``; non-public URLs are rejected.
 
     Returns:
-        list[dict[str, Any]]: List of search results.
+        list[SearchResult]: List of search results.
 
     Raises:
         ValueError: If days is negative.
@@ -266,25 +356,27 @@ def serper_search(
     results_list = res.get(search_type, [])[:max_results]
 
     if scrape:
+        from par_ai_core.web_tools import fetch_url_and_convert_to_markdown
+
         urls = [r["link"] for r in results_list]
         content = fetch_url_and_convert_to_markdown(urls, include_images=include_images)
         for r, c in zip(results_list, content, strict=False):
             r["raw_content"] = c
 
     return [
-        {
-            "title": r["title"],
-            "url": r["link"],
-            "content": r.get("snippet", r.get("section")) or "",
-            "raw_content": r.get("raw_content") or "",
-        }
+        SearchResult(
+            title=r["title"],
+            url=r["link"],
+            content=r.get("snippet", r.get("section")) or "",
+            raw_content=r.get("raw_content") or "",
+        )
         for r in results_list
     ]
 
 
 def reddit_search(
     query: str, subreddit: str = "all", max_comments: int = 0, max_results: int = 3
-) -> list[dict[str, Any]]:
+) -> list[SearchResult]:
     """Search Reddit for posts and comments.
 
     Searches Reddit for posts matching a query, optionally within a specific subreddit.
@@ -301,7 +393,7 @@ def reddit_search(
             Defaults to 3.
 
     Returns:
-        list[dict[str, Any]]: List of search results, where each dict contains:
+        list[SearchResult]: List of search results, where each result contains:
             title (str): Title of the Reddit post
             url (str): URL of the post
             content (str): Post text content
@@ -335,7 +427,7 @@ def reddit_search(
         sub_reddit = sub_reddit.controversial(limit=max_results)
     else:
         sub_reddit = sub_reddit.search(query, limit=max_results)
-    results: list[dict[str, Any]] = []
+    results: list[SearchResult] = []
     for sub in sub_reddit:
         comments_res = []
 
@@ -362,7 +454,7 @@ def reddit_search(
             "*Comments*: ",
             "\n".join(comments_res),
         ]
-        rec = {"title": sub.title, "url": sub.url, "content": sub.selftext, "raw_content": "\n".join(raw_content)}
+        rec = SearchResult(title=sub.title, url=sub.url, content=sub.selftext, raw_content="\n".join(raw_content))
         results.append(rec)
     return results
 
@@ -445,11 +537,12 @@ def youtube_search(
     max_results: int = 3,
     fetch_transcript: bool = False,
     summarize_llm: BaseChatModel | None = None,
-) -> list[dict[str, Any]]:
+    summarizer: Callable[[str], str] | None = None,
+) -> list[SearchResult]:
     """Search YouTube for videos with optional transcript and comment fetching.
 
     Performs a YouTube search and can optionally fetch video transcripts,
-    comments, and generate transcript summaries using an LLM.
+    comments, and generate transcript summaries.
 
     Args:
         query (str): The search query to execute.
@@ -462,10 +555,16 @@ def youtube_search(
         fetch_transcript (bool, optional): Whether to fetch video transcripts.
             Defaults to False.
         summarize_llm (BaseChatModel | None, optional): LLM to use for summarizing
-            transcripts. Defaults to None meaning no summarization.
+            transcripts (uses ``llm_utils.summarize_content`` internally). Defaults
+            to None meaning no summarization. Deprecated in favor of ``summarizer``;
+            this parameter couples the call to the LLM config stack.
+        summarizer (Callable[[str], str] | None, optional): Callable that takes the
+            transcript text and returns a summary. When provided, takes precedence
+            over ``summarize_llm`` and avoids importing the LLM config stack entirely.
+            Defaults to None meaning no summarization.
 
     Returns:
-        list[dict[str, Any]]: List of search results, where each dict contains:
+        list[SearchResult]: List of search results, where each result contains:
             title (str): Title of the video
             url (str): URL of the video
             content (str): Description, metadata, and optionally comments and
@@ -498,7 +597,7 @@ def youtube_search(
     )
     response = request.execute()
 
-    results = []
+    results: list[SearchResult] = []
     for item in response["items"]:
         video_id = item["id"]["videoId"]
         video_title = item["snippet"]["title"]
@@ -521,7 +620,12 @@ def youtube_search(
         if fetch_transcript:
             transcript_text = youtube_get_transcript(video_id, languages=["en"])
             transcript_summary = ""
-            if transcript_text and summarize_llm is not None:
+            if transcript_text and summarizer is not None:
+                transcript_summary = summarizer(transcript_text)
+                content += "\n\nTranscript Summary:\n" + transcript_summary
+            elif transcript_text and summarize_llm is not None:
+                from par_ai_core.llm_utils import summarize_content
+
                 transcript_summary = summarize_content(transcript_text, summarize_llm)
                 content += "\n\nTranscript Summary:\n" + transcript_summary
             else:
@@ -530,6 +634,6 @@ def youtube_search(
             transcript_text = ""
             transcript_summary = ""
 
-        results.append({"title": video_title, "url": video_url, "content": content, "raw_content": transcript_text})
+        results.append(SearchResult(title=video_title, url=video_url, content=content, raw_content=transcript_text))
 
     return results

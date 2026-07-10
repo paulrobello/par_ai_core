@@ -27,6 +27,26 @@ Release dates are derived from the corresponding git tag timestamps.
   returns an exact case-insensitive match first and raises on ambiguous prefixes.
   `"open"` is now ambiguous (matches both OpenAI and OpenRouter) where it previously
   guessed; use the full provider name.
+- **Search functions return typed `SearchResult` (ARC-014):** `tavily_search`,
+  `jina_search`, `brave_search`, `serper_search`, `reddit_search`, `youtube_search`,
+  and `web_search` now return `list[SearchResult]` instead of `list[dict[str, Any]]`.
+  `SearchResult` is a Pydantic v2 model that is **dict-compatible** — it supports
+  `result["title"]`, `result.get("url")`, `"title" in result`, `dict(result)`, and
+  iteration over field names — so existing dict-style callers continue to work without
+  changes. The unified fields are `title`, `url`, `content`, `raw_content`, and
+  `score` (optional). `web_search` (Google CSE) has been relocated from `web_tools`
+  to `search_utils` and is re-exported from `web_tools` for backward compatibility;
+  it now maps `link`→`url` and `snippet`→`content` to align with the other engines.
+  `GoogleSearchResult` remains in `web_tools` as a deprecated legacy model.
+- **Search subsystem decoupled from LLM config (ARC-014):** `import par_ai_core.search_utils`
+  no longer transitively imports `llm_utils`, `llm_config`, or `llm_providers`. The
+  top-level `from par_ai_core.llm_utils import summarize_content` import has been
+  removed; `youtube_search` accepts a new `summarizer: Callable[[str], str] | None`
+  parameter for decoupled transcript summarization. The legacy `summarize_llm`
+  parameter still works (the `summarize_content` import is deferred to call time)
+  but is deprecated in favor of `summarizer`. The `fetch_url_and_convert_to_markdown`
+  import is now lazy inside `brave_search`/`serper_search`, removing the top-level
+  `web_tools` dependency from `search_utils`.
 
 ### Security
 - **`fetch_url` rejects unsafe URLs (SEC-001):** only public `http(s)` URLs are

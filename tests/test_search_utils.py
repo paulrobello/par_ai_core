@@ -12,6 +12,7 @@ import requests
 from langchain_core.language_models import BaseChatModel
 
 from par_ai_core.search_utils import (
+    SearchResult,
     brave_search,
     jina_search,
     reddit_search,
@@ -76,7 +77,10 @@ def test_tavily_search(mock_tavily):
     mock_tavily.return_value.search.return_value = {"results": mock_results}
 
     results = tavily_search("test query", max_results=1)
-    assert results == mock_results
+    assert len(results) == 1
+    assert results[0]["title"] == "Test Title"
+    assert results[0]["url"] == "https://example.com"
+    assert results[0]["content"] == "Test content"
     mock_tavily.return_value.search.assert_called_once_with(
         "test query",
         max_results=1,
@@ -111,7 +115,7 @@ def test_brave_search(mock_brave):
         assert len(results) == 1
 
         # Test with scraping enabled
-        with patch("par_ai_core.search_utils.fetch_url_and_convert_to_markdown") as mock_fetch:
+        with patch("par_ai_core.web_tools.fetch_url_and_convert_to_markdown") as mock_fetch:
             mock_fetch.return_value = ["Scraped content"]
             results = brave_search("test query", max_results=1, scrape=True)
             assert results[0]["raw_content"] == "Scraped content"
@@ -161,7 +165,7 @@ def test_serper_search(mock_serper):
 
     # Test with scraping enabled
     mock_serper.return_value.results.return_value = {"search": mock_results}  # Reset mock response
-    with patch("par_ai_core.search_utils.fetch_url_and_convert_to_markdown") as mock_fetch:
+    with patch("par_ai_core.web_tools.fetch_url_and_convert_to_markdown") as mock_fetch:
         mock_fetch.return_value = ["Scraped content"]
         results = serper_search("test query", max_results=1, scrape=True)
         assert len(results) == 1
@@ -326,6 +330,39 @@ def test_youtube_search_with_transcript_and_summary(mock_build):
         assert len(results) == 1
         assert results[0]["title"] == "Test Title"
         assert "Summary of transcript" in results[0]["content"]
+        assert results[0]["raw_content"] == "Test transcript"
+
+
+@patch("googleapiclient.discovery.build")
+def test_youtube_search_with_summarizer_callable(mock_build):
+    """ARC-014: ``summarizer`` callable decouples search from the LLM config stack."""
+    mock_youtube = MagicMock()
+    mock_build.return_value = mock_youtube
+    mock_response = {
+        "items": [
+            {
+                "id": {"videoId": "test_id"},
+                "snippet": {
+                    "title": "Test Title",
+                    "publishedAt": "2024-01-01T00:00:00Z",
+                    "channelId": "test_channel",
+                    "description": "Test description",
+                },
+            }
+        ]
+    }
+    mock_youtube.search().list().execute.return_value = mock_response
+
+    with patch("par_ai_core.search_utils.youtube_get_transcript", return_value="Test transcript"):
+        results = youtube_search(
+            "test query",
+            max_results=1,
+            fetch_transcript=True,
+            summarizer=lambda text: f"SUMMARIZED:{text}",
+        )
+
+        assert len(results) == 1
+        assert "SUMMARIZED:Test transcript" in results[0]["content"]
         assert results[0]["raw_content"] == "Test transcript"
 
 
@@ -497,3 +534,55 @@ def test_youtube_search_passes_max_comments(monkeypatch):
         youtube_search("test query", max_results=1, max_comments=50)
         mock_comments.assert_called_once()
         assert mock_comments.call_args.kwargs.get("max_results") == 50
+
+
+def test_search_result_dict_compatibility():
+    """SearchResult must support dict-style access for backward compat (ARC-014)."""
+    sr = SearchResult(title="T", url="https://example.com", content="C", raw_content="R", score=0.9)
+
+    # __getitem__
+    assert sr["title"] == "T"
+    assert sr["url"] == "https://example.com"
+    assert sr["content"] == "C"
+    assert sr["raw_content"] == "R"
+    assert sr["score"] == 0.9
+
+    # KeyError on unknown key
+    with pytest.raises(KeyError):
+        sr["nonexistent"]
+
+    # __contains__
+    assert "title" in sr
+    assert "url" in sr
+    assert "nonexistent" not in sr
+
+    # get with default
+    assert sr.get("title") == "T"
+    assert sr.get("nonexistent") is None
+    assert sr.get("nonexistent", "fallback") == "fallback"
+
+    # keys / values / items
+    assert set(sr.keys()) == {"title", "url", "content", "raw_content", "score"}
+    assert dict(sr) == {
+        "title": "T",
+        "url": "https://example.com",
+        "content": "C",
+        "raw_content": "R",
+        "score": 0.9,
+    }
+    assert dict(sr.items()) == dict(sr)
+
+    # iteration yields field names (like dict)
+    assert sorted(sr) == sorted(["title", "url", "content", "raw_content", "score"])
+
+    # attribute access still works
+    assert sr.title == "T"
+    assert sr.url == "https://example.com"
+
+
+def test_web_search_reexported_from_web_tools():
+    """web_search must be importable from web_tools (backward-compat re-export, ARC-014)."""
+    from par_ai_core.search_utils import web_search as ws_from_search_utils
+    from par_ai_core.web_tools import web_search as ws_from_web_tools
+
+    assert ws_from_web_tools is ws_from_search_utils
